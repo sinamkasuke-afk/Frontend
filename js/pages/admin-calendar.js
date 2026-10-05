@@ -12,7 +12,17 @@ document.addEventListener(
        RESERVATIONS
        ========================================================== */
 
-    const reservations = firebaseRequests.filter(r => { const d = new Date(r.dateISO || r.date); return d.getFullYear() === 2026 && d.getMonth() === 9; }).map(r => ({ ...r, day: new Date(r.dateISO || r.date).getDate() }));
+    function reservationDate(request) {
+      const value = request.dateISO || request.date;
+      // Parse a date-only value in local time so it keeps its selected day.
+      return new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? value + "T00:00:00" : value);
+    }
+    const reservations = firebaseRequests
+      .filter(request => {
+        const date = reservationDate(request);
+        return date.getFullYear() === 2026 && date.getMonth() === 9;
+      })
+      .map(request => ({ ...request, day: reservationDate(request).getDate() }));
 
 
     /* ==========================================================
