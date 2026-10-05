@@ -1,0 +1,15 @@
+/* ==========================================================
+   badge.css
+   Small black pill label (e.g. "OFFICIAL PORTAL").
+   ========================================================== */
+
+.badge {
+  display: inline-block;
+  background-color: var(--color-black);
+  color: var(--color-yellow);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  border-radius: 4px;
+}

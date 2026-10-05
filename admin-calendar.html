@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Calendar | School Facilities Reservation System
+  </title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/base.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/pages/admin-calendar.css"
+  />
+</head>
+
+<body>
+
+
+  <!-- =====================================================
+       HEADER
+       ===================================================== -->
+
+  <header class="admin-header">
+
+    <div class="admin-header__brand">
+
+      <div class="admin-header__logo">
+        ▥
+      </div>
+
+      <strong>
+        SCHOOL
+      </strong>
+
+      <span class="admin-header__divider"></span>
+
+      <p>
+        Facilities Reservation System
+      </p>
+
+    </div>
+
+
+    <div class="admin-header__right">
+
+
+      <!-- SEARCH -->
+
+      <div class="admin-header-search">
+
+        <span>
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          id="global-search"
+          placeholder="Search requests, venues, or users..."
+        />
+
+      </div>
+
+
+      <!-- NOTIFICATION -->
+
+      <button
+        type="button"
+        class="notification-button"
+        aria-label="Notifications"
+      >
+
+        <span class="notification-bell">
+          🔔
+        </span>
+
+        <span class="notification-dot"></span>
+
+      </button>
+
+
+      <!-- PROFILE -->
+
+      <div class="admin-profile-wrapper">
+
+        <button
+          type="button"
+          class="admin-profile"
+          id="admin-profile-button"
+        >
+
+          <div class="admin-profile__avatar">
+            AS
+          </div>
+
+          <div class="admin-profile__text">
+
+            <strong>
+              Admin Santos
+            </strong>
+
+            <span>
+              Administrator
+            </span>
+
+          </div>
+
+          <span class="admin-profile__arrow">
+            ⌄
+          </span>
+
+        </button>
+
+
+        <div
+          class="admin-profile-menu"
+          id="admin-profile-menu"
+        >
+
+          <a href="#">
+            <span>♙</span>
+            Profile
+          </a>
+
+          <div class="admin-profile-menu__divider"></div>
+
+          <a
+            href="admin-login.html"
+            class="admin-profile-menu__logout"
+          >
+            <span>↪</span>
+            Logout
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       APP SHELL
+       ===================================================== -->
+
+  <main class="admin-shell">
+
+
+    <!-- ===================================================
+         HOVER SIDEBAR
+         =================================================== -->
+
+    <aside class="admin-sidebar">
+
+      <nav class="admin-sidebar__nav">
+
+
+        <a
+          href="admin-dashboard.html"
+          class="admin-sidebar__link"
+        >
+          <span class="admin-sidebar__icon">
+            ▦
+          </span>
+
+          <span class="admin-sidebar__text">
+            Dashboard
+          </span>
+        </a>
+
+
+        <a
+          href="admin-requests.html"
+          class="admin-sidebar__link"
+        >
+          <span class="admin-sidebar__icon">
+            ▤
+          </span>
+
+          <span class="admin-sidebar__text">
+            Requests
+          </span>
+        </a>
+
+
+        <a
+          href="admin-history.html"
+          class="admin-sidebar__link"
+        >
+          <span class="admin-sidebar__icon">
+            ◷
+          </span>
+
+          <span class="admin-sidebar__text">
+            History
+          </span>
+        </a>
+
+
+        <a
+          href="admin-calendar.html"
+          class="
+            admin-sidebar__link
+            admin-sidebar__link--active
+          "
+        >
+          <span class="admin-sidebar__icon">
+            ▣
+          </span>
+
+          <span class="admin-sidebar__text">
+            Calendar
+          </span>
+        </a>
+
+      </nav>
+
+
+      <div class="admin-sidebar__bottom">
+
+        <a
+          href="admin-login.html"
+          class="admin-sidebar__link"
+        >
+          <span class="admin-sidebar__icon">
+            ↪
+          </span>
+
+          <span class="admin-sidebar__text">
+            Logout
+          </span>
+        </a>
+
+      </div>
+
+    </aside>
+
+
+    <!-- ===================================================
+         CALENDAR CONTENT
+         =================================================== -->
+
+    <section class="calendar-main">
+
+
+      <!-- PAGE HEADING -->
+
+      <div class="calendar-heading">
+
+        <div>
+
+          <p class="calendar-heading__label">
+            RESERVATION SCHEDULE
+          </p>
+
+          <h1>
+            Calendar
+          </h1>
+
+          <p>
+            View and manage facility reservations by date.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           TOP CONTROLS
+           ================================================= -->
+
+      <div class="calendar-toolbar">
+
+
+        <!-- MONTH NAV -->
+
+        <div class="calendar-toolbar__left">
+
+          <button
+            type="button"
+            class="month-nav-button"
+            id="prev-month"
+          >
+            ‹
+          </button>
+
+
+          <button
+            type="button"
+            class="month-select-button"
+            id="current-month-button"
+          >
+            October 2026
+            <span>
+              ⌄
+            </span>
+          </button>
+
+
+          <button
+            type="button"
+            class="month-nav-button"
+            id="next-month"
+          >
+            ›
+          </button>
+
+        </div>
+
+
+        <!-- VIEW SWITCH -->
+
+        <div class="calendar-view-switch">
+
+          <button
+            type="button"
+            class="calendar-view-button calendar-view-button--active"
+          >
+            Month
+          </button>
+
+          <button
+            type="button"
+            class="calendar-view-button"
+          >
+            Week
+          </button>
+
+          <button
+            type="button"
+            class="calendar-view-button"
+          >
+            Day
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           CALENDAR LAYOUT
+           ================================================= -->
+
+      <div class="calendar-layout">
+
+
+        <!-- ===============================================
+             MAIN CALENDAR CARD
+             =============================================== -->
+
+        <section class="calendar-card">
+
+          <div class="calendar-grid-header">
+
+            <div>SUN</div>
+            <div>MON</div>
+            <div>TUE</div>
+            <div>WED</div>
+            <div>THU</div>
+            <div>FRI</div>
+            <div>SAT</div>
+
+          </div>
+
+
+          <div
+            class="calendar-grid"
+            id="calendar-grid"
+          >
+          </div>
+
+
+          <!-- LEGEND -->
+
+          <div class="calendar-legend">
+
+            <div>
+              <span class="legend-dot legend-dot--approved"></span>
+
+              <p>
+                <strong>
+                  Approved Reservation
+                </strong>
+
+                <small>
+                  Confirmed and scheduled
+                </small>
+              </p>
+            </div>
+
+
+            <div>
+              <span class="legend-dot legend-dot--pending"></span>
+
+              <p>
+                <strong>
+                  Pending Reservation
+                </strong>
+
+                <small>
+                  Awaiting approval
+                </small>
+              </p>
+            </div>
+
+
+            <div>
+              <span class="legend-dot legend-dot--declined"></span>
+
+              <p>
+                <strong>
+                  Declined Reservation
+                </strong>
+
+                <small>
+                  Not approved
+                </small>
+              </p>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===============================================
+             RIGHT PANEL
+             =============================================== -->
+
+        <aside class="calendar-side">
+
+
+          <!-- MINI CALENDAR -->
+
+          <section class="side-card mini-calendar-card">
+
+            <div class="side-card__heading">
+
+              <h2>
+                October 2026
+              </h2>
+
+              <div>
+
+                <button
+                  type="button"
+                  class="mini-nav-button"
+                >
+                  ‹
+                </button>
+
+                <button
+                  type="button"
+                  class="mini-nav-button"
+                >
+                  ›
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div class="mini-weekdays">
+
+              <span>S</span>
+              <span>M</span>
+              <span>T</span>
+              <span>W</span>
+              <span>T</span>
+              <span>F</span>
+              <span>S</span>
+
+            </div>
+
+
+            <div
+              class="mini-calendar-grid"
+              id="mini-calendar-grid"
+            >
+            </div>
+
+          </section>
+
+
+          <!-- SELECTED DATE -->
+
+          <section class="side-card">
+
+            <p class="side-card__eyebrow">
+              Reservations on
+            </p>
+
+            <h2 id="selected-date-title">
+              October 4, 2026
+            </h2>
+
+
+            <div
+              class="selected-reservations"
+              id="selected-reservations"
+            >
+            </div>
+
+          </section>
+
+
+          <!-- FILTERS -->
+
+          <section class="side-card">
+
+            <h2>
+              Filter Reservations
+            </h2>
+
+
+            <label class="filter-check">
+
+              <input
+                type="checkbox"
+                id="filter-approved"
+                checked
+              />
+
+              <span class="filter-color filter-color--approved"></span>
+
+              Approved Reservation
+
+            </label>
+
+
+            <label class="filter-check">
+
+              <input
+                type="checkbox"
+                id="filter-pending"
+                checked
+              />
+
+              <span class="filter-color filter-color--pending"></span>
+
+              Pending Reservation
+
+            </label>
+
+
+            <label class="filter-check">
+
+              <input
+                type="checkbox"
+                id="filter-declined"
+                checked
+              />
+
+              <span class="filter-color filter-color--declined"></span>
+
+              Declined Reservation
+
+            </label>
+
+          </section>
+
+        </aside>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js"></script>
+  <script src="js/firebase/client.js"></script>
+<script src="js/pages/admin-calendar.js"></script>
+
+</body>
+</html>

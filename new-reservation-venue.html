@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    New Reservation | School Facilities Reservation System
+  </title>
+
+  <!-- Fonts -->
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+
+  <!-- Global Styles -->
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components/navbar.css" />
+  <link rel="stylesheet" href="css/components/button.css" />
+  <link rel="stylesheet" href="css/components/panel.css" />
+  <link rel="stylesheet" href="css/components/stepper.css" />
+  <link rel="stylesheet" href="css/components/venue-list.css" />
+  <link rel="stylesheet" href="css/components/calendar.css" />
+  <link rel="stylesheet" href="css/components/time-slot.css" />
+
+  <!-- Page Style -->
+  <link
+    rel="stylesheet"
+    href="css/pages/new-reservation-venue.css"
+  />
+</head>
+
+
+<body>
+
+  <!-- NAVBAR -->
+  <div id="navbar"></div>
+
+
+  <main class="reservation-page">
+
+
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside class="reservation-sidebar">
+
+      <nav class="reservation-sidebar__nav">
+
+        <a
+          href="dashboard.html"
+          class="reservation-sidebar__link"
+        >
+          <span class="reservation-sidebar__icon">
+            ⌂
+          </span>
+
+          <span>
+            Dashboard
+          </span>
+        </a>
+
+
+        <a
+          href="new-reservation-venue.html"
+          class="
+            reservation-sidebar__link
+            reservation-sidebar__link--active
+          "
+        >
+          <span class="reservation-sidebar__icon">
+            ▣
+          </span>
+
+          <span>
+            New Reservation
+          </span>
+        </a>
+
+
+        <a
+          href="my-requests.html"
+          class="reservation-sidebar__link"
+        >
+          <span class="reservation-sidebar__icon">
+            ▤
+          </span>
+
+          <span>
+            My Reservations
+          </span>
+        </a>
+
+
+        <a
+          href="new-reservation-venue.html"
+          class="reservation-sidebar__link"
+        >
+          <span class="reservation-sidebar__icon">
+            ▥
+          </span>
+
+          <span>
+            Browse Facilities
+          </span>
+        </a>
+
+      </nav>
+
+
+      <div class="reservation-sidebar__bottom">
+
+        <a
+          href="mailto:pfmo@national-u.edu.ph"
+          class="reservation-sidebar__link"
+        >
+          <span class="reservation-sidebar__icon">
+            ?
+          </span>
+
+          <span>
+            Help & Support
+          </span>
+        </a>
+
+
+        <a
+          href="index.html"
+          class="reservation-sidebar__link"
+        >
+          <span class="reservation-sidebar__icon">
+            ↪
+          </span>
+
+          <span>
+            Logout
+          </span>
+        </a>
+
+      </div>
+
+
+      <div class="reservation-sidebar__quote">
+
+        <span>
+          ✦
+        </span>
+
+        <p>
+          Same spaces.
+          <br />
+          New opportunities.
+        </p>
+
+      </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
+
+    <section class="reservation-content">
+
+
+      <!-- HERO -->
+      <section class="reservation-hero">
+
+        <div class="reservation-hero__overlay"></div>
+
+
+        <div class="reservation-hero__content">
+
+          <p class="reservation-hero__label">
+            RESERVATION
+            <span></span>
+          </p>
+
+
+          <h1>
+            New Reservation
+          </h1>
+
+
+          <p>
+            Book a campus facility for your event
+            in just a few simple steps.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================
+           STEPPER
+           =================================================== -->
+
+      <section class="reservation-stepper-card">
+
+        <div class="reservation-step">
+
+          <div class="reservation-step__number reservation-step__number--active">
+            1
+          </div>
+
+          <div>
+            <strong>
+              Venue & Date
+            </strong>
+
+            <span>
+              Choose a venue and date
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="reservation-step__line"></div>
+
+
+        <div class="reservation-step">
+
+          <div class="reservation-step__number">
+            2
+          </div>
+
+          <div>
+            <strong>
+              Event Details
+            </strong>
+
+            <span>
+              Provide event information
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="reservation-step__line"></div>
+
+
+        <div class="reservation-step">
+
+          <div class="reservation-step__number">
+            3
+          </div>
+
+          <div>
+            <strong>
+              Review & Submit
+            </strong>
+
+            <span>
+              Confirm your reservation
+            </span>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================
+           VENUE + CALENDAR
+           =================================================== -->
+
+      <section class="reservation">
+
+
+        <!-- LEFT -->
+        <section class="reservation-card reservation__venues">
+
+          <div class="reservation-card__heading">
+
+            <div class="reservation-card__icon">
+              ▦
+            </div>
+
+            <div>
+
+              <h2>
+                Select Venue
+              </h2>
+
+              <p>
+                Choose the facility you would like
+                to reserve.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="venue-search-wrapper"
+          >
+
+            <span class="venue-search-icon">
+              ⌕
+            </span>
+
+            <input
+              type="text"
+              id="venue-search"
+              class="venue-search"
+              placeholder="Search venue..."
+            />
+
+          </div>
+
+
+          <!-- JS venue list -->
+          <div id="venue-list"></div>
+
+
+          <div class="venue-tip">
+
+            <span class="venue-tip__icon">
+              ✦
+            </span>
+
+            <div>
+
+              <strong>
+                Quick Tip
+              </strong>
+
+              <p>
+                Select a venue first to view
+                its available dates and time slots.
+              </p>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- RIGHT -->
+        <section class="reservation-card reservation__schedule">
+
+
+          <div class="reservation-card__heading">
+
+            <div class="reservation-card__icon">
+              ◷
+            </div>
+
+            <div>
+
+              <h2>
+                Select Date
+              </h2>
+
+              <p>
+                Choose a date to view the available
+                reservation schedule.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- JS CALENDAR -->
+          <div
+            class="calendar-wrapper"
+          >
+            <div id="calendar"></div>
+          </div>
+
+
+<!-- CHOOSE TIME -->
+<div class="choose-time-section">
+
+  <div class="choose-time-heading">
+
+    <div>
+      <h3>Choose Time</h3>
+
+      <p>
+        Select an available time slot for your reservation.
+      </p>
+    </div>
+
+  </div>
+
+  <div
+    id="time-slots"
+    class="time-slots"
+  ></div>
+
+</div>
+
+          <!-- LEGEND -->
+          <div class="availability-legend">
+
+            <div class="legend-item">
+
+              <span class="legend-dot legend-dot--available"></span>
+
+              <div>
+                <strong>
+                  Available
+                </strong>
+
+                <small>
+                  Date has available slots
+                </small>
+              </div>
+
+            </div>
+
+
+            <div class="legend-item">
+
+              <span class="legend-dot legend-dot--selected"></span>
+
+              <div>
+                <strong>
+                  Selected
+                </strong>
+
+                <small>
+                  Currently selected date
+                </small>
+              </div>
+
+            </div>
+
+
+            <div class="legend-item">
+
+              <span class="legend-dot legend-dot--limited"></span>
+
+              <div>
+                <strong>
+                  Limited
+                </strong>
+
+                <small>
+                  Few time slots left
+                </small>
+              </div>
+
+            </div>
+
+
+            <div class="legend-item">
+
+              <span class="legend-dot legend-dot--full"></span>
+
+              <div>
+                <strong>
+                  Fully Booked
+                </strong>
+
+                <small>
+                  No available time slots
+                </small>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- FOOTER -->
+          <div class="reservation__footer">
+
+            <div class="reservation__footer-info">
+
+              <span class="reservation__footer-icon">
+                ▣
+              </span>
+
+              <div>
+
+                <small>
+                  Ready to continue?
+                </small>
+
+                <strong>
+                  Complete your venue and date selection
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <button
+              class="reservation-next"
+              id="next-button"
+              type="button"
+            >
+              Next: Event Details
+              <span>→</span>
+            </button>
+
+          </div>
+
+        </section>
+
+      </section>
+
+    </section>
+
+  </main>
+
+
+  <!-- =======================================================
+       SCRIPTS
+       ======================================================= -->
+
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js"></script>
+  <script src="js/firebase/client.js"></script>
+<script src="js/data/mock-venues.js"></script>
+<script src="js/data/mock-slots.js"></script>
+
+<script src="js/components/navbar.js"></script>
+<script src="js/components/venue-list.js"></script>
+<script src="js/components/calendar.js"></script>
+
+<script src="js/components/time-slots.js"></script>
+
+<script src="js/data/reservation-store.js"></script>
+<script src="js/pages/new-reservation-venue.js"></script>
+
+</body>
+</html>

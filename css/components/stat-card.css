@@ -1,0 +1,51 @@
+/* ==========================================================
+   stat-card.css
+   Admin dashboard stat cards: a number plus a colored "Live"
+   badge (reuses status-badge.css colors).
+   ========================================================== */
+
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 20px 0 28px;
+}
+
+.stat-card {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-black);
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+
+.stat-card__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-gray);
+  margin-bottom: 10px;
+}
+
+.stat-card__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-card__value {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .stat-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .stat-cards {
+    grid-template-columns: 1fr;
+  }
+}

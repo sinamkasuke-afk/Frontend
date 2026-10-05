@@ -1,0 +1,29 @@
+/* ==========================================================
+   status-badge.css
+   Small colored pill showing a reservation's status.
+   Reusable wherever a status needs to be shown (e.g. Admin
+   request management later).
+   ========================================================== */
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.status-badge--pending {
+  background-color: #fdedb0;
+  color: #7a5c00;
+}
+
+.status-badge--approved {
+  background-color: #d3f2d8;
+  color: #1e6b32;
+}
+
+.status-badge--declined {
+  background-color: #fbd6d9;
+  color: #a11d2b;
+}

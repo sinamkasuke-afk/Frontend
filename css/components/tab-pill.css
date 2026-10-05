@@ -1,0 +1,28 @@
+/* ==========================================================
+   tab-pill.css
+   Light-background filter tabs (white/yellow), for pages
+   that don't sit on a dark header bar. Reusable wherever
+   status filtering is needed on a light section.
+   ========================================================== */
+
+.tab-pill {
+  padding: 6px 14px;
+  background-color: var(--color-white);
+  color: var(--color-black);
+  border: 1px solid var(--color-black);
+  border-radius: 5px;
+  font-family: var(--font-main);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tab-pill:hover {
+  background-color: #fff3c4;
+}
+
+.tab-pill--active,
+.tab-pill--active:hover {
+  background-color: var(--color-yellow);
+  font-weight: 700;
+}

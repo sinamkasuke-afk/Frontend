@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function admin() { return signedIn() && request.auth.token.admin == true; }
+    match /reservations/{id} {
+      allow read: if admin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.id == id
+        && request.resource.data.requestId == id
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.keys().hasAll(['venue', 'event', 'date', 'time', 'dateISO'])
+        && request.resource.data.venue is string
+        && request.resource.data.event is string
+        && request.resource.data.dateISO is string
+        && !request.resource.data.keys().hasAny(['reviewedBy', 'updatedAt']);
+      allow update: if admin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'reviewedBy'])
+        && request.resource.data.status in ['approved', 'declined']
+        && request.resource.data.reviewedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+    match /venues/{id} {
+      allow read: if signedIn();
+      allow write: if admin();
+    }
+  }
+}

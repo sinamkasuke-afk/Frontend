@@ -1,0 +1,37 @@
+/* ==========================================================
+   summary-card.css
+   Small stat cards on the dashboard (Pending / Approved /
+   Upcoming). Reusable if other pages need a stat row later.
+   ========================================================== */
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.summary-card {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-black);
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+
+.summary-card__value {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.summary-card__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-gray);
+}
+
+@media (max-width: 700px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+}

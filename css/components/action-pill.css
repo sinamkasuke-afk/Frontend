@@ -1,0 +1,48 @@
+/* ==========================================================
+   action-pill.css
+   Approve / Decline pill buttons, and the gray "No Action
+   Required" fallback text, used in the requests table.
+   ========================================================== */
+
+.action-pill-group {
+  display: flex;
+  gap: 8px;
+}
+
+.action-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  background-color: var(--color-white);
+  border: 1px solid;
+  border-radius: 4px;
+  font-family: var(--font-main);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.action-pill--approve {
+  color: #1e6b32;
+  border-color: #1e6b32;
+}
+
+.action-pill--approve:hover {
+  background-color: #eafaf0;
+}
+
+.action-pill--decline {
+  color: #a11d2b;
+  border-color: #a11d2b;
+}
+
+.action-pill--decline:hover {
+  background-color: #fdeef0;
+}
+
+.no-action {
+  font-size: 11px;
+  font-style: italic;
+  color: #888888;
+}

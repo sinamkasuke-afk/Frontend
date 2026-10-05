@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    Admin Login | School Facilities Reservation System
+  </title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components/navbar.css">
+  <link rel="stylesheet" href="css/pages/admin-login.css">
+</head>
+
+<body>
+
+  <div id="navbar"></div>
+
+  <main class="admin-login-page">
+
+    <div class="admin-login-layout">
+
+      <!-- LEFT SIDE -->
+      <section class="admin-showcase">
+
+        <div class="admin-showcase__shade"></div>
+
+        <div class="admin-showcase__content">
+
+          <p class="admin-showcase__label">
+            ADMINISTRATION PORTAL
+            <span></span>
+          </p>
+
+          <h1>
+            Manage Campus
+            <br>
+            Spaces
+            <br>
+            <em>with Clarity.</em>
+          </h1>
+
+          <p class="admin-showcase__description">
+            Review reservation requests, manage facility
+            schedules, and keep campus spaces organized
+            through one centralized system.
+          </p>
+
+        </div>
+
+
+        <div class="admin-feature-box">
+
+          <div class="admin-feature">
+
+            <div class="admin-feature__icon">
+              ✓
+            </div>
+
+            <div>
+              <h3>Review Requests</h3>
+              <p>
+                Approve or decline submitted
+                facility reservations.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="admin-feature">
+
+            <div class="admin-feature__icon">
+              ◷
+            </div>
+
+            <div>
+              <h3>Manage Schedules</h3>
+              <p>
+                Monitor venue availability
+                and campus schedules.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="admin-feature">
+
+            <div class="admin-feature__icon">
+              ▤
+            </div>
+
+            <div>
+              <h3>Track Activity</h3>
+              <p>
+                View reservation history
+                and facility activity.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- RIGHT SIDE -->
+      <section class="admin-login-panel">
+
+        <div class="admin-login-icon">
+          ◆
+        </div>
+
+        <p class="admin-login-label">
+          ADMINISTRATOR LOGIN
+        </p>
+
+        <h2>
+          Welcome, Admin
+        </h2>
+
+        <p class="admin-login-description">
+          Sign in to manage facility reservations
+          and campus schedules.
+        </p>
+
+
+        <form id="admin-login-form">
+
+          <div class="admin-field">
+
+            <label for="admin-username">
+              Email
+            </label>
+
+            <input
+              type="text"
+              id="admin-username"
+              placeholder="Enter your email"
+              required
+            >
+
+          </div>
+
+
+          <div class="admin-field">
+
+            <label for="admin-password">
+              Password
+            </label>
+
+            <div class="admin-password-field">
+
+              <input
+                type="password"
+                id="admin-password"
+                placeholder="Enter your password"
+                required
+              >
+
+              <button
+                type="button"
+                id="admin-password-toggle"
+              >
+                Show
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="admin-login-options">
+
+            <label class="admin-remember">
+
+              <input
+                type="checkbox"
+                id="admin-remember"
+              >
+
+              <span>
+                Remember me
+              </span>
+
+            </label>
+
+
+            <a href="#">
+              Forgot password?
+            </a>
+
+          </div>
+
+
+          <button
+            type="submit"
+            class="admin-login-button"
+          >
+            Login as Administrator
+            <span>→</span>
+          </button>
+
+        </form>
+
+      </section>
+
+    </div>
+
+  </main>
+
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js"></script>
+  <script src="js/firebase/client.js"></script>
+<script src="js/components/navbar.js"></script>
+  <script src="js/pages/admin-login.js"></script>
+
+</body>
+</html>

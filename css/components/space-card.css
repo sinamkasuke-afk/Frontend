@@ -1,0 +1,23 @@
+/* ==========================================================
+   space-card.css
+   White card showing one campus space.
+   ========================================================== */
+
+.space-card {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.space-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.space-card__description {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-gray);
+}

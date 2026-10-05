@@ -1,0 +1,46 @@
+/* ==========================================================
+   venue-list.css
+   List of selectable venue buttons. Selected = yellow + check.
+   ========================================================== */
+
+.venue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.venue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  background-color: var(--color-white);
+  color: var(--color-black);
+  border: 1px solid var(--color-black);
+  border-radius: 6px;
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.venue-item:hover {
+  background-color: #fff3c4;
+}
+
+.venue-item__check {
+  display: none;
+}
+
+/* Selected venue */
+.venue-item--selected,
+.venue-item--selected:hover {
+  background-color: var(--color-yellow);
+  font-weight: 700;
+}
+
+.venue-item--selected .venue-item__check {
+  display: block;
+}

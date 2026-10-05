@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Admin Dashboard | School Facilities Reservation System
+  </title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/base.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/pages/admin-dashboard.css"
+  />
+</head>
+
+<body>
+
+
+  <!-- =====================================================
+       HEADER
+       ===================================================== -->
+
+  <header class="admin-header">
+
+    <div class="admin-header__brand">
+
+      <div class="admin-header__logo">
+        ▥
+      </div>
+
+      <strong>
+        SCHOOL
+      </strong>
+
+      <span class="admin-header__divider"></span>
+
+      <p>
+        Facilities Reservation System
+      </p>
+
+    </div>
+
+
+    <div class="admin-header__right">
+
+
+      <!-- SEARCH -->
+
+      <div class="admin-search">
+
+        <span>
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          id="global-search"
+          placeholder="Search requests, venues, or users..."
+        />
+
+      </div>
+
+
+      <!-- NOTIFICATION -->
+
+      <button
+        type="button"
+        class="notification-button"
+        id="notification-button"
+        aria-label="Notifications"
+      >
+
+        <span class="notification-bell">
+          🔔
+        </span>
+
+        <span class="notification-dot"></span>
+
+      </button>
+
+
+      <!-- ADMIN PROFILE -->
+
+      <div class="admin-profile-wrapper">
+
+
+        <button
+          type="button"
+          class="admin-profile"
+          id="admin-profile-button"
+        >
+
+          <div class="admin-profile__avatar">
+            AS
+          </div>
+
+
+          <div class="admin-profile__text">
+
+            <strong>
+              Admin Santos
+            </strong>
+
+            <span>
+              Administrator
+            </span>
+
+          </div>
+
+
+          <span
+            class="admin-profile__arrow"
+            id="admin-profile-arrow"
+          >
+           ⌄
+          </span>
+
+        </button>
+
+
+        <!-- PROFILE DROPDOWN -->
+
+        <div
+          class="admin-profile-menu"
+          id="admin-profile-menu"
+        >
+
+          <a href="#">
+            <span>♙</span>
+            Profile
+          </a>
+
+          <div class="admin-profile-menu__divider"></div>
+
+          <a
+            href="admin-login.html"
+            class="admin-profile-menu__logout"
+          >
+            <span>↪</span>
+            Logout
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       APP
+       ===================================================== -->
+
+  <main class="admin-shell">
+
+
+    <!-- ===================================================
+         HOVER SIDEBAR
+         =================================================== -->
+
+    <aside class="admin-sidebar">
+
+      <nav class="admin-sidebar__nav">
+
+
+        <a
+          href="admin-dashboard.html"
+          class="
+            admin-sidebar__link
+            admin-sidebar__link--active
+          "
+        >
+
+          <span class="admin-sidebar__icon">
+            ▦
+          </span>
+
+          <span class="admin-sidebar__text">
+            Dashboard
+          </span>
+
+        </a>
+
+
+        <a
+          href="admin-requests.html"
+          class="admin-sidebar__link"
+        >
+
+          <span class="admin-sidebar__icon">
+            ▤
+          </span>
+
+          <span class="admin-sidebar__text">
+            Requests
+          </span>
+
+        </a>
+
+
+        <a
+          href="admin-history.html"
+          class="admin-sidebar__link"
+        >
+
+          <span class="admin-sidebar__icon">
+            ◷
+          </span>
+
+          <span class="admin-sidebar__text">
+            History
+          </span>
+
+        </a>
+
+
+        <a
+          href="admin-calendar.html"
+          class="admin-sidebar__link"
+        >
+
+          <span class="admin-sidebar__icon">
+            ▣
+          </span>
+
+          <span class="admin-sidebar__text">
+            Calendar
+          </span>
+
+        </a>
+
+      </nav>
+
+
+      <!-- SIDEBAR BOTTOM -->
+
+      <div class="admin-sidebar__bottom">
+
+        <a
+          href="admin-login.html"
+          class="admin-sidebar__link"
+        >
+
+          <span class="admin-sidebar__icon">
+            ↪
+          </span>
+
+          <span class="admin-sidebar__text">
+            Logout
+          </span>
+
+        </a>
+
+      </div>
+
+    </aside>
+
+
+    <!-- ===================================================
+         MAIN CONTENT
+         =================================================== -->
+
+    <section class="admin-main">
+
+
+      <!-- PAGE HEADING -->
+
+      <div class="admin-page-header">
+
+        <div>
+
+          <h1>
+            Admin Dashboard
+          </h1>
+
+          <p>
+            Monitor and manage all facility reservation requests.
+          </p>
+
+        </div>
+
+
+        <div class="admin-date-time">
+
+          <strong id="admin-current-date">
+            —
+          </strong>
+
+          <span id="admin-current-time">
+            —
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           STAT CARDS
+           ================================================= -->
+
+      <section class="admin-stats">
+
+
+        <!-- TOTAL -->
+
+        <article class="admin-stat-card admin-stat-card--total">
+
+          <div class="admin-stat-card__top">
+
+            <div class="admin-stat-card__icon">
+              ▤
+            </div>
+
+            <span>
+              Total Requests
+            </span>
+
+          </div>
+
+
+          <div class="admin-stat-card__bottom">
+
+            <div>
+
+              <strong id="total-requests">
+                0
+              </strong>
+
+              <small class="stat-growth stat-growth--green">
+                ↗ +3 this week
+              </small>
+
+            </div>
+
+
+            <div class="mini-bars">
+
+              <span></span>
+              <span></span>
+              <span></span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- PENDING -->
+
+        <article class="admin-stat-card admin-stat-card--pending">
+
+          <div class="admin-stat-card__top">
+
+            <div class="admin-stat-card__icon">
+              ◷
+            </div>
+
+            <span>
+              Pending Approval
+            </span>
+
+          </div>
+
+
+          <div class="admin-stat-card__bottom">
+
+            <div>
+
+              <strong id="pending-requests">
+                0
+              </strong>
+
+              <small class="stat-growth stat-growth--gold">
+                ↗ +2 this week
+              </small>
+
+            </div>
+
+
+            <div class="mini-bars">
+
+              <span></span>
+              <span></span>
+              <span></span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- APPROVED -->
+
+        <article class="admin-stat-card admin-stat-card--approved">
+
+          <div class="admin-stat-card__top">
+
+            <div class="admin-stat-card__icon">
+              ✓
+            </div>
+
+            <span>
+              Approved Bookings
+            </span>
+
+          </div>
+
+
+          <div class="admin-stat-card__bottom">
+
+            <div>
+
+              <strong id="approved-requests">
+                0
+              </strong>
+
+              <small class="stat-growth stat-growth--green">
+                ↗ +1 this week
+              </small>
+
+            </div>
+
+
+            <div class="mini-bars">
+
+              <span></span>
+              <span></span>
+              <span></span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- DECLINED -->
+
+        <article class="admin-stat-card admin-stat-card--declined">
+
+          <div class="admin-stat-card__top">
+
+            <div class="admin-stat-card__icon">
+              ×
+            </div>
+
+            <span>
+              Declined Requests
+            </span>
+
+          </div>
+
+
+          <div class="admin-stat-card__bottom">
+
+            <div>
+
+              <strong id="declined-requests">
+                0
+              </strong>
+
+              <small class="stat-growth stat-growth--neutral">
+                ⊖ +0 this week
+              </small>
+
+            </div>
+
+
+            <div class="mini-bars">
+
+              <span></span>
+              <span></span>
+              <span></span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- =================================================
+           RECENT REQUESTS
+           ================================================= -->
+
+      <section class="recent-card">
+
+
+        <div class="recent-card__header">
+
+          <div class="recent-card__heading">
+
+            <div class="recent-card__icon">
+              ▤
+            </div>
+
+            <div>
+
+              <h2>
+                Recent Reservation Requests
+              </h2>
+
+              <p>
+                Latest facility reservation requests submitted to PFMO.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <a
+            href="admin-requests.html"
+            class="view-all-button"
+          >
+            View All Requests
+            <span>→</span>
+          </a>
+
+        </div>
+
+
+        <div class="admin-table-wrap">
+
+          <table class="admin-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Request ID
+                </th>
+
+                <th>
+                  Requester
+                </th>
+
+                <th>
+                  Venue
+                </th>
+
+                <th>
+                  Date & Time
+                </th>
+
+                <th>
+                  Status
+                </th>
+
+                <th>
+                  Actions
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody id="admin-request-rows">
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js"></script>
+  <script src="js/firebase/client.js"></script>
+<script src="js/pages/admin-dashboard.js"></script>
+
+</body>
+</html>

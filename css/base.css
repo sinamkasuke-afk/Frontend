@@ -1,0 +1,45 @@
+/* ==========================================================
+   base.css
+   Global reset, color/size variables, and page defaults.
+   Change colors and sizes HERE to match Figma exactly.
+   ========================================================== */
+
+:root {
+  /* Colors (estimated from the Figma screenshot) */
+  --color-black: #111111;
+  --color-yellow: #fbbf24;
+  --color-cream: #fffbdb;
+  --color-cream-panel: #fff8c4;
+  --color-white: #ffffff;
+  --color-gray: #666666;
+  --color-border: #333333;
+
+  /* Layout */
+  --navbar-height: 72px;
+  --page-padding: 48px;
+  --page-max-width: 1280px;
+
+  /* Font */
+  --font-main: "Inter", Arial, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--color-cream);
+  color: var(--color-black);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}

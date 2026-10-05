@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Reservation Details | Facilities Reservation System
+  </title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components/navbar.css" />
+  <link rel="stylesheet" href="css/components/button.css" />
+  <link rel="stylesheet" href="css/components/form.css" />
+  <link rel="stylesheet" href="css/components/panel.css" />
+
+  <link
+    rel="stylesheet"
+    href="css/pages/new-reservation-details.css"
+  />
+</head>
+
+<body>
+
+  <div id="navbar"></div>
+
+  <main class="reservation-details-page">
+
+    <!-- SIDEBAR -->
+    <aside class="details-sidebar">
+
+      <nav class="details-sidebar__nav">
+
+        <a
+          href="dashboard.html"
+          class="details-sidebar__link"
+        >
+          <span class="details-sidebar__icon">⌂</span>
+          <span>Dashboard</span>
+        </a>
+
+        <a
+          href="new-reservation-venue.html"
+          class="details-sidebar__link details-sidebar__link--active"
+        >
+          <span class="details-sidebar__icon">▣</span>
+          <span>New Reservation</span>
+        </a>
+
+        <a
+          href="my-requests.html"
+          class="details-sidebar__link"
+        >
+          <span class="details-sidebar__icon">▤</span>
+          <span>My Reservations</span>
+        </a>
+
+        <a
+          href="new-reservation-venue.html"
+          class="details-sidebar__link"
+        >
+          <span class="details-sidebar__icon">▥</span>
+          <span>Browse Facilities</span>
+        </a>
+
+      </nav>
+
+      <div class="details-sidebar__bottom">
+
+        <a
+          href="mailto:pfmo@national-u.edu.ph"
+          class="details-sidebar__link"
+        >
+          <span class="details-sidebar__icon">?</span>
+          <span>Help & Support</span>
+        </a>
+
+        <a
+          href="index.html"
+          class="details-sidebar__link"
+        >
+          <span class="details-sidebar__icon">↪</span>
+          <span>Logout</span>
+        </a>
+
+      </div>
+
+      <div class="details-sidebar__quote">
+        <span>✦</span>
+
+        <p>
+          Plan clearly.
+          <br />
+          Reserve confidently.
+        </p>
+      </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <section class="details-content">
+
+      <!-- HERO -->
+      <section class="details-hero">
+
+        <div class="details-hero__overlay"></div>
+
+        <div class="details-hero__content">
+
+          <p class="details-hero__label">
+            RESERVATION
+            <span></span>
+          </p>
+
+          <h1>
+            Event Details
+          </h1>
+
+          <p>
+            Tell us more about your event and
+            operational requirements.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- STEPPER -->
+      <section class="details-stepper-card">
+
+        <div class="details-step">
+
+          <div class="details-step__number details-step__number--done">
+            ✓
+          </div>
+
+          <div>
+            <strong>Venue & Date</strong>
+            <span>Venue and schedule selected</span>
+          </div>
+
+        </div>
+
+        <div class="details-step__line details-step__line--done"></div>
+
+        <div class="details-step">
+
+          <div class="details-step__number details-step__number--active">
+            2
+          </div>
+
+          <div>
+            <strong>Event Details</strong>
+            <span>Provide event information</span>
+          </div>
+
+        </div>
+
+        <div class="details-step__line"></div>
+
+        <div class="details-step">
+
+          <div class="details-step__number">
+            3
+          </div>
+
+          <div>
+            <strong>Review & Submit</strong>
+            <span>Confirm your reservation</span>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- FORM -->
+      <form
+        id="reservation-details-form"
+        novalidate
+      >
+
+        <div class="details-layout">
+
+
+          <!-- LEFT CARD -->
+          <section class="details-card event-information">
+
+            <div class="details-card__heading">
+
+              <div class="details-card__icon">
+                ▤
+              </div>
+
+              <div>
+                <h2>Event Information</h2>
+
+                <p>
+                  Provide the basic details about
+                  your event.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="form-grid">
+
+              <div class="form-group">
+
+                <label for="event-name">
+                  Event Name
+                </label>
+
+                <input
+                  type="text"
+                  id="event-name"
+                  name="eventName"
+                  placeholder="e.g. IT Department General Assembly"
+                />
+
+                <small
+                  class="field-error"
+                  id="event-name-error"
+                ></small>
+
+              </div>
+
+
+              <div class="form-group">
+
+                <label for="organization">
+                  Organization
+                </label>
+
+                <input
+                  type="text"
+                  id="organization"
+                  name="organization"
+                  placeholder="e.g. NU IT Society"
+                />
+
+                <small
+                  class="field-error"
+                  id="organization-error"
+                ></small>
+
+              </div>
+
+
+              <div class="form-group">
+
+                <label for="event-type">
+                  Event Type
+                </label>
+
+                <input
+                  type="text"
+                  id="event-type"
+                  name="eventType"
+                  placeholder="e.g. Academic Seminar"
+                />
+
+                <small
+                  class="field-error"
+                  id="event-type-error"
+                ></small>
+
+              </div>
+
+
+              <div class="form-group">
+
+                <label for="expected-guests">
+                  Expected Guests
+                </label>
+
+                <input
+                  type="number"
+                  id="expected-guests"
+                  name="expectedGuests"
+                  placeholder="e.g. 150"
+                  min="1"
+                />
+
+                <small
+                  class="field-error"
+                  id="expected-guests-error"
+                ></small>
+
+              </div>
+
+
+              <div class="form-group full-width">
+
+                <label for="purpose">
+                  Purpose of Event
+                </label>
+
+                <textarea
+                  id="purpose"
+                  name="purpose"
+                  rows="4"
+                  placeholder="Briefly describe the objective of the request"
+                ></textarea>
+
+                <small
+                  class="field-error"
+                  id="purpose-error"
+                ></small>
+
+              </div>
+
+
+              <div class="form-group full-width">
+
+                <label for="contact-person">
+                  Contact Person Email / Number
+                </label>
+
+                <input
+                  type="text"
+                  id="contact-person"
+                  name="contactPerson"
+                  placeholder="e.g. contact@national-u.edu.ph / 0912345678"
+                />
+
+                <small
+                  class="field-error"
+                  id="contact-person-error"
+                ></small>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- RIGHT CARD -->
+          <section class="details-card operational-requirements">
+
+            <div class="details-card__heading">
+
+              <div class="details-card__icon">
+                ⚙
+              </div>
+
+              <div>
+                <h2>Operational Requirements</h2>
+
+                <p>
+                  Add facility needs and
+                  supporting documents.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="facility-requirements">
+                Facility Requirements
+              </label>
+
+              <textarea
+                id="facility-requirements"
+                name="facilityRequirements"
+                rows="3"
+                placeholder="e.g. Sound system, 3 microphones, projector"
+              ></textarea>
+
+              <small
+                class="field-error"
+                id="facility-requirements-error"
+              ></small>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="setup-notes">
+                Setup Notes
+              </label>
+
+              <textarea
+                id="setup-notes"
+                name="setupNotes"
+                rows="3"
+                placeholder="e.g. Chairs arranged in seminar style"
+              ></textarea>
+
+              <small
+                class="field-error"
+                id="setup-notes-error"
+              ></small>
+
+            </div>
+
+
+            <div class="form-group document-group">
+
+              <label for="supporting-document">
+                Supporting Document
+              </label>
+
+              <label
+                class="upload-box"
+                for="supporting-document"
+                id="upload-box"
+              >
+
+                <span class="upload-icon">
+                  ⇧
+                </span>
+
+                <span
+                  class="upload-title"
+                  id="upload-title"
+                >
+                  Upload Proposal PDF
+                </span>
+
+                <span class="upload-description">
+                  PDF only · Maximum file size 5MB
+                </span>
+
+              </label>
+
+              <input
+                type="file"
+                id="supporting-document"
+                name="supportingDocument"
+                accept="application/pdf,.pdf"
+                hidden
+              />
+
+              <small
+                class="field-error"
+                id="supporting-document-error"
+              ></small>
+
+            </div>
+
+
+            <div class="details-note">
+
+              <span>✦</span>
+
+              <div>
+                <strong>
+                  Before continuing
+                </strong>
+
+                <p>
+                  Review the information you entered.
+                  You can still make changes before
+                  final submission.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="details-actions">
+
+              <button
+                type="button"
+                id="back-button"
+                class="details-back-button"
+              >
+                ← Back
+              </button>
+
+              <button
+                type="submit"
+                class="details-next-button"
+              >
+                Next: Review
+                <span>→</span>
+              </button>
+
+            </div>
+
+          </section>
+
+        </div>
+
+      </form>
+
+    </section>
+
+  </main>
+
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js"></script>
+  <script src="js/firebase/client.js"></script>
+<script src="js/components/navbar.js"></script>
+  <script src="js/data/reservation-store.js"></script>
+  <script src="js/pages/new-reservation-details.js"></script>
+
+</body>
+</html>

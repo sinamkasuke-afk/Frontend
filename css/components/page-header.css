@@ -1,0 +1,57 @@
+/* ==========================================================
+   page-header.css
+   Dark bar under the navbar: page title (left) + filter
+   tabs with counts (right). Reusable on future list screens.
+   ========================================================== */
+
+.page-header {
+  background-color: #1a1a1a;
+  padding: 16px var(--page-padding);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-header__title {
+  color: var(--color-white);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.page-header__tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-tab {
+  padding: 6px 14px;
+  background-color: transparent;
+  color: #9a9a9a;
+  border: 1px solid #444444;
+  border-radius: 5px;
+  font-family: var(--font-main);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-tab:hover {
+  color: var(--color-white);
+  border-color: #666666;
+}
+
+/* Active filter tab */
+.filter-tab--active,
+.filter-tab--active:hover {
+  background-color: var(--color-yellow);
+  color: var(--color-black);
+  border-color: var(--color-yellow);
+}
+
+@media (max-width: 600px) {
+  .page-header {
+    padding: 14px 16px;
+  }
+}

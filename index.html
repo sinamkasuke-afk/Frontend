@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    School | Facilities Reservation System
+  </title>
+
+
+  <!-- Fonts -->
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+
+  <!-- Styles -->
+  <link
+    rel="stylesheet"
+    href="css/base.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/components/navbar.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/components/button.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/pages/landing.css"
+  />
+</head>
+
+
+<body>
+
+  <!-- NAVBAR -->
+  <div id="navbar"></div>
+
+
+  <main class="landing-page">
+
+
+    <!-- =====================================================
+         HERO
+         ===================================================== -->
+
+    <section class="hero">
+
+      <div class="hero__overlay"></div>
+
+
+      <div class="hero__content">
+
+        <div class="hero__badge">
+          OFFICIAL CAMPUS PORTAL
+          <span></span>
+        </div>
+
+
+        <h1 class="hero__title">
+          Campus Spaces
+
+          <span>
+            for a Brighter Tomorrow.
+          </span>
+        </h1>
+
+
+        <h2 class="hero__system-title">
+          School Facilities Reservation System
+        </h2>
+
+
+        <p class="hero__description">
+          Manage venue requests, space rentals,
+          and campus scheduling in one centralized
+          platform.
+        </p>
+
+
+        <!-- LOGIN BUTTONS -->
+        <div class="hero__buttons">
+
+
+          <!-- STUDENT LOGIN -->
+          <a
+            href="login.html"
+            class="hero-btn hero-btn--primary"
+          >
+
+            <span class="hero-btn__icon">
+              ♙
+            </span>
+
+            Student Login / Register
+
+            <span class="hero-btn__arrow">
+              →
+            </span>
+
+          </a>
+
+
+          <!-- ADMIN LOGIN -->
+          <a
+            href="admin-login.html"
+            class="hero-btn hero-btn--secondary"
+          >
+
+            <span class="hero-btn__icon">
+              ▣
+            </span>
+
+            Admin Login
+
+          </a>
+
+
+        </div>
+
+      </div>
+
+
+      <!-- SIDE TEXT -->
+      <div class="hero__side-note">
+
+        <span>Spaces</span>
+        <span>People</span>
+        <span>Ideas</span>
+        <span>Progress</span>
+
+      </div>
+
+
+      <!-- HERO MESSAGE -->
+      <div class="hero__message">
+
+        <span class="hero__message-star">
+          ✦
+        </span>
+
+        <p>
+          Well-maintained spaces
+          <br />
+          for a more vibrant
+          <br />
+          academic community.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FEATURES
+         ===================================================== -->
+
+    <section class="feature-strip">
+
+
+      <!-- EASY BOOKING -->
+      <article class="feature-item">
+
+        <div class="feature-icon">
+          ▣
+        </div>
+
+        <div>
+
+          <h3>
+            Easy Booking
+          </h3>
+
+          <p>
+            Submit and track your requests
+            <br />
+            in just a few clicks.
+          </p>
+
+        </div>
+
+      </article>
+
+
+      <div class="feature-divider"></div>
+
+
+      <!-- AVAILABILITY -->
+      <article class="feature-item">
+
+        <div class="feature-icon">
+          ◷
+        </div>
+
+        <div>
+
+          <h3>
+            Real-time Availability
+          </h3>
+
+          <p>
+            View available schedules
+            <br />
+            before you book.
+          </p>
+
+        </div>
+
+      </article>
+
+
+      <div class="feature-divider"></div>
+
+
+      <!-- ORGANIZED REQUESTS -->
+      <article class="feature-item">
+
+        <div class="feature-icon">
+          ▤
+        </div>
+
+        <div>
+
+          <h3>
+            Organized Requests
+          </h3>
+
+          <p>
+            Keep all your reservations
+            <br />
+            in one place.
+          </p>
+
+        </div>
+
+      </article>
+
+
+      <div class="feature-divider"></div>
+
+
+      <!-- SECURITY -->
+      <article class="feature-item">
+
+        <div class="feature-icon">
+          ♢
+        </div>
+
+        <div>
+
+          <h3>
+            Secure and Reliable
+          </h3>
+
+          <p>
+            A safe and centralized
+            <br />
+            system for everyone.
+          </p>
+
+        </div>
+
+      </article>
+
+
+    </section>
+
+
+    <!-- =====================================================
+         FEATURED FACILITIES
+         ===================================================== -->
+
+    <section class="facilities">
+
+
+      <div class="facilities__heading">
+
+
+        <div>
+
+          <p class="section-label">
+            EXPLORE OUR FACILITIES
+            <span></span>
+          </p>
+
+          <h2>
+            Featured Campus Spaces
+          </h2>
+
+        </div>
+
+
+        <button
+          class="view-all-btn"
+          id="view-all-facilities"
+          type="button"
+        >
+
+          View All Facilities
+
+          <span>
+            →
+          </span>
+
+        </button>
+
+
+      </div>
+
+      <!-- CARDS GENERATED BY landing.js -->
+      <div
+        class="facilities__grid"
+        id="featured-spaces"
+      ></div>
+
+    </section>
+
+  </main>
+
+  <!-- =======================================================
+       SCRIPTS
+       ======================================================= -->
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js"></script>
+  <script src="js/firebase/client.js"></script>
+<script src="js/components/navbar.js"></script>
+
+  <script src="js/pages/landing.js"></script>
+
+
+</body>
+</html>

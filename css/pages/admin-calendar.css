@@ -1,0 +1,1547 @@
+* {
+  box-sizing: border-box;
+}
+
+
+body {
+  margin: 0;
+
+  background: #f5f2e9;
+
+  font-family:
+    "Inter",
+    sans-serif;
+
+  color: #19251f;
+}
+
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+
+.admin-header {
+  width: calc(100% - 36px);
+
+  min-height: 82px;
+
+  margin:
+    18px
+    auto
+    0;
+
+  padding:
+    0
+    28px;
+
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 30px;
+
+  box-shadow:
+    0 8px 28px
+    rgba(30, 45, 38, 0.05);
+
+  position: relative;
+
+  z-index: 100;
+}
+
+
+/* BRAND */
+
+.admin-header__brand {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  white-space: nowrap;
+}
+
+
+.admin-header__logo {
+  color: #174c3a;
+
+  font-size: 30px;
+}
+
+
+.admin-header__brand strong {
+  font-family:
+    "DM Serif Display",
+    serif;
+
+  color: #174c3a;
+
+  font-size: 27px;
+
+  font-weight: 400;
+}
+
+
+.admin-header__divider {
+  width: 1px;
+
+  height: 30px;
+
+  margin:
+    0
+    4px;
+
+  background: #d9d6ce;
+}
+
+
+.admin-header__brand p {
+  margin: 0;
+
+  color: #68716c;
+
+  font-size: 14px;
+}
+
+
+/* ==========================================================
+   HEADER RIGHT
+   ========================================================== */
+
+.admin-header__right {
+  display: flex;
+
+  align-items: center;
+
+  gap: 18px;
+}
+
+
+/* SEARCH */
+
+.admin-header-search {
+  width: 380px;
+
+  height: 46px;
+
+  padding:
+    0
+    17px;
+
+  border-radius: 999px;
+
+  background: #f6f4ee;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+.admin-header-search span {
+  color: #35463e;
+
+  font-size: 20px;
+}
+
+
+.admin-header-search input {
+  width: 100%;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  font-family: inherit;
+
+  color: #3c4641;
+
+  font-size: 12px;
+}
+
+
+/* NOTIFICATION */
+
+.notification-button {
+  width: 43px;
+
+  height: 43px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: transparent;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  position: relative;
+
+  cursor: pointer;
+}
+
+
+.notification-button:hover {
+  background: #f5f3ed;
+}
+
+
+.notification-bell {
+  font-size: 18px;
+}
+
+
+.notification-dot {
+  width: 9px;
+
+  height: 9px;
+
+  position: absolute;
+
+  top: 5px;
+
+  right: 5px;
+
+  border:
+    2px solid
+    #ffffff;
+
+  border-radius: 50%;
+
+  background: #ef2929;
+}
+
+
+/* ==========================================================
+   PROFILE
+   ========================================================== */
+
+.admin-profile-wrapper {
+  position: relative;
+}
+
+
+.admin-profile {
+  padding:
+    5px
+    7px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: transparent;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  cursor: pointer;
+
+  font-family: inherit;
+}
+
+
+.admin-profile:hover {
+  background: #f6f4ee;
+}
+
+
+.admin-profile__avatar {
+  width: 46px;
+
+  height: 46px;
+
+  border-radius: 50%;
+
+  background: #ccefd9;
+
+  color: #174c3a;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 13px;
+
+  font-weight: 700;
+}
+
+
+.admin-profile__text {
+  text-align: left;
+}
+
+
+.admin-profile__text strong {
+  display: block;
+
+  color: #17221d;
+
+  font-size: 12px;
+}
+
+
+.admin-profile__text span {
+  color: #757d78;
+
+  font-size: 10px;
+}
+
+
+.admin-profile__arrow {
+  margin-left: 5px;
+
+  color: #53605a;
+
+  transition:
+    transform 0.2s ease;
+}
+
+
+.admin-profile-wrapper--open
+.admin-profile__arrow {
+  transform:
+    rotate(180deg);
+}
+
+
+/* PROFILE MENU */
+
+.admin-profile-menu {
+  width: 180px;
+
+  position: absolute;
+
+  top:
+    calc(100% + 10px);
+
+  right: 0;
+
+  padding: 8px;
+
+  border:
+    1px solid
+    #e8e3d8;
+
+  border-radius: 13px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 14px 35px
+    rgba(27, 43, 36, 0.15);
+
+  opacity: 0;
+
+  visibility: hidden;
+
+  transform:
+    translateY(-6px);
+
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease,
+    transform 0.2s ease;
+
+  z-index: 1000;
+}
+
+
+.admin-profile-wrapper--open
+.admin-profile-menu {
+  opacity: 1;
+
+  visibility: visible;
+
+  transform:
+    translateY(0);
+}
+
+
+.admin-profile-menu a {
+  min-height: 42px;
+
+  padding:
+    0
+    12px;
+
+  border-radius: 8px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  color: #354039;
+
+  text-decoration: none;
+
+  font-size: 11px;
+
+  font-weight: 600;
+}
+
+
+.admin-profile-menu a:hover {
+  background: #f5f3ed;
+}
+
+
+.admin-profile-menu__divider {
+  height: 1px;
+
+  margin: 5px;
+
+  background: #ebe7dd;
+}
+
+
+.admin-profile-menu
+.admin-profile-menu__logout {
+  color: #a2323a;
+}
+
+
+/* ==========================================================
+   APP SHELL
+   ========================================================== */
+
+.admin-shell {
+  width: calc(100% - 36px);
+
+  max-width: 1600px;
+
+  min-height:
+    calc(100vh - 118px);
+
+  margin:
+    0
+    auto
+    20px;
+
+  display: grid;
+
+  grid-template-columns:
+    78px
+    minmax(0, 1fr);
+
+  position: relative;
+}
+
+
+/* ==========================================================
+   HOVER SIDEBAR
+   ========================================================== */
+
+.admin-sidebar {
+  width: 78px;
+
+  min-height:
+    calc(100vh - 118px);
+
+  padding:
+    28px
+    12px;
+
+  border-right:
+    1px solid
+    #e6e1d6;
+
+  background:
+    rgba(250, 248, 241, 0.98);
+
+  position: relative;
+
+  z-index: 50;
+
+  overflow: hidden;
+
+  transition:
+    width 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+
+.admin-sidebar:hover {
+  width: 270px;
+
+  box-shadow:
+    12px 0 35px
+    rgba(24, 48, 38, 0.14);
+}
+
+
+.admin-sidebar__nav {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+
+.admin-sidebar__link {
+  width: 246px;
+
+  min-height: 54px;
+
+  padding:
+    0
+    15px;
+
+  border-radius: 11px;
+
+  color: #25332c;
+
+  text-decoration: none;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 18px;
+
+  white-space: nowrap;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+
+.admin-sidebar__icon {
+  width: 24px;
+
+  min-width: 24px;
+
+  height: 24px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  font-size: 19px;
+}
+
+
+.admin-sidebar__text {
+  opacity: 1;
+
+  visibility: visible;
+
+  transition:
+    opacity 0.15s ease;
+}
+
+
+.admin-sidebar:not(:hover)
+.admin-sidebar__text {
+  opacity: 0;
+
+  visibility: hidden;
+}
+
+
+/* ACTIVE */
+
+.admin-sidebar__link--active {
+  background:
+    linear-gradient(
+      135deg,
+      #0e523d,
+      #17644c
+    );
+
+  color: #ffffff;
+
+  font-weight: 700;
+
+  position: relative;
+
+  box-shadow:
+    0 9px 18px
+    rgba(23, 76, 58, 0.12);
+}
+
+
+.admin-sidebar__link--active::before {
+  content: "";
+
+  width: 3px;
+
+  height: 28px;
+
+  position: absolute;
+
+  left: 0;
+
+  border-radius:
+    0 6px 6px 0;
+
+  background: #f2bd28;
+}
+
+
+.admin-sidebar__link--active:hover {
+  background: #0e523d;
+
+  color: #ffffff;
+}
+
+
+.admin-sidebar__link:not(
+  .admin-sidebar__link--active
+):hover {
+  background: #efede5;
+
+  color: #174c3a;
+}
+
+
+/* BOTTOM */
+
+.admin-sidebar__bottom {
+  width: 246px;
+
+  margin-top: 30px;
+
+  padding-top: 25px;
+
+  border-top:
+    1px solid
+    #e1ddd3;
+}
+
+
+/* ==========================================================
+   MAIN
+   ========================================================== */
+
+.calendar-main {
+  width: 100%;
+
+  min-width: 0;
+
+  padding:
+    32px
+    28px
+    45px;
+
+  position: relative;
+
+  z-index: 1;
+}
+
+
+/* ==========================================================
+   HEADING
+   ========================================================== */
+
+.calendar-heading {
+  margin-bottom: 20px;
+}
+
+
+.calendar-heading__label {
+  margin:
+    0
+    0
+    4px;
+
+  color: #9b8d5b;
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.14em;
+}
+
+
+.calendar-heading h1 {
+  margin: 0;
+
+  font-family:
+    "DM Serif Display",
+    serif;
+
+  color: #173429;
+
+  font-size: 42px;
+
+  font-weight: 400;
+}
+
+
+.calendar-heading > div > p:last-child {
+  margin:
+    5px
+    0
+    0;
+
+  color: #77807b;
+
+  font-size: 11px;
+}
+
+
+/* ==========================================================
+   TOOLBAR
+   ========================================================== */
+
+.calendar-toolbar {
+  margin-bottom: 16px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+
+.calendar-toolbar__left {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+.month-nav-button {
+  width: 46px;
+
+  height: 46px;
+
+  border:
+    1px solid
+    #ddd9cf;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  color: #26362e;
+
+  font-size: 24px;
+
+  cursor: pointer;
+}
+
+
+.month-nav-button:hover {
+  background: #f6f4ee;
+}
+
+
+.month-select-button {
+  min-width: 185px;
+
+  height: 46px;
+
+  padding:
+    0
+    17px;
+
+  border:
+    1px solid
+    #ddd9cf;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  color: #26362e;
+
+  font-family: inherit;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+
+.calendar-view-switch {
+  display: flex;
+
+  gap: 7px;
+}
+
+
+.calendar-view-button {
+  min-width: 74px;
+
+  height: 44px;
+
+  padding:
+    0
+    15px;
+
+  border:
+    1px solid
+    #ddd9cf;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: #344039;
+
+  font-family: inherit;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+
+.calendar-view-button--active {
+  border-color: #174c3a;
+
+  background: #174c3a;
+
+  color: #ffffff;
+}
+
+
+/* ==========================================================
+   LAYOUT
+   ========================================================== */
+
+.calendar-layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    290px;
+
+  gap: 16px;
+
+  align-items: start;
+}
+
+
+/* ==========================================================
+   CALENDAR CARD
+   ========================================================== */
+
+.calendar-card {
+  overflow: hidden;
+
+  border:
+    1px solid
+    #e8e3d8;
+
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 8px 26px
+    rgba(29, 44, 37, 0.04);
+}
+
+
+/* WEEK HEADER */
+
+.calendar-grid-header {
+  display: grid;
+
+  grid-template-columns:
+    repeat(7, 1fr);
+
+  border-bottom:
+    1px solid
+    #e7e3da;
+
+  background: #f6f5f0;
+}
+
+
+.calendar-grid-header div {
+  min-height: 42px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: #59645e;
+
+  font-size: 9px;
+
+  font-weight: 800;
+}
+
+
+/* ==========================================================
+   CALENDAR GRID
+   ========================================================== */
+
+.calendar-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(7, 1fr);
+}
+
+
+.calendar-day {
+  min-height: 125px;
+
+  padding: 9px;
+
+  border-right:
+    1px solid
+    #ebe7de;
+
+  border-bottom:
+    1px solid
+    #ebe7de;
+
+  background: #ffffff;
+
+  position: relative;
+
+  cursor: pointer;
+}
+
+
+.calendar-day:nth-child(7n) {
+  border-right: none;
+}
+
+
+.calendar-day:hover {
+  background: #fafaf6;
+}
+
+
+.calendar-day--outside {
+  background: #faf9f5;
+
+  color: #adb2af;
+}
+
+
+.calendar-day--selected {
+  background:
+    linear-gradient(
+      150deg,
+      #fff9df,
+      #f4fbf2
+    );
+
+  box-shadow:
+    inset 0 0 0 2px
+    #e8b82d;
+}
+
+
+.calendar-day__number {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #24312b;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+
+.calendar-day--outside
+.calendar-day__number {
+  color: #b5bab7;
+}
+
+
+/* ==========================================================
+   EVENT CHIP
+   ========================================================== */
+
+.calendar-event {
+  margin-bottom: 5px;
+
+  padding:
+    7px
+    8px;
+
+  border-radius: 8px;
+
+  font-size: 8px;
+
+  line-height: 1.35;
+
+  overflow: hidden;
+}
+
+
+.calendar-event strong {
+  display: block;
+
+  margin-bottom: 2px;
+
+  color: #24332c;
+
+  font-size: 8px;
+}
+
+
+.calendar-event small {
+  color: #5f6964;
+
+  font-size: 7px;
+}
+
+
+.calendar-event--approved {
+  background: #e2f4e5;
+
+  border-left:
+    3px solid
+    #20904c;
+}
+
+
+.calendar-event--pending {
+  background: #fff2c6;
+
+  border-left:
+    3px solid
+    #e4a817;
+}
+
+
+.calendar-event--declined {
+  background: #fde2e4;
+
+  border-left:
+    3px solid
+    #dd4e59;
+}
+
+
+/* ==========================================================
+   LEGEND
+   ========================================================== */
+
+.calendar-legend {
+  padding:
+    17px
+    18px;
+
+  border-top:
+    1px solid
+    #ebe7de;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 14px;
+}
+
+
+.calendar-legend > div {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 9px;
+}
+
+
+.legend-dot {
+  width: 13px;
+
+  height: 13px;
+
+  margin-top: 2px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+}
+
+
+.legend-dot--approved {
+  background: #22924d;
+}
+
+
+.legend-dot--pending {
+  background: #e7aa18;
+}
+
+
+.legend-dot--declined {
+  background: #df4f5b;
+}
+
+
+.calendar-legend strong {
+  display: block;
+
+  color: #2a3630;
+
+  font-size: 9px;
+}
+
+
+.calendar-legend small {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #858c88;
+
+  font-size: 7px;
+}
+
+
+/* ==========================================================
+   RIGHT SIDE
+   ========================================================== */
+
+.calendar-side {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+
+.side-card {
+  padding: 18px;
+
+  border:
+    1px solid
+    #e8e3d8;
+
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 7px 21px
+    rgba(29, 44, 37, 0.035);
+}
+
+
+.side-card__heading {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 14px;
+}
+
+
+.side-card h2 {
+  margin: 0;
+
+  font-family:
+    "DM Serif Display",
+    serif;
+
+  color: #22362d;
+
+  font-size: 17px;
+
+  font-weight: 400;
+}
+
+
+.mini-nav-button {
+  width: 28px;
+
+  height: 28px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: #37443e;
+
+  cursor: pointer;
+}
+
+
+.mini-nav-button:hover {
+  background: #f4f2ec;
+}
+
+
+/* ==========================================================
+   MINI CALENDAR
+   ========================================================== */
+
+.mini-weekdays,
+.mini-calendar-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(7, 1fr);
+}
+
+
+.mini-weekdays span {
+  padding:
+    4px
+    0;
+
+  text-align: center;
+
+  color: #77807a;
+
+  font-size: 8px;
+
+  font-weight: 700;
+}
+
+
+.mini-date {
+  height: 30px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+  color: #344039;
+
+  font-size: 9px;
+
+  cursor: pointer;
+}
+
+
+.mini-date:hover {
+  background: #f0eee8;
+}
+
+
+.mini-date--outside {
+  color: #b8bdba;
+}
+
+
+.mini-date--selected {
+  background: #174c3a;
+
+  color: #ffffff;
+}
+
+
+/* ==========================================================
+   SELECTED RESERVATIONS
+   ========================================================== */
+
+.side-card__eyebrow {
+  margin: 0;
+
+  color: #7a837e;
+
+  font-size: 9px;
+}
+
+
+.selected-reservations {
+  margin-top: 14px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 9px;
+}
+
+
+.selected-reservation {
+  padding: 11px;
+
+  border-radius: 10px;
+
+  background: #f7f7f2;
+}
+
+
+.selected-reservation__top {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  margin-bottom: 5px;
+}
+
+
+.selected-reservation__dot {
+  width: 9px;
+
+  height: 9px;
+
+  border-radius: 50%;
+}
+
+
+.selected-reservation__dot--approved {
+  background: #219049;
+}
+
+
+.selected-reservation__dot--pending {
+  background: #dda20e;
+}
+
+
+.selected-reservation__dot--declined {
+  background: #d94954;
+}
+
+
+.selected-reservation strong {
+  color: #23322b;
+
+  font-size: 10px;
+}
+
+
+.selected-reservation small {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #7c8580;
+
+  font-size: 8px;
+}
+
+
+/* ==========================================================
+   FILTERS
+   ========================================================== */
+
+.filter-check {
+  min-height: 34px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  color: #3c4741;
+
+  font-size: 9px;
+
+  cursor: pointer;
+}
+
+
+.filter-check input {
+  accent-color: #174c3a;
+}
+
+
+.filter-color {
+  width: 9px;
+
+  height: 9px;
+
+  border-radius: 50%;
+}
+
+
+.filter-color--approved {
+  background: #23924d;
+}
+
+
+.filter-color--pending {
+  background: #e4aa17;
+}
+
+
+.filter-color--declined {
+  background: #dc4e59;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 1150px) {
+
+  .calendar-layout {
+    grid-template-columns: 1fr;
+  }
+
+
+  .calendar-side {
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+}
+
+
+@media (max-width: 900px) {
+
+  .admin-header__brand p,
+  .admin-header__divider {
+    display: none;
+  }
+
+
+  .admin-header-search {
+    display: none;
+  }
+
+
+  .calendar-main {
+    padding:
+      26px
+      18px
+      40px;
+  }
+
+
+  .calendar-day {
+    min-height: 110px;
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .admin-header {
+    width:
+      calc(100% - 20px);
+
+    margin-top: 10px;
+
+    padding:
+      0
+      16px;
+  }
+
+
+  .admin-profile__text,
+  .admin-profile__arrow {
+    display: none;
+  }
+
+
+  .admin-shell {
+    width:
+      calc(100% - 20px);
+
+    display: block;
+  }
+
+
+  .admin-sidebar {
+    display: none;
+  }
+
+
+  .calendar-toolbar {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+
+  .calendar-view-switch {
+    width: 100%;
+  }
+
+
+  .calendar-view-button {
+    flex: 1;
+  }
+
+
+  .calendar-card {
+    overflow-x: auto;
+  }
+
+
+  .calendar-grid-header,
+  .calendar-grid {
+    min-width: 850px;
+  }
+
+
+  .calendar-legend {
+    min-width: 850px;
+  }
+
+
+  .calendar-side {
+    display: flex;
+  }
+
+}

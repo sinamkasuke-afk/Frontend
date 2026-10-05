@@ -1,0 +1,70 @@
+/* ==========================================================
+   stepper.css
+   Dark progress bar under the navbar:  1 Venue & Date → 2 Details → 3 Review
+   ========================================================== */
+
+.stepper {
+  background-color: #1a1a1a;
+  padding: 0 var(--page-padding);
+}
+
+.stepper__list {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 52px;
+}
+
+.stepper__step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepper__circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #8a8a8a;
+  color: #1a1a1a;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stepper__label {
+  color: #9a9a9a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.stepper__arrow {
+  color: #8a8a8a;
+  font-size: 12px;
+}
+
+/* Current step */
+.stepper__step--active .stepper__circle {
+  background-color: var(--color-yellow);
+  color: var(--color-black);
+}
+
+.stepper__step--active .stepper__label {
+  color: var(--color-yellow);
+}
+
+@media (max-width: 600px) {
+  .stepper {
+    padding: 0 16px;
+  }
+  .stepper__list {
+    gap: 8px;
+  }
+  .stepper__label {
+    font-size: 11px;
+  }
+}

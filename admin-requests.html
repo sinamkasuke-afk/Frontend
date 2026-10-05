@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Reservation Requests | School Facilities Reservation System
+  </title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/base.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/pages/admin-requests.css"
+  />
+</head>
+
+<body>
+
+
+  <!-- =====================================================
+       HEADER
+       ===================================================== -->
+
+  <header class="admin-header">
+
+    <div class="admin-header__brand">
+
+      <div class="admin-header__logo">
+        ▥
+      </div>
+
+      <strong>
+        SCHOOL
+      </strong>
+
+      <span class="admin-header__divider"></span>
+
+      <p>
+        Facilities Reservation System
+      </p>
+
+    </div>
+
+
+    <div class="admin-header__right">
+
+
+      <!-- GLOBAL SEARCH -->
+
+      <div class="admin-header-search">
+
+        <span>
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          id="global-search"
+          placeholder="Search requests, venues, or users..."
+        />
+
+      </div>
+
+
+      <!-- NOTIFICATION -->
+
+      <button
+        type="button"
+        class="notification-button"
+        aria-label="Notifications"
+      >
+
+        <span class="notification-bell">
+          🔔
+        </span>
+
+        <span class="notification-dot"></span>
+
+      </button>
+
+
+      <!-- ADMIN PROFILE -->
+
+      <div class="admin-profile-wrapper">
+
+        <button
+          type="button"
+          class="admin-profile"
+          id="admin-profile-button"
+        >
+
+          <div class="admin-profile__avatar">
+            AS
+          </div>
+
+
+          <div class="admin-profile__text">
+
+            <strong>
+              Admin Santos
+            </strong>
+
+            <span>
+              Administrator
+            </span>
+
+          </div>
+
+
+          <span class="admin-profile__arrow">
+            ⌄
+          </span>
+
+        </button>
+
+
+        <div
+          class="admin-profile-menu"
+          id="admin-profile-menu"
+        >
+
+          <a href="#">
+            <span>♙</span>
+            Profile
+          </a>
+
+
+          <div class="admin-profile-menu__divider"></div>
+
+
+          <a
+            href="admin-login.html"
+            class="admin-profile-menu__logout"
+          >
+            <span>↪</span>
+            Logout
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       APP SHELL
+       ===================================================== -->
+
+  <main class="admin-shell">
+
+
+    <!-- ===================================================
+         HOVER SIDEBAR
+         =================================================== -->
+
+    <aside class="admin-sidebar">
+
+      <nav class="admin-sidebar__nav">
+
+
+        <!-- DASHBOARD -->
+
+        <a
+          href="admin-dashboard.html"
+          class="admin-sidebar__link"
+        >
+
+          <span class="admin-sidebar__icon">
+            ▦
+          </span>
+
+          <span class="admin-sidebar__text">
+            Dashboard
+          </span>
+
+        </a>
+
+
+        <!-- REQUESTS -->
+
+        <a
+          href="admin-requests.html"
+          class="
+            admin-sidebar__link
+            admin-sidebar__link--active
+          "
+        >
+
+          <span class="admin-sidebar__icon">
+            ▤
+          </span>
+
+          <span class="admin-sidebar__text">
+            Requests
+          </span>
+
+        </a>
+
+
+        <!-- HISTORY -->
+
+        <a
+          href="admin-history.html"
+          class="admin-sidebar__link"
+        >
+
+          <span class="admin-sidebar__icon">
+            ◷
+          </span>
+
+          <span class="admin-sidebar__text">
+            History
+          </span>
+
+        </a>
+
+
+        <!-- CALENDAR -->
+
+        <a
+          href="admin-calendar.html"
+          class="admin-sidebar__link"
+        >
+
+          <span class="admin-sidebar__icon">
+            ▣
+          </span>
+
+          <span class="admin-sidebar__text">
+            Calendar
+          </span>
+
+        </a>
+
+      </nav>
+
+
+      <!-- LOGOUT -->
+
+      <div class="admin-sidebar__bottom">
+
+        <a
+          href="admin-login.html"
+          class="admin-sidebar__link"
+        >
+
+          <span class="admin-sidebar__icon">
+            ↪
+          </span>
+
+          <span class="admin-sidebar__text">
+            Logout
+          </span>
+
+        </a>
+
+      </div>
+
+    </aside>
+
+
+    <!-- ===================================================
+         MAIN REQUESTS CONTENT
+         =================================================== -->
+
+    <section class="requests-main">
+
+
+      <!-- =================================================
+           PAGE TITLE
+           ================================================= -->
+
+      <section class="requests-heading">
+
+        <div class="requests-heading__icon">
+          ▤
+        </div>
+
+
+        <div>
+
+          <p class="requests-heading__label">
+            RESERVATION MANAGEMENT
+          </p>
+
+          <h1>
+            Reservation Requests
+          </h1>
+
+          <p>
+            Review and manage facility reservation requests.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           SUMMARY
+           ================================================= -->
+
+      <section class="request-summary">
+
+        <article class="request-summary__card">
+
+          <div class="request-summary__icon request-summary__icon--all">
+            ▤
+          </div>
+
+          <div>
+
+            <strong id="all-count">
+              0
+            </strong>
+
+            <span>
+              All Requests
+            </span>
+
+          </div>
+
+        </article>
+
+
+        <article class="request-summary__card">
+
+          <div class="request-summary__icon request-summary__icon--pending">
+            ◷
+          </div>
+
+          <div>
+
+            <strong id="pending-count">
+              0
+            </strong>
+
+            <span>
+              Pending
+            </span>
+
+          </div>
+
+        </article>
+
+
+        <article class="request-summary__card">
+
+          <div class="request-summary__icon request-summary__icon--approved">
+            ✓
+          </div>
+
+          <div>
+
+            <strong id="approved-count">
+              0
+            </strong>
+
+            <span>
+              Approved
+            </span>
+
+          </div>
+
+        </article>
+
+
+        <article class="request-summary__card">
+
+          <div class="request-summary__icon request-summary__icon--declined">
+            ×
+          </div>
+
+          <div>
+
+            <strong id="declined-count">
+              0
+            </strong>
+
+            <span>
+              Declined
+            </span>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- =================================================
+           REQUESTS CARD
+           ================================================= -->
+
+      <section class="requests-card">
+
+
+        <!-- TOOLBAR -->
+
+        <div class="requests-toolbar">
+
+
+          <!-- SEARCH -->
+
+          <div class="requests-search">
+
+            <span>
+              ⌕
+            </span>
+
+            <input
+              type="text"
+              id="request-search"
+              placeholder="Search by requester, venue, or ID..."
+            />
+
+          </div>
+
+
+          <!-- STATUS FILTER -->
+
+          <select
+            id="status-filter"
+            class="requests-filter"
+          >
+
+            <option value="all">
+              All Statuses
+            </option>
+
+            <option value="pending">
+              Pending
+            </option>
+
+            <option value="approved">
+              Approved
+            </option>
+
+            <option value="declined">
+              Declined
+            </option>
+
+          </select>
+
+
+          <!-- DATE FILTER -->
+
+          <select
+            id="date-filter"
+            class="requests-filter"
+          >
+
+            <option value="all">
+              All Dates
+            </option>
+
+            <option value="september">
+              September 2026
+            </option>
+
+            <option value="october">
+              October 2026
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="requests-table-wrap">
+
+          <table class="requests-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Request ID
+                </th>
+
+                <th>
+                  Requester
+                </th>
+
+                <th>
+                  Venue
+                </th>
+
+                <th>
+                  Date
+                </th>
+
+                <th>
+                  Time
+                </th>
+
+                <th>
+                  Status
+                </th>
+
+                <th>
+                  Action
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody id="request-rows">
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <!-- EMPTY STATE -->
+
+        <div
+          class="requests-empty"
+          id="requests-empty"
+          hidden
+        >
+
+          <div class="requests-empty__icon">
+            ▤
+          </div>
+
+          <h3>
+            No requests found
+          </h3>
+
+          <p>
+            Try changing your search or filter.
+          </p>
+
+        </div>
+
+
+        <!-- FOOTER -->
+
+        <div class="requests-card__footer">
+
+          <p id="request-result-text">
+            Showing 0 requests
+          </p>
+
+        </div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js"></script>
+  <script src="js/firebase/client.js"></script>
+<script
+    src="js/pages/admin-requests.js"
+  ></script>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Student Login | School Facilities Reservation System</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components/navbar.css">
+  <link rel="stylesheet" href="css/pages/login.css">
+</head>
+
+<body>
+
+  <div id="navbar"></div>
+
+  <main class="login-page">
+
+    <div class="login-layout">
+
+      <!-- LEFT SIDE -->
+      <section class="login-showcase">
+
+        <div class="showcase-shade"></div>
+
+        <div class="showcase-content">
+
+          <p class="showcase-label">
+            STUDENT PORTAL
+            <span></span>
+          </p>
+
+          <h1>
+            Access<br>
+            Campus Spaces<br>
+            <em>with Confidence.</em>
+          </h1>
+
+          <p class="showcase-description">
+            Sign in to your student account to reserve
+            facilities, track your requests, and stay
+            updated with your schedules.
+          </p>
+
+        </div>
+
+
+        <div class="showcase-benefits">
+
+          <div class="benefit-item">
+
+            <div class="benefit-icon">
+              ▣
+            </div>
+
+            <div>
+              <h3>Reserve Facilities</h3>
+              <p>
+                Book classrooms, halls,
+                and open spaces easily.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="benefit-item">
+
+            <div class="benefit-icon">
+              ◷
+            </div>
+
+            <div>
+              <h3>Track Your Requests</h3>
+              <p>
+                View real-time status
+                and application history.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="benefit-item">
+
+            <div class="benefit-icon">
+              ●
+            </div>
+
+            <div>
+              <h3>Be Part of Campus Life</h3>
+              <p>
+                Create events and make the most
+                of your university experience.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- RIGHT SIDE -->
+      <section class="login-panel">
+
+        <div class="login-icon">
+          ◆
+        </div>
+
+        <p
+          class="login-label"
+          id="login-label"
+        >
+          STUDENT LOGIN
+        </p>
+
+        <h2 id="login-title">
+          Welcome Back!
+        </h2>
+
+        <p
+          class="login-description"
+          id="login-description"
+        >
+          Sign in to continue to the School Facilities
+          Reservation System.
+        </p>
+        <form id="login-form">
+
+          <div class="login-field">
+
+            <label
+              for="identifier"
+              id="identifier-label"
+            >
+              Student ID or Email Number
+            </label>
+
+<input
+  type="text"
+  id="identifier"
+  placeholder="Enter your student number"
+  inputmode="email"
+  
+  maxlength="12"
+  required
+>
+          </div>
+
+
+          <div class="login-field">
+
+            <label for="password">
+              Password
+            </label>
+
+            <div class="password-field">
+
+              <input
+                type="password"
+                id="password"
+                placeholder="Enter your password"
+                required
+              >
+
+              <button
+                type="button"
+                id="toggle-password"
+              >
+                Show
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="login-options">
+
+            <label class="remember">
+
+              <input
+                type="checkbox"
+                id="remember"
+              >
+
+              <span>
+                Remember me
+              </span>
+
+            </label>
+
+
+            <a href="#">
+              Forgot password?
+            </a>
+
+          </div>
+
+
+          <button
+            type="submit"
+            class="login-button"
+            id="login-button"
+          >
+            Login as Student
+            <span>→</span>
+          </button>
+        </form>
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js"></script>
+  <script src="js/firebase/client.js"></script>
+<script src="js/components/navbar.js"></script>
+  <script src="js/pages/login.js"></script>
+
+</body>
+</html>

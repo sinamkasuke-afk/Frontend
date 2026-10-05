@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    History | School Facilities Reservation System
+  </title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/base.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/pages/admin-history.css"
+  />
+</head>
+
+<body>
+
+
+  <!-- =====================================================
+       HEADER
+       ===================================================== -->
+
+  <header class="admin-header">
+
+    <div class="admin-header__brand">
+
+      <div class="admin-header__logo">
+        ▥
+      </div>
+
+      <strong>
+        SCHOOL
+      </strong>
+
+      <span class="admin-header__divider"></span>
+
+      <p>
+        Facilities Reservation System
+      </p>
+
+    </div>
+
+
+    <div class="admin-header__right">
+
+
+      <!-- SEARCH -->
+
+      <div class="admin-header-search">
+
+        <span>
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          id="global-search"
+          placeholder="Search requests, venues, or users..."
+        />
+
+      </div>
+
+
+      <!-- NOTIFICATION -->
+
+      <button
+        type="button"
+        class="notification-button"
+        aria-label="Notifications"
+      >
+
+        <span class="notification-bell">
+          🔔
+        </span>
+
+        <span class="notification-dot"></span>
+
+      </button>
+
+
+      <!-- PROFILE -->
+
+      <div class="admin-profile-wrapper">
+
+        <button
+          type="button"
+          class="admin-profile"
+          id="admin-profile-button"
+        >
+
+          <div class="admin-profile__avatar">
+            AS
+          </div>
+
+          <div class="admin-profile__text">
+
+            <strong>
+              Admin Santos
+            </strong>
+
+            <span>
+              Administrator
+            </span>
+
+          </div>
+
+          <span class="admin-profile__arrow">
+            ⌄
+          </span>
+
+        </button>
+
+
+        <div
+          class="admin-profile-menu"
+          id="admin-profile-menu"
+        >
+
+          <a href="#">
+            <span>♙</span>
+            Profile
+          </a>
+
+          <div class="admin-profile-menu__divider"></div>
+
+          <a
+            href="admin-login.html"
+            class="admin-profile-menu__logout"
+          >
+            <span>↪</span>
+            Logout
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       PAGE SHELL
+       ===================================================== -->
+
+  <main class="admin-shell">
+
+
+    <!-- ===================================================
+         HOVER SIDEBAR
+         =================================================== -->
+
+    <aside class="admin-sidebar">
+
+      <nav class="admin-sidebar__nav">
+
+
+        <a
+          href="admin-dashboard.html"
+          class="admin-sidebar__link"
+        >
+
+          <span class="admin-sidebar__icon">
+            ▦
+          </span>
+
+          <span class="admin-sidebar__text">
+            Dashboard
+          </span>
+
+        </a>
+
+
+        <a
+          href="admin-requests.html"
+          class="admin-sidebar__link"
+        >
+
+          <span class="admin-sidebar__icon">
+            ▤
+          </span>
+
+          <span class="admin-sidebar__text">
+            Requests
+          </span>
+
+        </a>
+
+
+        <a
+          href="admin-history.html"
+          class="
+            admin-sidebar__link
+            admin-sidebar__link--active
+          "
+        >
+
+          <span class="admin-sidebar__icon">
+            ◷
+          </span>
+
+          <span class="admin-sidebar__text">
+            History
+          </span>
+
+        </a>
+
+
+        <a
+          href="admin-calendar.html"
+          class="admin-sidebar__link"
+        >
+
+          <span class="admin-sidebar__icon">
+            ▣
+          </span>
+
+          <span class="admin-sidebar__text">
+            Calendar
+          </span>
+
+        </a>
+
+      </nav>
+
+
+      <div class="admin-sidebar__bottom">
+
+        <a
+          href="admin-login.html"
+          class="admin-sidebar__link"
+        >
+
+          <span class="admin-sidebar__icon">
+            ↪
+          </span>
+
+          <span class="admin-sidebar__text">
+            Logout
+          </span>
+
+        </a>
+
+      </div>
+
+    </aside>
+
+
+    <!-- ===================================================
+         HISTORY CONTENT
+         =================================================== -->
+
+    <section class="history-main">
+
+
+      <!-- PAGE HEADER -->
+
+      <div class="history-heading">
+
+        <div>
+
+          <p class="history-heading__label">
+            RESERVATION ARCHIVE
+          </p>
+
+          <h1>
+            History
+          </h1>
+
+          <p>
+            Approved and declined reservation records.
+          </p>
+
+        </div>
+
+
+        <div class="history-heading__icon">
+          ◷
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           CONTROLS
+           ================================================= -->
+
+      <section class="history-controls">
+
+
+        <!-- TABS -->
+
+        <div class="history-tabs">
+
+          <button
+            type="button"
+            class="history-tab history-tab--active"
+            data-status="approved"
+          >
+
+            Approved
+
+            <span id="approved-count">
+              0
+            </span>
+
+          </button>
+
+
+          <button
+            type="button"
+            class="history-tab"
+            data-status="declined"
+          >
+
+            Declined
+
+            <span id="declined-count">
+              0
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <!-- MONTH FILTER -->
+
+        <select
+          id="history-month-filter"
+          class="history-month-filter"
+        >
+
+          <option value="all">
+            All Dates
+          </option>
+
+          <option value="september">
+            September 2026
+          </option>
+
+          <option value="october">
+            October 2026
+          </option>
+
+        </select>
+
+      </section>
+
+
+      <!-- =================================================
+           HISTORY TABLE
+           ================================================= -->
+
+      <section class="history-card">
+
+        <div class="history-table-wrap">
+
+          <table class="history-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Request ID
+                </th>
+
+                <th>
+                  Requester
+                </th>
+
+                <th>
+                  Venue
+                </th>
+
+                <th>
+                  Date
+                </th>
+
+                <th>
+                  Time
+                </th>
+
+                <th>
+                  Final Status
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody id="history-table-body">
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <!-- EMPTY STATE -->
+
+        <div
+          class="history-empty"
+          id="history-empty"
+          hidden
+        >
+
+          <div class="history-empty__icon">
+            ◷
+          </div>
+
+          <h3>
+            No history found
+          </h3>
+
+          <p>
+            There are no reservation records under this category.
+          </p>
+
+        </div>
+
+
+        <!-- TABLE FOOTER -->
+
+        <div class="history-card__footer">
+
+          <p id="history-result-text">
+            Showing 0 records
+          </p>
+
+
+          <div class="history-pagination">
+
+            <button
+              type="button"
+              class="pagination-button"
+            >
+              ‹
+            </button>
+
+            <button
+              type="button"
+              class="pagination-button pagination-button--active"
+            >
+              1
+            </button>
+
+            <button
+              type="button"
+              class="pagination-button"
+            >
+              ›
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js"></script>
+  <script src="js/firebase/client.js"></script>
+
+  <script src="js/pages/admin-history.js"></script>
+
+</body>
+</html>

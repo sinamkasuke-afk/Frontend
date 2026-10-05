@@ -1,0 +1,36 @@
+/* ==========================================================
+   event-chip.css
+   Small colored chip shown inside a calendar day cell,
+   representing one reservation. Colors match status-badge.css.
+   ========================================================== */
+
+.event-chip {
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.event-chip__id {
+  display: block;
+  font-weight: 700;
+}
+
+.event-chip__status {
+  display: block;
+}
+
+.event-chip--pending {
+  background-color: #fdedb0;
+  color: #7a5c00;
+}
+
+.event-chip--approved {
+  background-color: #d3f2d8;
+  color: #1e6b32;
+}
+
+.event-chip--declined {
+  background-color: #fbd6d9;
+  color: #a11d2b;
+}

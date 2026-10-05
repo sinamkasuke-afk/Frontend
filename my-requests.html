@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    My Reservations | School Facilities Reservation System
+  </title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components/navbar.css" />
+  <link rel="stylesheet" href="css/components/status-badge.css" />
+
+  <link
+    rel="stylesheet"
+    href="css/pages/my-requests.css"
+  />
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <div id="navbar"></div>
+
+
+  <main class="requests-shell">
+
+
+    <!-- =====================================================
+         HOVER SIDEBAR
+         ===================================================== -->
+
+    <aside class="requests-sidebar">
+
+      <nav class="requests-sidebar__nav">
+
+        <a
+          href="dashboard.html"
+          class="requests-sidebar__link"
+        >
+          <span class="requests-sidebar__icon">
+            ⌂
+          </span>
+
+          <span class="requests-sidebar__text">
+            Dashboard
+          </span>
+        </a>
+
+
+        <a
+          href="new-reservation-venue.html"
+          class="requests-sidebar__link"
+        >
+          <span class="requests-sidebar__icon">
+            ▣
+          </span>
+
+          <span class="requests-sidebar__text">
+            New Reservation
+          </span>
+        </a>
+
+
+        <a
+          href="my-requests.html"
+          class="
+            requests-sidebar__link
+            requests-sidebar__link--active
+          "
+        >
+          <span class="requests-sidebar__icon">
+            ▤
+          </span>
+
+          <span class="requests-sidebar__text">
+            My Reservations
+          </span>
+        </a>
+
+
+        <a
+          href="new-reservation-venue.html"
+          class="requests-sidebar__link"
+        >
+          <span class="requests-sidebar__icon">
+            ▥
+          </span>
+
+          <span class="requests-sidebar__text">
+            Browse Facilities
+          </span>
+        </a>
+
+      </nav>
+
+
+      <div class="requests-sidebar__bottom">
+
+        <a
+          href="mailto:pfmo@national-u.edu.ph"
+          class="requests-sidebar__link"
+        >
+          <span class="requests-sidebar__icon">
+            ?
+          </span>
+
+          <span class="requests-sidebar__text">
+            Help & Support
+          </span>
+        </a>
+
+
+        <a
+          href="index.html"
+          class="requests-sidebar__link"
+        >
+          <span class="requests-sidebar__icon">
+            ↪
+          </span>
+
+          <span class="requests-sidebar__text">
+            Logout
+          </span>
+        </a>
+
+      </div>
+
+
+      <div class="requests-sidebar__promo">
+
+        <span class="requests-sidebar__sparkle">
+          ✦
+        </span>
+
+        <p>
+          Same spaces.
+          <br />
+          New opportunities.
+        </p>
+
+      </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         PAGE CONTENT
+         ===================================================== -->
+
+    <section class="requests-content">
+
+
+      <!-- HERO -->
+      <section class="requests-hero">
+
+        <div class="requests-hero__overlay"></div>
+
+
+        <div class="requests-hero__content">
+
+          <p class="requests-hero__label">
+            MY RESERVATIONS
+            <span></span>
+          </p>
+
+
+          <h1>
+            My Reservation Requests
+          </h1>
+
+
+          <p>
+            Track, review, and manage all your
+            facility reservation requests in one place.
+          </p>
+
+        </div>
+
+
+        <div class="requests-hero__mini-card">
+
+          <span>✦</span>
+
+          <div>
+            <small>
+              CAMPUS SERVICES
+            </small>
+
+            <strong>
+              Stay updated.
+            </strong>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- SUMMARY -->
+      <section class="request-summary">
+
+        <article class="request-summary__card">
+
+          <div class="request-summary__icon">
+            ▦
+          </div>
+
+          <div>
+            <strong id="total-count">
+              0
+            </strong>
+
+            <span>
+              Total Requests
+            </span>
+          </div>
+
+        </article>
+
+
+        <article class="request-summary__card">
+
+          <div
+            class="
+              request-summary__icon
+              request-summary__icon--pending
+            "
+          >
+            ◷
+          </div>
+
+          <div>
+            <strong id="pending-count">
+              0
+            </strong>
+
+            <span>
+              Pending
+            </span>
+          </div>
+
+        </article>
+
+
+        <article class="request-summary__card">
+
+          <div
+            class="
+              request-summary__icon
+              request-summary__icon--approved
+            "
+          >
+            ✓
+          </div>
+
+          <div>
+            <strong id="approved-count">
+              0
+            </strong>
+
+            <span>
+              Approved
+            </span>
+          </div>
+
+        </article>
+
+
+        <article class="request-summary__card">
+
+          <div
+            class="
+              request-summary__icon
+              request-summary__icon--declined
+            "
+          >
+            ×
+          </div>
+
+          <div>
+            <strong id="declined-count">
+              0
+            </strong>
+
+            <span>
+              Declined
+            </span>
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- MAIN REQUEST CARD -->
+      <section class="requests-panel">
+
+
+        <!-- TOP -->
+        <div class="requests-panel__top">
+
+          <div>
+
+            <p class="requests-panel__eyebrow">
+              RESERVATION HISTORY
+            </p>
+
+            <h2>
+              Your Requests
+            </h2>
+
+            <p>
+              Select a status to view your reservation requests.
+            </p>
+
+          </div>
+
+
+          <div class="requests-search">
+
+            <span>
+              ⌕
+            </span>
+
+            <input
+              type="text"
+              id="request-search"
+              placeholder="Search request or venue..."
+            />
+
+          </div>
+
+        </div>
+
+
+        <!-- TABS -->
+        <div class="request-tabs">
+
+          <button
+            type="button"
+            class="request-tab request-tab--active"
+            data-status="pending"
+          >
+
+            <span class="request-tab__dot request-tab__dot--pending"></span>
+
+            Pending
+
+            <span
+              class="request-tab__count"
+              id="pending-tab-count"
+            >
+              0
+            </span>
+
+          </button>
+
+
+          <button
+            type="button"
+            class="request-tab"
+            data-status="approved"
+          >
+
+            <span class="request-tab__dot request-tab__dot--approved"></span>
+
+            Approved
+
+            <span
+              class="request-tab__count"
+              id="approved-tab-count"
+            >
+              0
+            </span>
+
+          </button>
+
+
+          <button
+            type="button"
+            class="request-tab"
+            data-status="declined"
+          >
+
+            <span class="request-tab__dot request-tab__dot--declined"></span>
+
+            Declined
+
+            <span
+              class="request-tab__count"
+              id="declined-tab-count"
+            >
+              0
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <!-- TABLE -->
+        <div class="requests-table-wrap">
+
+          <table class="requests-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Request ID
+                </th>
+
+                <th>
+                  Venue
+                </th>
+
+                <th>
+                  Event
+                </th>
+
+                <th>
+                  Date
+                </th>
+
+                <th>
+                  Time
+                </th>
+
+                <th>
+                  Status
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody id="request-table-body"></tbody>
+
+          </table>
+
+        </div>
+
+
+        <!-- EMPTY STATE -->
+        <div
+          class="requests-empty"
+          id="requests-empty"
+          hidden
+        >
+
+          <div class="requests-empty__icon">
+            ▤
+          </div>
+
+          <h3>
+            No reservations found
+          </h3>
+
+          <p id="requests-empty-message">
+            You currently have no requests under this status.
+          </p>
+
+          <a href="new-reservation-venue.html">
+            Make a Reservation →
+          </a>
+
+        </div>
+
+      </section>
+
+
+      <!-- BOTTOM DECORATION -->
+      <section class="requests-footer-art">
+
+        <div>
+
+          <p class="requests-footer-art__label">
+            <span></span>
+            SCHOOL FACILITIES
+          </p>
+
+          <h2>
+            Supporting
+            <br />
+            Brighter
+            <br />
+            Communities.
+          </h2>
+
+        </div>
+
+
+        <div class="requests-footer-art__building">
+          ♜
+        </div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+
+  <!-- DATA FIRST -->
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js"></script>
+  <script src="js/firebase/client.js"></script>
+
+  <!-- COMPONENT -->
+  <script src="js/components/navbar.js"></script>
+
+  <!-- PAGE -->
+  <script src="js/pages/my-requests.js"></script>
+
+</body>
+</html>

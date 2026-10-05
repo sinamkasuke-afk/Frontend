@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Review Reservation | Facilities Reservation System
+  </title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components/navbar.css" />
+  <link rel="stylesheet" href="css/components/button.css" />
+  <link rel="stylesheet" href="css/components/panel.css" />
+
+  <link
+    rel="stylesheet"
+    href="css/pages/new-reservation-review.css"
+  />
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <div id="navbar"></div>
+
+
+  <main class="review-shell">
+
+
+    <!-- =====================================================
+         HOVER SIDEBAR
+         ===================================================== -->
+
+    <aside class="review-sidebar">
+
+      <nav class="review-sidebar__nav">
+
+        <a
+          href="dashboard.html"
+          class="review-sidebar__link"
+        >
+          <span class="review-sidebar__icon">
+            ⌂
+          </span>
+
+          <span class="review-sidebar__text">
+            Dashboard
+          </span>
+        </a>
+
+
+        <a
+          href="new-reservation-venue.html"
+          class="
+            review-sidebar__link
+            review-sidebar__link--active
+          "
+        >
+          <span class="review-sidebar__icon">
+            ▣
+          </span>
+
+          <span class="review-sidebar__text">
+            New Reservation
+          </span>
+        </a>
+
+
+        <a
+          href="my-requests.html"
+          class="review-sidebar__link"
+        >
+          <span class="review-sidebar__icon">
+            ▤
+          </span>
+
+          <span class="review-sidebar__text">
+            My Reservations
+          </span>
+        </a>
+
+
+        <a
+          href="new-reservation-venue.html"
+          class="review-sidebar__link"
+        >
+          <span class="review-sidebar__icon">
+            ▥
+          </span>
+
+          <span class="review-sidebar__text">
+            Browse Facilities
+          </span>
+        </a>
+
+      </nav>
+
+
+      <div class="review-sidebar__bottom">
+
+        <a
+          href="mailto:pfmo@national-u.edu.ph"
+          class="review-sidebar__link"
+        >
+          <span class="review-sidebar__icon">
+            ?
+          </span>
+
+          <span class="review-sidebar__text">
+            Help & Support
+          </span>
+        </a>
+
+
+        <a
+          href="index.html"
+          class="review-sidebar__link"
+        >
+          <span class="review-sidebar__icon">
+            ↪
+          </span>
+
+          <span class="review-sidebar__text">
+            Logout
+          </span>
+        </a>
+
+      </div>
+
+
+      <div class="review-sidebar__quote">
+
+        <span>
+          ✦
+        </span>
+
+        <p>
+          Same spaces.
+          <br />
+          New opportunities.
+        </p>
+
+      </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
+
+    <section class="review-content">
+
+
+      <!-- HERO -->
+      <section class="review-hero">
+
+        <div class="review-hero__overlay"></div>
+
+
+        <div class="review-hero__content">
+
+          <p class="review-hero__label">
+            RESERVATION
+            <span></span>
+          </p>
+
+
+          <h1>
+            Review Reservation
+          </h1>
+
+
+          <p>
+            Please review your reservation details
+            before submitting your request.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================
+           STEPPER
+           =================================================== -->
+
+      <section class="review-stepper">
+
+        <div class="review-step">
+
+          <div class="review-step__number review-step__number--done">
+            ✓
+          </div>
+
+          <div>
+            <strong>
+              Venue & Date
+            </strong>
+
+            <span>
+              Venue and schedule selected
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="review-step__line review-step__line--done"></div>
+
+
+        <div class="review-step">
+
+          <div class="review-step__number review-step__number--done">
+            ✓
+          </div>
+
+          <div>
+            <strong>
+              Event Details
+            </strong>
+
+            <span>
+              Event information provided
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="review-step__line review-step__line--done"></div>
+
+
+        <div class="review-step">
+
+          <div class="review-step__number review-step__number--active">
+            3
+          </div>
+
+          <div>
+            <strong>
+              Review & Submit
+            </strong>
+
+            <span>
+              Confirm your reservation
+            </span>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================
+           REVIEW GRID
+           =================================================== -->
+
+      <div class="review-layout">
+
+
+        <!-- =================================================
+             LEFT SUMMARY
+             ================================================= -->
+
+        <section class="review-summary">
+
+          <div class="review-summary__header">
+
+            <div class="review-summary__header-icon">
+              ▤
+            </div>
+
+            <div>
+
+              <h2>
+                Reservation Summary
+              </h2>
+
+              <p>
+                Please check all details before
+                submitting your reservation request.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- VENUE & SCHEDULE -->
+
+          <section class="review-section">
+
+            <div class="review-section__icon">
+              ▣
+            </div>
+
+
+            <div class="review-section__content">
+
+              <div class="review-section__heading">
+
+                <h3>
+                  Venue & Schedule
+                </h3>
+
+                <a
+                  href="new-reservation-venue.html"
+                  class="review-edit"
+                >
+                  Edit
+                </a>
+
+              </div>
+
+
+              <div class="review-info-grid review-info-grid--venue">
+
+                <div class="review-info-item">
+
+                  <span class="review-info-label">
+                    Venue
+                  </span>
+
+                  <strong id="review-venue">
+                    —
+                  </strong>
+
+                </div>
+
+
+                <div class="review-info-item">
+
+                  <span class="review-info-label">
+                    Date & Time
+                  </span>
+
+                  <strong id="review-schedule">
+                    —
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- EVENT INFORMATION -->
+
+          <section class="review-section">
+
+            <div class="review-section__icon">
+              ◉
+            </div>
+
+
+            <div class="review-section__content">
+
+              <div class="review-section__heading">
+
+                <h3>
+                  Event Information
+                </h3>
+
+                <a
+                  href="new-reservation-details.html"
+                  class="review-edit"
+                >
+                  Edit
+                </a>
+
+              </div>
+
+
+              <div class="review-info-grid">
+
+                <div class="review-info-item">
+
+                  <span class="review-info-label">
+                    Event Name
+                  </span>
+
+                  <strong id="review-event-name">
+                    —
+                  </strong>
+
+                </div>
+
+
+                <div class="review-info-item">
+
+                  <span class="review-info-label">
+                    Organization / Type
+                  </span>
+
+                  <strong id="review-organization-type">
+                    —
+                  </strong>
+
+                </div>
+
+
+                <div class="review-info-item">
+
+                  <span class="review-info-label">
+                    Expected Guests
+                  </span>
+
+                  <strong id="review-guests">
+                    —
+                  </strong>
+
+                </div>
+
+
+                <div class="review-info-item review-info-item--wide">
+
+                  <span class="review-info-label">
+                    Purpose of Event
+                  </span>
+
+                  <strong id="review-purpose">
+                    —
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- CONTACT -->
+
+          <section class="review-section">
+
+            <div class="review-section__icon">
+              ♙
+            </div>
+
+
+            <div class="review-section__content">
+
+              <div class="review-section__heading">
+
+                <h3>
+                  Contact Information
+                </h3>
+
+                <a
+                  href="new-reservation-details.html"
+                  class="review-edit"
+                >
+                  Edit
+                </a>
+
+              </div>
+
+
+              <div class="review-info-item">
+
+                <span class="review-info-label">
+                  Contact Person Email / Number
+                </span>
+
+                <strong id="review-contact">
+                  —
+                </strong>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- REQUIREMENTS -->
+
+          <section class="review-section">
+
+            <div class="review-section__icon">
+              ⚙
+            </div>
+
+
+            <div class="review-section__content">
+
+              <div class="review-section__heading">
+
+                <h3>
+                  Operational Requirements
+                </h3>
+
+                <a
+                  href="new-reservation-details.html"
+                  class="review-edit"
+                >
+                  Edit
+                </a>
+
+              </div>
+
+
+              <div class="review-info-grid">
+
+                <div class="review-info-item">
+
+                  <span class="review-info-label">
+                    Facility Requirements
+                  </span>
+
+                  <strong id="review-requirements">
+                    —
+                  </strong>
+
+                </div>
+
+
+                <div class="review-info-item">
+
+                  <span class="review-info-label">
+                    Setup Notes
+                  </span>
+
+                  <strong id="review-setup-notes">
+                    —
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- DOCUMENT -->
+
+          <section class="review-section review-section--last">
+
+            <div class="review-section__icon">
+              ⌕
+            </div>
+
+
+            <div class="review-section__content">
+
+              <div class="review-section__heading">
+
+                <h3>
+                  Supporting Document
+                </h3>
+
+                <a
+                  href="new-reservation-details.html"
+                  class="review-edit"
+                >
+                  Edit
+                </a>
+
+              </div>
+
+
+              <div class="document-summary">
+
+                <div class="document-summary__icon">
+                  PDF
+                </div>
+
+
+                <div>
+
+                  <span class="review-info-label">
+                    Attached File
+                  </span>
+
+                  <strong id="review-document">
+                    —
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </section>
+
+
+        <!-- =================================================
+             CONDITIONS
+             ================================================= -->
+
+        <aside class="conditions-card">
+
+          <div class="conditions-card__heading">
+
+            <div class="conditions-card__icon">
+              !
+            </div>
+
+            <div>
+
+              <h2>
+                Important Conditions
+              </h2>
+
+              <p>
+                Please read these conditions
+                before submitting.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <ol class="conditions-list">
+
+            <li>
+              <span>1</span>
+
+              <div>
+                <strong>
+                  Facility Availability
+                </strong>
+
+                <p>
+                  All requests are subject to
+                  physical facility availability
+                  checks by the PFMO.
+                </p>
+              </div>
+            </li>
+
+
+            <li>
+              <span>2</span>
+
+              <div>
+                <strong>
+                  Cancellation Policy
+                </strong>
+
+                <p>
+                  Cancellations must be made at least
+                  48 hours before the reserved date
+                  and time.
+                </p>
+              </div>
+            </li>
+
+
+            <li>
+              <span>3</span>
+
+              <div>
+                <strong>
+                  Compliance with Policies
+                </strong>
+
+                <p>
+                  Events must comply with school
+                  facility policies and regulations.
+                </p>
+              </div>
+            </li>
+
+
+            <li>
+              <span>4</span>
+
+              <div>
+                <strong>
+                  Approval Notice
+                </strong>
+
+                <p>
+                  You will receive confirmation once
+                  your reservation has been reviewed
+                  by the PFMO.
+                </p>
+              </div>
+            </li>
+
+
+            <li>
+              <span>5</span>
+
+              <div>
+                <strong>
+                  Accurate Information
+                </strong>
+
+                <p>
+                  Incomplete or inaccurate information
+                  may affect the processing of your
+                  request.
+                </p>
+              </div>
+            </li>
+
+          </ol>
+
+
+          <div class="conditions-confirm">
+
+            <input
+              type="checkbox"
+              id="conditions-checkbox"
+            />
+
+            <label for="conditions-checkbox">
+              I have read and understood
+              the conditions above.
+            </label>
+
+          </div>
+
+
+          <div class="review-actions">
+
+            <button
+              type="button"
+              id="submit-reservation-button"
+              class="submit-reservation-button"
+            >
+              Submit Reservation
+              <span>→</span>
+            </button>
+
+
+            <button
+              type="button"
+              id="back-details-button"
+              class="back-details-button"
+            >
+              ← Back to Event Details
+            </button>
+
+          </div>
+
+        </aside>
+
+      </div>
+
+    </section>
+
+  </main>
+<!-- =========================================================
+     RESERVATION SUBMISSION MODALS
+     ========================================================= -->
+
+<div
+  class="reservation-modal-overlay"
+  id="reservation-modal-overlay"
+  aria-hidden="true"
+>
+
+  <!-- =======================================================
+       CONFIRMATION MODAL
+       ======================================================= -->
+
+  <div
+    class="reservation-modal"
+    id="confirmation-modal"
+    hidden
+  >
+
+    <button
+      type="button"
+      class="reservation-modal__close"
+      id="confirmation-close"
+      aria-label="Close"
+    >
+      ×
+    </button>
+
+
+    <div class="reservation-modal__decor">
+      <span>✦</span>
+      <span>✦</span>
+      <span>✦</span>
+    </div>
+
+
+    <div
+      class="
+        reservation-modal__icon
+        reservation-modal__icon--confirm
+      "
+    >
+      ▤
+    </div>
+
+
+    <h2>
+      Submit Reservation?
+    </h2>
+
+
+    <p class="reservation-modal__description">
+      Please review your details before submitting.
+      Once submitted, your request will be sent to
+      the PFMO for review.
+    </p>
+
+
+    <div class="reservation-modal__summary">
+
+      <div>
+        <span>Venue</span>
+
+        <strong id="modal-confirm-venue">
+          —
+        </strong>
+      </div>
+
+
+      <div>
+        <span>Schedule</span>
+
+        <strong id="modal-confirm-schedule">
+          —
+        </strong>
+      </div>
+
+    </div>
+
+
+    <div class="reservation-modal__actions">
+
+      <button
+        type="button"
+        class="modal-button modal-button--secondary"
+        id="confirmation-cancel"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        type="button"
+        class="modal-button modal-button--primary"
+        id="confirmation-submit"
+      >
+        Submit Reservation
+        <span>→</span>
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       LOADING MODAL
+       ======================================================= -->
+
+  <div
+    class="reservation-modal reservation-modal--loading"
+    id="loading-modal"
+    hidden
+  >
+
+    <div
+      class="
+        reservation-modal__icon
+        reservation-modal__icon--loading
+      "
+    >
+      ➤
+    </div>
+
+
+    <h2>
+      Submitting Reservation
+    </h2>
+
+
+    <p class="reservation-modal__description">
+      Please wait while we send your reservation
+      request to the PFMO.
+    </p>
+
+
+    <div class="submission-progress">
+
+      <div class="submission-progress__track">
+
+        <div
+          class="submission-progress__bar"
+          id="submission-progress-bar"
+        ></div>
+
+      </div>
+
+
+      <p>
+        Processing your request...
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       SUCCESS MODAL
+       ======================================================= -->
+
+  <div
+    class="reservation-modal reservation-modal--success"
+    id="success-modal"
+    hidden
+  >
+
+    <button
+      type="button"
+      class="reservation-modal__close"
+      id="success-close"
+      aria-label="Close"
+    >
+      ×
+    </button>
+
+
+    <div class="reservation-modal__decor">
+      <span>✦</span>
+      <span>✦</span>
+      <span>✦</span>
+    </div>
+
+
+    <div
+      class="
+        reservation-modal__icon
+        reservation-modal__icon--success
+      "
+    >
+      ✓
+    </div>
+
+
+    <h2>
+      Reservation Submitted!
+    </h2>
+
+
+    <p class="reservation-modal__description">
+      Your reservation request has been successfully
+      submitted and is now pending review by the PFMO.
+    </p>
+
+
+    <div class="request-id-card">
+
+      <div>
+
+        <span>
+          Request ID
+        </span>
+
+        <strong id="success-request-id">
+          REQ-2026-001
+        </strong>
+
+      </div>
+
+
+      <button
+        type="button"
+        id="copy-request-id"
+        title="Copy Request ID"
+      >
+        ▣
+      </button>
+
+    </div>
+
+
+    <p class="success-note">
+      You will be notified once there is an
+      update on your request.
+    </p>
+
+
+    <button
+      type="button"
+      class="modal-button modal-button--primary modal-button--full"
+      id="view-reservations-button"
+    >
+      View My Reservations
+      <span>→</span>
+    </button>
+
+  </div>
+
+
+  <!-- =======================================================
+       ERROR MODAL
+       ======================================================= -->
+
+  <div
+    class="reservation-modal reservation-modal--error"
+    id="error-modal"
+    hidden
+  >
+
+    <button
+      type="button"
+      class="reservation-modal__close"
+      id="error-close"
+      aria-label="Close"
+    >
+      ×
+    </button>
+
+
+    <div
+      class="
+        reservation-modal__icon
+        reservation-modal__icon--error
+      "
+    >
+      !
+    </div>
+
+
+    <h2>
+      Submission Failed
+    </h2>
+
+
+    <p class="reservation-modal__description">
+      We couldn't submit your reservation request
+      right now. Please try again.
+    </p>
+
+
+    <div class="reservation-modal__actions">
+
+      <button
+        type="button"
+        class="modal-button modal-button--secondary"
+        id="try-again-button"
+      >
+        Try Again
+      </button>
+
+
+      <button
+        type="button"
+        class="modal-button modal-button--primary"
+        id="error-back-button"
+      >
+        Back to Review
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js"></script>
+  <script src="js/firebase/client.js"></script>
+<script src="js/components/navbar.js"></script>
+  <script src="js/data/reservation-store.js"></script>
+  <script src="js/pages/new-reservation-review.js"></script>
+
+</body>
+</html>
