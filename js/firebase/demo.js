@@ -133,6 +133,6 @@ if (window.FRMS_DEMO_MODE === true) {
       banner.append(reset); document.body.prepend(banner);
     });
     read();
-    return { ready, showError, requireUser, login, requests, venues, availableSlots, submit, updateStatus, openDocument, reservationEvents };
+    return { ready, showError, requireUser, login, register: async () => { throw new Error("Switch to live Firebase mode to register an account."); }, requests, venues, availableSlots, submit, updateStatus, openDocument, reservationEvents };
   })();
 }

@@ -49,3 +49,7 @@ node --test tests/*.test.cjs
 Firestore has free storage, read and write quotas. Monitor Firebase Console > Firestore > Usage; free quota is finite. Passwords remain in Firebase Authentication, never in user profiles. Keep service-account private keys outside the web folder.
 
 References: [Firestore pricing](https://firebase.google.com/docs/firestore/pricing), [Transactions and rules](https://firebase.google.com/docs/firestore/manage-data/transactions), [Storage billing requirements](https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024).
+
+## Student self-registration
+
+The Register as Student button below Login as Student opens the registration form. Full name, email, password (minimum eight characters), and password confirmation are required. Registration creates a Firebase Authentication user, saves a `users/{uid}` student profile, and signs in to the dashboard. The password is managed only by Authentication. No paid services or additional rules are needed.

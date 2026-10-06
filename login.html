@@ -16,7 +16,7 @@
 
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components/navbar.css">
-  <link rel="stylesheet" href="css/pages/login.css">
+  <link rel="stylesheet" href="css/pages/login.css?v=register-1">
 </head>
 
 <body>
@@ -218,8 +218,36 @@
             Login as Student
             <span>→</span>
           </button>
+          <button type="button" class="register-button" id="open-register" aria-controls="register-section" aria-expanded="false">
+            Register as Student
+          </button>
         </form>
-        </div>
+
+        <section id="register-section" hidden aria-labelledby="register-title">
+          <h3 id="register-title">Create your student account</h3>
+          <form id="register-form">
+            <div class="login-field">
+              <label for="register-name">Full name</label>
+              <input id="register-name" type="text" autocomplete="name" maxlength="100" required>
+            </div>
+            <div class="login-field">
+              <label for="register-email">Email</label>
+              <input id="register-email" type="email" autocomplete="email" maxlength="254" required>
+            </div>
+            <div class="login-field">
+              <label for="register-password">Password</label>
+              <input id="register-password" type="password" autocomplete="new-password" minlength="8" required aria-describedby="register-password-help">
+              <small id="register-password-help">Use at least 8 characters.</small>
+            </div>
+            <div class="login-field">
+              <label for="register-confirm">Confirm password</label>
+              <input id="register-confirm" type="password" autocomplete="new-password" minlength="8" required>
+            </div>
+            <p id="register-error" class="register-error" role="alert" hidden></p>
+            <button type="submit" class="login-button" id="register-submit">Create Student Account <span>→</span></button>
+            <button type="button" class="register-button" id="back-to-login">Back to login</button>
+          </form>
+        </section>
 
       </section>
 
@@ -235,9 +263,9 @@
   <script src="js/data/sample-data.js"></script>
   <script src="js/firebase/demo.js"></script>
   <script src="js/firebase/reservation-service.js?v=spark-1"></script>
-  <script src="js/firebase/client.js?v=spark-1"></script>
+  <script src="js/firebase/client.js?v=register-1"></script>
 <script src="js/components/navbar.js"></script>
-  <script src="js/pages/login.js"></script>
+  <script src="js/pages/login.js?v=register-1"></script>
 
 </body>
 </html>

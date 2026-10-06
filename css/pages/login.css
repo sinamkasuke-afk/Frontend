@@ -779,3 +779,23 @@ body {
   }
 
 }
+.register-button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 15px 20px;
+  border: 1px solid #1b5140;
+  border-radius: 12px;
+  background: transparent;
+  color: #1b5140;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.register-button:hover { background: #eff5ee; }
+.register-button:focus-visible { outline: 2px solid #1b5140; outline-offset: 3px; }
+.register-button:disabled, .login-button:disabled { opacity: .65; cursor: wait; }
+#register-form { margin-top: 24px; }
+#register-section h3 { text-align: center; color: #1b5140; margin-top: 24px; }
+.register-error { color: #9b2525; margin: 12px 0; }
+#register-password-help { display: block; margin-top: 8px; color: #68746d; }
+#login-form[hidden], #register-section[hidden], .register-error[hidden] { display: none; }

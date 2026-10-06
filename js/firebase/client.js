@@ -54,6 +54,25 @@ window.FRMS = (() => {
     await ensureProfile();
     sessionStorage.removeItem("frms_reservation");
   }
+  async function register(displayName, email, password) {
+    await ready;
+    displayName = displayName.trim();
+    email = email.trim();
+    if (!displayName || displayName.length > 100) throw new Error("Enter your full name (up to 100 characters).");
+    if (!email.includes("@")) throw new Error("Enter a valid email address.");
+    if (password.length < 8) throw new Error("Use a password with at least 8 characters.");
+    const credential = await auth.createUserWithEmailAndPassword(email, password);
+    user = credential.user;
+    admin = false;
+    try {
+      await user.updateProfile({ displayName });
+      await ensureProfile();
+    } catch (error) {
+      await auth.signOut(); user = null;
+      throw new Error("Your account was created, but your profile could not be saved. Sign in again to finish setup.");
+    }
+    sessionStorage.removeItem("frms_reservation");
+  }
   async function ensureProfile() {
     if (!user) return;
     const ref = db.collection("users").doc(user.uid);
@@ -190,5 +209,5 @@ window.FRMS = (() => {
     try { await ready; await auth.signOut(); sessionStorage.clear(); location.href = "index.html"; }
     catch (error) { showError(error); }
   }, true);
-  return { ready, requireUser, login, requests, venues, availableSlots, submit, updateStatus, openDocument, reservationEvents, showError };
+  return { ready, requireUser, login, register, requests, venues, availableSlots, submit, updateStatus, openDocument, reservationEvents, showError };
 })();

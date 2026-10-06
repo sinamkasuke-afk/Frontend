@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 function client(isAdmin = false) {
   const calls = [], writes = [], filters = [];
-  const user = { uid: 'student-1', email: 'student@example.com', getIdTokenResult: async () => ({ claims: { admin: isAdmin } }) };
+  const user = { uid: 'student-1', email: 'student@example.com', updateProfile: async profile => { user.displayName = profile.displayName; }, getIdTokenResult: async () => ({ claims: { admin: isAdmin } }) };
   const records = {
     reservations: [{ id: 'request-1', value: { ownerUid: user.uid, status: 'pending' } }],
     venues: [{ id: 'hall', value: { active: true, name: 'Hall', order: 1 } }],
@@ -12,7 +12,7 @@ function client(isAdmin = false) {
     bookings: [{ id: 'lock', value: { slotId: 'morning' } }],
     reservationEvents: []
   };
-  const auth = { setPersistence: async () => {}, onAuthStateChanged: callback => { queueMicrotask(() => callback(user)); return () => {}; }, signInWithEmailAndPassword: async () => ({ user }), signOut: async () => {} };
+  const auth = { setPersistence: async () => {}, onAuthStateChanged: callback => { queueMicrotask(() => callback(user)); return () => {}; }, signInWithEmailAndPassword: async () => ({ user }), createUserWithEmailAndPassword: async () => ({ user }), signOut: async () => {} };
   const db = { collection: name => {
     const query = {
       where: (...args) => { filters.push([name, ...args]); return query; },
@@ -59,4 +59,21 @@ test('student cannot invoke admin review; admin uses a Firestore transaction', a
   assert.equal(student.calls.length, 0);
   const admin = client(true); await admin.api.updateStatus('request-1', 'approved');
   assert.equal(admin.calls[0].name, 'firestore-review');
+});
+
+test('registration saves a student profile and name without copying passwords', async () => {
+  const { api, writes } = client(true);
+  await api.register(' Alex Student ', 'alex@example.com', 'TestPass123!');
+  assert.equal(writes[0].name, 'users');
+  assert.equal(writes[0].data.role, 'student');
+  assert.equal(writes[0].data.displayName, 'Alex Student');
+  assert(!('password' in writes[0].data));
+  await assert.rejects(api.updateStatus('request-1', 'approved'));
+});
+test('invalid registration input cannot create a profile', async () => {
+  const { api, writes } = client();
+  await assert.rejects(api.register('', 'alex@example.com', 'TestPass123!'));
+  await assert.rejects(api.register('Alex', 'alex', 'TestPass123!'));
+  await assert.rejects(api.register('Alex', 'alex@example.com', 'short'));
+  assert.equal(writes.length, 0);
 });
