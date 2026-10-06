@@ -11,7 +11,8 @@ service cloud.firestore {
     function approvedStudent() {
       return signedIn()
         && request.auth.token.email.matches('^[^@]+@gmail[.]com$')
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('enrollmentStatus', 'pending') == 'approved';
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('enrollmentStatus', 'pending') == 'approved'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('confirmedStudentId', '') == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.studentId;
     }
     function limited(id) { return getAfter(/databases/$(database)/documents/submissionLimits/$(id)).data; }
     match /submissionLimits/{id} {
@@ -40,26 +41,45 @@ service cloud.firestore {
         && reservation(request.resource.data.reservationId).createdAt == request.time;
       allow delete: if false;
     }
+    match /adminApplications/{uid} {
+      allow read: if admin() || (signedIn() && request.auth.uid == uid);
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['uid','email','displayName','status','createdAt'])
+        && request.resource.data.uid == uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() >= 1 && request.resource.data.displayName.size() <= 100
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time;
+      // Activation requires trusted Firebase Admin SDK credentials, never browser writes.
+      allow update, delete: if false;
+    }
     match /users/{uid} {
       allow read: if admin() || (signedIn() && request.auth.uid == uid);
       allow create: if signedIn() && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'createdAt', 'studentId', 'enrollmentStatus', 'approvedBy', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'createdAt', 'studentId', 'enrollmentStatus', 'approvedBy', 'updatedAt', 'confirmedStudentId', 'studentIdConfirmedAt'])
         && request.resource.data.uid == uid
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.displayName is string
         && request.resource.data.createdAt == request.time
         && request.resource.data.studentId is string && request.resource.data.studentId.size() <= 50
         && request.resource.data.enrollmentStatus == (admin() ? 'approved' : 'pending')
-        && !request.resource.data.keys().hasAny(['approvedBy','updatedAt'])
+        && !request.resource.data.keys().hasAny(['approvedBy','updatedAt','confirmedStudentId','studentIdConfirmedAt'])
         && (request.resource.data.role == 'student' || (admin() && request.resource.data.role == 'admin'));
       allow update: if admin()
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.email == resource.data.email
-        && request.resource.data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'createdAt', 'studentId', 'enrollmentStatus', 'approvedBy', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'createdAt', 'studentId', 'enrollmentStatus', 'approvedBy', 'updatedAt', 'confirmedStudentId', 'studentIdConfirmedAt'])
         && request.resource.data.role == resource.data.role
         && request.resource.data.enrollmentStatus in ['approved','rejected']
         && request.resource.data.studentId is string && request.resource.data.studentId.size() >= 1 && request.resource.data.studentId.size() <= 50
         && request.resource.data.updatedAt == request.time && request.resource.data.approvedBy == request.auth.uid;
+      allow update: if signedIn() && request.auth.uid == uid
+        && resource.data.role == 'student'
+        && resource.data.enrollmentStatus == 'approved'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['confirmedStudentId', 'studentIdConfirmedAt'])
+        && request.resource.data.confirmedStudentId == resource.data.studentId
+        && request.resource.data.studentIdConfirmedAt == request.time;
       allow delete: if false;
     }
     match /venues/{id} {

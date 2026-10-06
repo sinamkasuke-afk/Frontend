@@ -23,7 +23,7 @@ beforeEach(async () => {
     await database.collection('venues').doc('hall').set({ name: 'Hall', active: true, capacity: 50, location: 'Campus' });
     await database.collection('venues').doc('other-hall').set({ name: 'Other Hall', active: true, capacity: 50, location: 'Campus' });
     await database.collection('timeSlots').doc('morning').set({ label: 'Morning', active: true, startMinutes: 420 });
-    await database.collection('users').doc(uid).set({ uid, email, displayName: actor.name, role: 'student', studentId: '2026-001', enrollmentStatus: 'approved' });
+    await database.collection('users').doc(uid).set({ uid, email, displayName: actor.name, role: 'student', studentId: '2026-001', confirmedStudentId: '2026-001', enrollmentStatus: 'approved' });
   });
 });
 test('verified submission writes booking, request number, audit and daily quota', async () => {
@@ -130,10 +130,35 @@ test('real Auth emulator workflow: register without verification, admin enrollme
     await auth.signOut();
     await assert.rejects(auth.signInWithEmailAndPassword(email, 'WrongPassword123!'));
     await auth.signInWithEmailAndPassword(email, password);
+    await assertFails(submitReservation(options));
+    await assertFails(database.collection('users').doc(student.uid).update({ confirmedStudentId: 'WRONG', studentIdConfirmedAt: stamp() }));
+    await assertSucceeds(database.collection('users').doc(student.uid).update({ confirmedStudentId: '2026-TEST', studentIdConfirmedAt: stamp() }));
     await assertSucceeds(submitReservation(options));
     await assertSucceeds(reviewReservation({ db: db('admin1', true, true), actor: { uid: 'admin1', admin: true }, data: { id: 'auth-request', status: 'approved' }, timestamp: stamp }));
     assert.equal((await database.collection('reservations').doc('auth-request').get()).data().status, 'approved');
     await assertSucceeds(cancelReservation({ db: database, actor: options.actor, data: { id: 'auth-request' }, timestamp: stamp }));
     assert.equal((await database.collection('reservations').doc('auth-request').get()).data().status, 'cancelled');
   } finally { await app.delete(); }
+});
+
+test('approved student must confirm matching ID and cannot alter enrollment fields', async () => {
+  await env.withSecurityRulesDisabled(async ctx => { await ctx.firestore().collection('users').doc(uid).update({ confirmedStudentId: firebase.firestore.FieldValue.delete() }); });
+  await assertFails(submit());
+  const ref = db().collection('users').doc(uid);
+  await assertFails(ref.update({ confirmedStudentId: 'WRONG', studentIdConfirmedAt: stamp() }));
+  await assertFails(ref.update({ studentId: 'WRONG', confirmedStudentId: 'WRONG', studentIdConfirmedAt: stamp() }));
+  await assertSucceeds(ref.update({ confirmedStudentId: '2026-001', studentIdConfirmedAt: stamp() }));
+  await assertSucceeds(submit());
+});
+
+test('administrator registration is pending and cannot grant itself privileges', async () => {
+  const ref = db().collection('adminApplications').doc(uid);
+  const application = { uid, email, displayName: 'Applicant', status: 'pending', createdAt: stamp() };
+  await assertFails(ref.set({ ...application, status: 'approved' }));
+  await assertFails(ref.set({ ...application, admin: true }));
+  await assertSucceeds(ref.set(application));
+  await assertFails(ref.update({ status: 'approved' }));
+  await assertFails(db('other').collection('adminApplications').doc(uid).get());
+  await assertSucceeds(db('admin1', true, true).collection('adminApplications').doc(uid).get());
+  await assertFails(db().collection('users').doc(uid).update({ role: 'admin' }));
 });

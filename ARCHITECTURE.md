@@ -63,3 +63,5 @@ NODE_PATH=./tools/node_modules npx firebase-tools emulators:exec --config fireba
 ```
 
 The demo project and local emulator prevent changes to production data. Tests cover enrollment-approved submissions, student isolation, forbidden approval, cancellation, venue-specific conflicts, forged fields and disabled PDFs.
+
+After administrator enrollment approval, students must enter the approved student ID in the portal confirmation form. Firestore stores `confirmedStudentId` and `studentIdConfirmedAt`. Submissions require the confirmed ID to match the current approved ID. Approval or rejection through the admin Students page resets confirmation. Students cannot change their approved ID or enrollment status. This is a one-time ID confirmation, not a replacement for checking school records.

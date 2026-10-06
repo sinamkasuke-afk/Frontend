@@ -31,15 +31,6 @@ window.FRMS = (() => {
     if (user) admin = (await user.getIdTokenResult()).claims.admin === true;
     return user;
   })();
-  ready.then(async () => {
-    if (!user || admin) return;
-    const profile = await db.collection("users").doc(user.uid).get();
-    if (profile.data()?.enrollmentStatus === "approved") return;
-    const notice = document.createElement("p");
-    notice.style.cssText = "padding:12px 24px;background:#eef4ef";
-    notice.textContent = "Your student enrollment needs administrator approval before you can reserve. Contact the facilities office with your student ID.";
-    document.body.prepend(notice);
-  }).catch(showError);
   async function requireUser(isAdmin = false) {
     await ready;
     if (!user) { location.replace(isAdmin ? "admin-login.html" : "login.html"); return false; }
@@ -58,7 +49,7 @@ window.FRMS = (() => {
     admin = (await user.getIdTokenResult(true)).claims.admin === true;
     if (isAdmin && !admin) {
       await auth.signOut(); user = null;
-      throw new Error("This account does not have administrator access.");
+      throw new Error("Administrator access is not enabled for this account. If you registered, ask the project owner to approve it.");
     }
     if (!isAdmin && admin) {
       await auth.signOut(); user = null; admin = false;
@@ -87,6 +78,26 @@ window.FRMS = (() => {
       throw new Error("Your account was created, but your profile could not be saved. Sign in again to finish setup.");
     }
     sessionStorage.removeItem("frms_reservation");
+  }
+  async function registerAdmin(displayName, email, password) {
+    await ready;
+    displayName = displayName.trim(); email = email.trim();
+    if (!displayName || displayName.length > 100) throw new Error("Enter your full name (up to 100 characters).");
+    if (!email.includes("@")) throw new Error("Enter a valid email address.");
+    if (password.length < 8) throw new Error("Use at least eight characters for your password.");
+    const credential = await auth.createUserWithEmailAndPassword(email, password);
+    user = credential.user; admin = false;
+    try {
+      await user.updateProfile({ displayName });
+      await db.collection("adminApplications").doc(user.uid).set({ uid: user.uid, email: user.email,
+        displayName, status: "pending", createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    } catch (error) {
+      // Roll back the newly created Auth account so registration can be retried.
+      try { await credential.user.delete(); } catch (_) {}
+      throw error;
+    } finally {
+      await auth.signOut(); user = null; admin = false;
+    }
   }
   async function ensureProfile(studentId = "") {
     if (!user) return;
@@ -225,6 +236,7 @@ window.FRMS = (() => {
     await user.getIdToken(true);
     const profile = await db.collection("users").doc(user.uid).get();
     if (!admin && profile.data()?.enrollmentStatus !== "approved") throw new Error("Your student enrollment is awaiting administrator approval. Contact the facilities office with your student ID.");
+    if (!admin && profile.data()?.confirmedStudentId !== profile.data()?.studentId) throw new Error("Confirm your approved student ID at the top of this page before reserving.");
     const submittingActor = { ...actor(), name: profile.data()?.displayName || user.email };
     const result = await FRMS_RESERVATION_SERVICE.submitReservation({ db, actor: submittingActor, data,
       timestamp: () => firebase.firestore.FieldValue.serverTimestamp() });
@@ -249,7 +261,21 @@ window.FRMS = (() => {
   async function approveEnrollment(uid, studentId, approved) {
     if (!await requireUser(true)) throw new Error("Administrator access is required.");
     if (!/^[a-zA-Z0-9-]{1,50}$/.test(studentId)) throw new Error("Enter a valid student ID.");
-    await db.collection("users").doc(uid).update({ studentId, enrollmentStatus: approved ? "approved" : "rejected", approvedBy: user.uid, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    await db.collection("users").doc(uid).update({ studentId, enrollmentStatus: approved ? "approved" : "rejected", confirmedStudentId: firebase.firestore.FieldValue.delete(), studentIdConfirmedAt: firebase.firestore.FieldValue.delete(), approvedBy: user.uid, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }
+  async function watchEnrollment(callback) {
+    await ready;
+    if (!user || admin) return () => {};
+    return db.collection("users").doc(user.uid).onSnapshot(snapshot => callback(snapshot.data() || {}), showError);
+  }
+  async function confirmStudentId(studentId) {
+    if (!await requireUser()) throw new Error("Sign in first.");
+    studentId = studentId.trim();
+    const ref = db.collection("users").doc(user.uid);
+    const profile = (await ref.get()).data();
+    if (profile?.enrollmentStatus !== "approved") throw new Error("Wait for administrator enrollment approval first.");
+    if (!studentId || studentId !== profile.studentId) throw new Error("The student ID does not match the ID approved by your administrator.");
+    await ref.update({ confirmedStudentId: studentId, studentIdConfirmedAt: firebase.firestore.FieldValue.serverTimestamp() });
   }
   async function studentQuery() {
     if (!await requireUser(true)) throw new Error("Administrator access is required.");
@@ -325,5 +351,5 @@ window.FRMS = (() => {
     if (!user) return null;
     const profile = await db.collection("users").doc(user.uid).get();
     return { displayName: profile.data()?.displayName || user.displayName || "", email: user.email, role: admin ? "admin" : "student" };
-  }, requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, requests, watchRequests, requestCounts, mountRequestPagination, venues, availableSlots, submit, updateStatus, cancelReservation, approveEnrollment, studentQuery, resetPassword, reservationEvents, showError };
+  }, requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, registerAdmin, requests, watchRequests, requestCounts, mountRequestPagination, venues, availableSlots, submit, updateStatus, cancelReservation, approveEnrollment, watchEnrollment, confirmStudentId, studentQuery, resetPassword, reservationEvents, showError };
 })();

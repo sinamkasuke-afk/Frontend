@@ -18,3 +18,13 @@ Create, approve/decline and cancellation operations use transactions. Cancellati
 Security Rules enforce enrollment-approved Gmail submissions, canonical catalog fields, valid dates within 90 days, positive capacity-limited guest counts, field size limits, numbering, daily quota, booking consistency and immutable audit. Browser validation helps the user but is not the authorization boundary.
 
 Students register with Gmail and require administrator-approved enrollment to submit. Expired pending locks can be replaced, while approved locks remain exclusive. Students read only their own reservation/profile/activity. Administrators read all reservations. Lists and calendar subscribe to live changes. See ARCHITECTURE.md for state transitions and verification.
+
+After administrator enrollment approval, students must enter the approved student ID in the portal confirmation form. Firestore stores `confirmedStudentId` and `studentIdConfirmedAt`. Submissions require the confirmed ID to match the current approved ID. Approval or rejection through the admin Students page resets confirmation. Students cannot change their approved ID or enrollment status. This is a one-time ID confirmation, not a replacement for checking school records.
+
+Administrator registration is available below Admin Login. It creates a Firebase Authentication account and a pending `adminApplications/{uid}` document; passwords are handled by Authentication. Registration does not grant administrator access. The project owner checks the applicant and runs the trusted approval tool using credentials outside the website:
+
+```sh
+GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json" NODE_PATH=./functions/node_modules node tools/approve-admin-account.cjs administrator@example.com
+```
+
+The tool writes an administrator profile, grants the Firebase `admin` custom claim, and marks the application approved. The applicant then signs in through Admin Login. Browser users cannot approve administrator applications or grant themselves administrator claims. This uses no paid Cloud Functions backend.

@@ -38,3 +38,13 @@ Service-account credentials must stay outside the repository. The previously sha
 `tools/remove-legacy-pdfs.cjs` removes legacy supporting-document records and attachment metadata using trusted Admin SDK credentials. `tools/assign-request-numbers.cjs` numbers legacy reservations without changing their UUID references. Existing maintenance scripts require an external service-account file via GOOGLE_APPLICATION_CREDENTIALS.
 
 Student reservations, admin requests, history and student enrollment use cursor pagination (25 rows plus one lookahead). Status and month filters run in Firestore; text search applies to the visible page. Summary counts use database aggregation queries rather than the loaded page. Admin lists, calendar and student reservations receive live updates.
+
+After administrator enrollment approval, students must enter the approved student ID in the portal confirmation form. Firestore stores `confirmedStudentId` and `studentIdConfirmedAt`. Submissions require the confirmed ID to match the current approved ID. Approval or rejection through the admin Students page resets confirmation. Students cannot change their approved ID or enrollment status. This is a one-time ID confirmation, not a replacement for checking school records.
+
+Administrator registration is available below Admin Login. It creates a Firebase Authentication account and a pending `adminApplications/{uid}` document; passwords are handled by Authentication. Registration does not grant administrator access. The project owner checks the applicant and runs the trusted approval tool using credentials outside the website:
+
+```sh
+GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json" NODE_PATH=./functions/node_modules node tools/approve-admin-account.cjs administrator@example.com
+```
+
+The tool writes an administrator profile, grants the Firebase `admin` custom claim, and marks the application approved. The applicant then signs in through Admin Login. Browser users cannot approve administrator applications or grant themselves administrator claims. This uses no paid Cloud Functions backend.

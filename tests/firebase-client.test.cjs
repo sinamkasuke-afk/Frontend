@@ -24,7 +24,7 @@ function client(isAdmin = false, verified = true, profileName = null) {
         subscriptions.push({ name, callback });
         return () => subscriptions.push({ stopped: true });
       },
-      doc: id => ({ name, id, collection: sub => ({ doc: child => ({ name: sub, id: child }) }), get: async () => ({ exists: false, data: () => ({ displayName: profileName || user.displayName || user.email, enrollmentStatus: 'approved' }) }), set: async data => writes.push({ name, id, data }) })
+      doc: id => ({ name, id, collection: sub => ({ doc: child => ({ name: sub, id: child }) }), get: async () => ({ exists: false, data: () => ({ displayName: profileName || user.displayName || user.email, enrollmentStatus: 'approved', studentId: '2026-001', confirmedStudentId: '2026-001' }) }), set: async data => writes.push({ name, id, data }) })
     }; return query;
   } };
   const firebase = {
@@ -141,4 +141,15 @@ test('student login rejects an administrator account', async () => {
   const { api, writes } = client(true);
   await assert.rejects(api.login('admin@example.com', 'secret', false), /Use Admin Login/);
   assert.equal(writes.length, 0);
+});
+
+test('administrator registration saves only a pending application and signs out', async () => {
+  const { api, writes } = client();
+  await api.registerAdmin('New Administrator', 'newadmin@example.com', 'Password123!');
+  assert.equal(writes.length, 1);
+  assert.equal(writes[0].name, 'adminApplications');
+  assert.equal(writes[0].data.status, 'pending');
+  assert.equal(writes[0].data.displayName, 'New Administrator');
+  assert(!('password' in writes[0].data));
+  assert.equal(await api.currentUser(), null);
 });

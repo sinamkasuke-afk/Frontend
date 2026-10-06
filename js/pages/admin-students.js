@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
           button.style.cssText = 'margin:4px;padding:8px 12px;border-radius:8px;border:1px solid #ddd';
           button.onclick = async () => {
-            const studentId = student.studentId || window.prompt('Enter the student ID you verified with the school:');
+            const studentId = window.prompt('Enter or confirm the student ID checked against school records. Give this ID to the student to confirm in their portal:', student.studentId || '');
             if (!studentId) return;
             if (!window.confirm(`${label} enrollment for ${student.displayName || student.email}? Confirm that you have checked school records.`)) return;
             button.disabled = true;
