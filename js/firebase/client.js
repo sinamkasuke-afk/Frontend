@@ -245,7 +245,7 @@ window.FRMS = (() => {
   });
   document.addEventListener("click", async event => {
     const link = event.target.closest("a");
-    if (!link || !(link.classList.contains("admin-profile-menu__logout") || link.textContent.trim() === "Logout")) return;
+    if (!link || !(link.hasAttribute("data-logout") || link.classList.contains("admin-profile-menu__logout") || link.textContent.trim() === "Logout")) return;
     event.preventDefault();
     try { await ready; await auth.signOut(); sessionStorage.clear(); location.href = "index.html"; }
     catch (error) { showError(error); }

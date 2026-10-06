@@ -37,6 +37,7 @@
     rel="stylesheet"
     href="css/pages/admin-dashboard.css"
   />
+  <link rel="stylesheet" href="css/components/admin-layout.css?v=logout-layout-1" />
 </head>
 
 <body>
@@ -87,89 +88,9 @@
       </div>
 
 
-      <!-- NOTIFICATION -->
-
-      <button
-        type="button"
-        class="notification-button"
-        id="notification-button"
-        aria-label="Notifications"
-      >
-
-        <span class="notification-bell">
-          🔔
-        </span>
-
-        <span class="notification-dot"></span>
-
-      </button>
-
-
-      <!-- ADMIN PROFILE -->
-
-      <div class="admin-profile-wrapper">
-
-
-        <button
-          type="button"
-          class="admin-profile"
-          id="admin-profile-button"
-        >
-
-          <div class="admin-profile__avatar">
-            AS
-          </div>
-
-
-          <div class="admin-profile__text">
-
-            <strong>
-              Admin Santos
-            </strong>
-
-            <span>
-              Administrator
-            </span>
-
-          </div>
-
-
-          <span
-            class="admin-profile__arrow"
-            id="admin-profile-arrow"
-          >
-           ⌄
-          </span>
-
-        </button>
-
-
-        <!-- PROFILE DROPDOWN -->
-
-        <div
-          class="admin-profile-menu"
-          id="admin-profile-menu"
-        >
-
-          <a href="#">
-            <span>♙</span>
-            Profile
-          </a>
-
-          <div class="admin-profile-menu__divider"></div>
-
-          <a
-            href="admin-login.html"
-            class="admin-profile-menu__logout"
-          >
-            <span>↪</span>
-            Logout
-          </a>
-
-        </div>
-
-      </div>
-
+      <a href="admin-login.html" class="admin-logout" data-logout>
+        <span aria-hidden="true">↪</span> Logout
+      </a>
     </div>
 
   </header>
@@ -261,25 +182,6 @@
 
 
       <!-- SIDEBAR BOTTOM -->
-
-      <div class="admin-sidebar__bottom">
-
-        <a
-          href="admin-login.html"
-          class="admin-sidebar__link"
-        >
-
-          <span class="admin-sidebar__icon">
-            ↪
-          </span>
-
-          <span class="admin-sidebar__text">
-            Logout
-          </span>
-
-        </a>
-
-      </div>
 
     </aside>
 
@@ -611,8 +513,8 @@
   <script src="js/data/sample-data.js"></script>
   <script src="js/firebase/demo.js"></script>
   <script src="js/firebase/reservation-service.js?v=request-number-1"></script>
-  <script src="js/firebase/client.js?v=request-number-1"></script>
-<script src="js/pages/admin-dashboard.js?v=request-number-1"></script>
+  <script src="js/firebase/client.js?v=logout-layout-1"></script>
+<script src="js/pages/admin-dashboard.js?v=logout-layout-1"></script>
 
 </body>
 </html>

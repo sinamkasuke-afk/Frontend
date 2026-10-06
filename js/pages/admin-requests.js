@@ -464,57 +464,6 @@ document.addEventListener(
        PROFILE DROPDOWN
        ========================================================== */
 
-    const profileWrapper =
-      document.querySelector(
-        ".admin-profile-wrapper"
-      );
-
-
-    const profileButton =
-      document.getElementById(
-        "admin-profile-button"
-      );
-
-
-    profileButton.addEventListener(
-      "click",
-      function (event) {
-
-        event.stopPropagation();
-
-
-        profileWrapper
-          .classList
-          .toggle(
-            "admin-profile-wrapper--open"
-          );
-
-      }
-    );
-
-
-    document.addEventListener(
-      "click",
-      function (event) {
-
-        if (
-          !profileWrapper.contains(
-            event.target
-          )
-        ) {
-
-          profileWrapper
-            .classList
-            .remove(
-              "admin-profile-wrapper--open"
-            );
-
-        }
-
-      }
-    );
-
-
     /* ==========================================================
        HELPERS
        ========================================================== */
