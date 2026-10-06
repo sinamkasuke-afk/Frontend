@@ -48,3 +48,15 @@
   .admin-sidebar__text { font-size: 12px; }
   .admin-logout { padding: 10px 14px; }
 }
+
+/* The administrator's account menu contains only Logout. */
+.admin-profile__text strong { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+.admin-profile-menu { transition: opacity .2s ease, visibility .2s ease, transform .2s ease; }
+@media (max-width: 700px) {
+  .admin-header__right { gap: 10px; }
+  .admin-profile { gap: 8px; }
+  .admin-profile .admin-profile__text,
+  .admin-profile .admin-profile__arrow { display: block; }
+  .admin-profile__text strong { max-width: 100px; font-size: 12px; }
+  .admin-profile__text span { display: none; }
+}

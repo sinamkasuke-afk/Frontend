@@ -250,5 +250,5 @@ window.FRMS = (() => {
     try { await ready; await auth.signOut(); sessionStorage.clear(); location.href = "index.html"; }
     catch (error) { showError(error); }
   }, true);
-  return { requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, requests, watchRequests, venues, availableSlots, submit, updateStatus, deleteReservation, openDocument, reservationEvents, showError };
+  return { currentUser: async () => { await ready; return user ? { displayName: user.displayName, email: user.email } : null; }, requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, requests, watchRequests, venues, availableSlots, submit, updateStatus, deleteReservation, openDocument, reservationEvents, showError };
 })();

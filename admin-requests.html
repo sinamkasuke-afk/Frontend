@@ -37,7 +37,7 @@
     rel="stylesheet"
     href="css/pages/admin-requests.css"
   />
-  <link rel="stylesheet" href="css/components/admin-layout.css?v=logout-layout-1" />
+  <link rel="stylesheet" href="css/components/admin-layout.css?v=admin-name-1" />
 </head>
 
 <body>
@@ -88,9 +88,22 @@
       </div>
 
 
-      <a href="admin-login.html" class="admin-logout" data-logout>
-        <span aria-hidden="true">↪</span> Logout
-      </a>
+      <div class="admin-profile-wrapper">
+        <button type="button" class="admin-profile" id="admin-profile-button"
+          aria-expanded="false" aria-controls="admin-profile-menu">
+          <span class="admin-profile__avatar" id="admin-avatar">AS</span>
+          <span class="admin-profile__text">
+            <strong id="admin-display-name">Administrator</strong>
+            <span>Administrator</span>
+          </span>
+          <span class="admin-profile__arrow" aria-hidden="true">⌄</span>
+        </button>
+        <div class="admin-profile-menu" id="admin-profile-menu" inert>
+          <a href="admin-login.html" class="admin-profile-menu__logout" data-logout>
+            <span aria-hidden="true">↪</span> Logout
+          </a>
+        </div>
+      </div>
     </div>
 
   </header>
@@ -500,10 +513,11 @@
   <script src="js/data/sample-data.js"></script>
   <script src="js/firebase/demo.js"></script>
   <script src="js/firebase/reservation-service.js?v=request-number-1"></script>
-  <script src="js/firebase/client.js?v=logout-layout-1"></script>
+  <script src="js/firebase/client.js?v=admin-name-1"></script>
 <script
     src="js/pages/admin-requests.js?v=logout-layout-1"
   ></script>
 
+  <script src="js/components/admin-profile.js?v=admin-name-1"></script>
 </body>
 </html>
