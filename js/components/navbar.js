@@ -360,6 +360,7 @@ function renderNavbar(containerId, activePage, variant = "public") {
     FRMS.currentUser().then(user => {
       const name = container.querySelector(".navbar__student-name");
       if (!name || !user) return;
+      if (user.role === "admin") { location.replace("admin-dashboard.html"); return; }
       name.textContent = user.displayName || user.email || "Student";
       name.title = name.textContent;
       name.hidden = false;

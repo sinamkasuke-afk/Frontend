@@ -8,8 +8,8 @@ service cloud.firestore {
       return timestamp.date(int(parts[0]), int(parts[1]), int(parts[2]));
     }
     function today() { return (request.time + duration.value(8, 'h')).date(); }
-    function verifiedStudent() {
-      return signedIn() && request.auth.token.get('email_verified', false) == true
+    function approvedStudent() {
+      return signedIn()
         && request.auth.token.email.matches('^[^@]+@gmail[.]com$')
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('enrollmentStatus', 'pending') == 'approved';
     }
@@ -77,7 +77,7 @@ service cloud.firestore {
     match /reservations/{id} {
       allow get: if signedIn() && (!exists(/databases/$(database)/documents/reservations/$(id)) || admin() || resource.data.ownerUid == request.auth.uid);
       allow list: if admin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
-      allow create: if (admin() || verifiedStudent())
+      allow create: if (admin() || approvedStudent())
         && request.resource.data.keys().hasOnly(['id','requestId','requestNumber','ownerUid','requester','requesterType','initials','venueId','venue','venueDetail','slotId','dateISO','date','time','event','expectedGuests','organization','eventType','purpose','contactPerson','facilityRequirements','setupNotes','status','bookingId','createdAt','quotaId','lastEventId'])
         && request.resource.data.id == id && request.resource.data.requestId == id
         && request.resource.data.requestNumber is int

@@ -43,7 +43,7 @@ Every decision and cancellation creates an immutable audit entry in the same tra
 
 ## Limits and operations
 
-- Students register using gmail.com and verify email before submitting. This does not prove enrollment.
+- Students register using gmail.com without email verification. Administrators check school IDs and approve enrollment before submissions.
 - Dates are valid Manila calendar dates within the next 90 days.
 - A per-user Manila-day document enforces five submissions; cancellation does not reset the quota.
 - Numeric references range from 1 to 99999 and are never reused. UUIDs remain internal relationships.
@@ -62,4 +62,4 @@ Run actual Security Rules tests using Firebase CLI, Java 21, Firebase JS SDK and
 NODE_PATH=./tools/node_modules npx firebase-tools emulators:exec --config firebase.test.json --project demo-frms-rules --only firestore,auth "node --test tests/firestore-rules.integration.cjs"
 ```
 
-The demo project and local emulator prevent changes to production data. Tests cover verified submissions, student isolation, forbidden approval, cancellation, venue-specific conflicts, forged fields and disabled PDFs.
+The demo project and local emulator prevent changes to production data. Tests cover enrollment-approved submissions, student isolation, forbidden approval, cancellation, venue-specific conflicts, forged fields and disabled PDFs.

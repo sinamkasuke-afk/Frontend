@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-function client(isAdmin = false, verified = true) {
+function client(isAdmin = false, verified = true, profileName = null) {
   const calls = [], writes = [], filters = [], subscriptions = [], persistence = [], deletes = [], fetches = [];
   const user = { emailVerified: verified, reload: async () => {}, getIdToken: async () => 'token', sendEmailVerification: async () => calls.push({ name: 'verification-email' }), uid: 'student-1', email: 'student@example.com', updateProfile: async profile => { user.displayName = profile.displayName; }, getIdTokenResult: async () => ({ claims: { admin: isAdmin } }) };
   const records = {
@@ -24,7 +24,7 @@ function client(isAdmin = false, verified = true) {
         subscriptions.push({ name, callback });
         return () => subscriptions.push({ stopped: true });
       },
-      doc: id => ({ name, id, collection: sub => ({ doc: child => ({ name: sub, id: child }) }), get: async () => ({ exists: false, data: () => ({ displayName: user.displayName || user.email, enrollmentStatus: 'approved' }) }), set: async data => writes.push({ name, id, data }) })
+      doc: id => ({ name, id, collection: sub => ({ doc: child => ({ name: sub, id: child }) }), get: async () => ({ exists: false, data: () => ({ displayName: profileName || user.displayName || user.email, enrollmentStatus: 'approved' }) }), set: async data => writes.push({ name, id, data }) })
     }; return query;
   } };
   const firebase = {
@@ -56,15 +56,15 @@ test('student list queries are scoped to owner and available slots omit bookings
   assert.deepEqual(Array.from(await api.availableSlots('hall', '2026-10-15'), slot => slot.id), ['midday']);
   assert(filters.some(filter => filter.join('/') === 'bookings/dateISO/==/2026-10-15'));
 });
-test('submission uses verified email and has no PDF support', async () => {
+test('submission does not require email verification and has no PDF support', async () => {
   const { api, calls } = client();
   assert.equal(await api.submit({ requestId: 'request-1', venueId: 'hall' }), 'request-1');
   assert.equal(calls[0].name, 'firestore-submit');
   assert(!('hasAttachment' in calls[0].data));
   assert.equal(api.openDocument, undefined);
   const unverified = client(false, false);
-  await assert.rejects(unverified.api.submit({ requestId: 'request-1' }), /Verify your email/);
-  assert.equal(unverified.calls.length, 0);
+  assert.equal(await unverified.api.submit({ requestId: 'request-1' }), 'request-1');
+  assert.equal(unverified.calls[0].name, 'firestore-submit');
 });
 test('student cannot invoke admin review; admin uses a Firestore transaction', async () => {
   const student = client(); await assert.rejects(student.api.updateStatus('request-1', 'approved'));
@@ -129,4 +129,16 @@ test('slot availability ignores expired pending holds but preserves old approved
   assert.deepEqual(Array.from(await api.availableSlots('hall', '2026-10-15'), slot => slot.id), ['morning', 'midday']);
   records.bookings[0].value.status = 'approved';
   assert.deepEqual(Array.from(await api.availableSlots('hall', '2026-10-15'), slot => slot.id), ['midday']);
+});
+
+test('navbar identity uses the saved student profile name', async () => {
+  const { api } = client(false, true, 'Maria Student');
+  const identity = await api.currentUser();
+  assert.equal(identity.displayName, 'Maria Student');
+  assert.equal(identity.role, 'student');
+});
+test('student login rejects an administrator account', async () => {
+  const { api, writes } = client(true);
+  await assert.rejects(api.login('admin@example.com', 'secret', false), /Use Admin Login/);
+  assert.equal(writes.length, 0);
 });

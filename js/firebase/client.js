@@ -31,21 +31,6 @@ window.FRMS = (() => {
     if (user) admin = (await user.getIdTokenResult()).claims.admin === true;
     return user;
   })();
-  ready.then(() => {
-    if (!user || admin || user.emailVerified) return;
-    const notice = document.createElement("p");
-    notice.style.cssText = "padding:12px 24px;background:#fff8e1";
-    const send = document.createElement("button");
-    send.type = "button"; send.textContent = "Send verification email";
-    send.onclick = async () => {
-      send.disabled = true;
-      try { await sendVerification(); notice.firstChild.textContent = "Verification email sent. Open the email link, then submit your reservation again. "; }
-      catch (error) { showError(error); }
-      finally { send.disabled = false; }
-    };
-    notice.append("Verify your email before reserving facilities. ", send);
-    document.body.prepend(notice);
-  }).catch(showError);
   ready.then(async () => {
     if (!user || admin) return;
     const profile = await db.collection("users").doc(user.uid).get();
@@ -75,6 +60,10 @@ window.FRMS = (() => {
       await auth.signOut(); user = null;
       throw new Error("This account does not have administrator access.");
     }
+    if (!isAdmin && admin) {
+      await auth.signOut(); user = null; admin = false;
+      throw new Error("This is an administrator account. Use Admin Login, or sign in with your student account.");
+    }
     await ensureProfile();
     sessionStorage.removeItem("frms_reservation");
   }
@@ -97,8 +86,6 @@ window.FRMS = (() => {
       await auth.signOut(); user = null;
       throw new Error("Your account was created, but your profile could not be saved. Sign in again to finish setup.");
     }
-    try { await user.sendEmailVerification(); }
-    catch (error) { throw new Error("Your account is ready, but the verification email could not be sent. Sign in and use Send verification email to retry."); }
     sessionStorage.removeItem("frms_reservation");
   }
   async function ensureProfile(studentId = "") {
@@ -235,7 +222,6 @@ window.FRMS = (() => {
   async function submit(data) {
     if (!await requireUser()) throw new Error("Sign in to submit a reservation.");
     await user.reload();
-    if (!admin && !user.emailVerified) throw new Error("Verify your email before submitting a reservation. Use Send verification email below.");
     await user.getIdToken(true);
     const profile = await db.collection("users").doc(user.uid).get();
     if (!admin && profile.data()?.enrollmentStatus !== "approved") throw new Error("Your student enrollment is awaiting administrator approval. Contact the facilities office with your student ID.");
@@ -259,11 +245,6 @@ window.FRMS = (() => {
     await ready;
     if (!email || !email.includes("@")) throw new Error("Enter your email address first.");
     await auth.sendPasswordResetEmail(email.trim());
-  }
-  async function sendVerification() {
-    await ready;
-    if (!user) throw new Error("Sign in first.");
-    await user.sendEmailVerification();
   }
   async function approveEnrollment(uid, studentId, approved) {
     if (!await requireUser(true)) throw new Error("Administrator access is required.");
@@ -339,5 +320,10 @@ window.FRMS = (() => {
     try { await ready; await auth.signOut(); sessionStorage.clear(); location.href = "index.html"; }
     catch (error) { showError(error); }
   }, true);
-  return { currentUser: async () => { await ready; return user ? { displayName: user.displayName, email: user.email } : null; }, requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, requests, watchRequests, requestCounts, mountRequestPagination, venues, availableSlots, submit, updateStatus, cancelReservation, approveEnrollment, studentQuery, resetPassword, sendVerification, reservationEvents, showError };
+  return { currentUser: async () => {
+    await ready;
+    if (!user) return null;
+    const profile = await db.collection("users").doc(user.uid).get();
+    return { displayName: profile.data()?.displayName || user.displayName || "", email: user.email, role: admin ? "admin" : "student" };
+  }, requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, requests, watchRequests, requestCounts, mountRequestPagination, venues, availableSlots, submit, updateStatus, cancelReservation, approveEnrollment, studentQuery, resetPassword, reservationEvents, showError };
 })();

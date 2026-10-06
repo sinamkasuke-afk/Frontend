@@ -30,7 +30,7 @@ test('verified submission writes booking, request number, audit and daily quota'
   await assertSucceeds(submit());
   assert.equal((await db().collection('reservations').doc('request-1').get()).data().requestNumber, 1);
 });
-test('unverified users cannot submit', async () => { await assertFails(submit(db(uid, false))); });
+test('enrollment-approved students can submit without email verification', async () => { await assertSucceeds(submit(db(uid, false))); });
 test('student cannot read another student reservation or approve it', async () => {
   await submit();
   await assertFails(db('other').collection('reservations').doc('request-1').get());
@@ -86,7 +86,7 @@ test('administrator expires old pending holds but cannot expire fresh requests',
   await assertSucceeds(reviewReservation(options));
   assert.equal((await db().collection('bookings').doc('hall_' + dateISO + '_morning').get()).exists, false);
 });
-test('verified Gmail alone is insufficient; only admin can approve enrollment', async () => {
+test('Gmail alone is insufficient; only admin can approve enrollment', async () => {
   await env.withSecurityRulesDisabled(async ctx => { await ctx.firestore().collection('users').doc(uid).update({ enrollmentStatus: 'pending' }); });
   await assertFails(submit());
   await assertFails(db().collection('users').doc(uid).update({ enrollmentStatus: 'approved' }));
@@ -112,7 +112,7 @@ test('approved bookings cannot be stolen even if their creation time is old', as
   await env.withSecurityRulesDisabled(async ctx => { await ctx.firestore().collection('bookings').doc('hall_' + dateISO + '_morning').update({ createdAt: firebase.firestore.Timestamp.fromMillis(Date.now() - 49 * 3600000) }); });
   await assert.rejects(submit(db(), { requestId: 'replacement' }), { code: 'already-exists' });
 });
-test('real Auth emulator workflow: register, verify email, admin enrollment approval, login, submit, approve and cancel', async () => {
+test('real Auth emulator workflow: register without verification, admin enrollment approval, login, submit, approve and cancel', async () => {
   if (!process.env.FIREBASE_AUTH_EMULATOR_HOST) throw new Error('Auth emulator must be running; refusing external email operations.');
   const app = firebase.initializeApp({ projectId: 'demo-frms-rules', apiKey: 'demo-key', authDomain: 'demo-frms-rules.firebaseapp.com' }, 'auth-workflow');
   const auth = app.auth(); auth.useEmulator('http://127.0.0.1:9096', { disableWarnings: true });
@@ -125,12 +125,7 @@ test('real Auth emulator workflow: register, verify email, admin enrollment appr
     await database.collection('users').doc(student.uid).set({ uid: student.uid, email, displayName: student.displayName, role: 'student', studentId: '2026-TEST', enrollmentStatus: 'pending', createdAt: stamp() });
     const options = { db: database, actor: { uid: student.uid, email, name: student.displayName }, data: { ...data, requestId: 'auth-request' }, timestamp: stamp };
     await assertFails(submitReservation(options));
-    await student.sendEmailVerification();
-    const codes = await (await fetch('http://127.0.0.1:9096/emulator/v1/projects/demo-frms-rules/oobCodes')).json();
-    const code = codes.oobCodes.find(item => item.email === email && item.requestType === 'VERIFY_EMAIL');
-    assert(code); await auth.applyActionCode(code.oobCode); await student.reload(); await student.getIdToken(true);
-    assert.equal(student.emailVerified, true);
-    await assertFails(submitReservation(options));
+    assert.equal(student.emailVerified, false);
     await db('admin1', true, true).collection('users').doc(student.uid).update({ enrollmentStatus: 'approved', approvedBy: 'admin1', updatedAt: stamp() });
     await auth.signOut();
     await assert.rejects(auth.signInWithEmailAndPassword(email, 'WrongPassword123!'));

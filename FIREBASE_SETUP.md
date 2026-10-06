@@ -4,7 +4,7 @@ The app uses Firebase Authentication and Firestore transactions. It does not upl
 
 ## Accounts
 
-Students register with a `gmail.com` email, full name, school student ID, password (at least eight characters), and matching confirmation. Registration saves a student profile and sends an email verification link. Students can sign in immediately but must verify their email before submitting. The dashboard includes a resend-verification control. A verified Gmail does not prove enrollment: an administrator must verify the student ID against school records and approve it on the Students page.
+Students register with a `gmail.com` email, full name, school student ID, password (at least eight characters), and matching confirmation. Registration saves a student profile without sending a verification email. Students can sign in immediately; an administrator must check the student ID against school records and approve enrollment on the Students page before reservations can be submitted.
 
 Administrator privileges come from an Auth custom claim set by a trusted provisioning script, not the Firestore profile's role field. Existing test accounts can sign in, but the example.com student accounts cannot submit under the new Gmail policy. Use a real Gmail account for student submission testing. Passwords are never stored in Firestore.
 
