@@ -27,7 +27,11 @@ function client(isAdmin = false) {
     app: () => ({ functions: region => { assert.equal(region, 'asia-southeast1'); return { httpsCallable: name => async data => { calls.push({ name, data }); return { data: { id: data.checkOnly ? null : data.requestId } }; } }; } }),
     storage: () => ({ ref: path => ({ put: async (file, metadata) => calls.push({ path, file, metadata }) }) })
   };
-  const sandbox = { window: { FIREBASE_CONFIG: { apiKey: 'test', projectId: 'test', appId: 'test' } }, firebase, console, document: { addEventListener: () => {} }, sessionStorage: { removeItem: () => {} }, location: { replace: () => {} } };
+  const reservationService = {
+    submitReservation: async options => { calls.push({ name: 'firestore-submit', data: options.data }); if(options.data.hasAttachment) calls.push(await options.verifyAttachment(user.uid, options.data.requestId)); return { id: options.data.requestId }; },
+    reviewReservation: async options => { calls.push({ name: 'firestore-review', data: options.data }); }
+  };
+  const sandbox = { FRMS_RESERVATION_SERVICE: reservationService, Uint8Array, btoa: value => Buffer.from(value, 'binary').toString('base64'), window: { FIREBASE_CONFIG: { apiKey: 'test', projectId: 'test', appId: 'test' } }, firebase, console, document: { addEventListener: () => {} }, sessionStorage: { removeItem: () => {} }, location: { replace: () => {} } };
   vm.createContext(sandbox); vm.runInContext(fs.readFileSync('js/firebase/client.js', 'utf8'), sandbox);
   return { api: sandbox.window.FRMS, calls, writes, filters };
 }
@@ -44,16 +48,15 @@ test('student list queries are scoped to owner and available slots omit bookings
   assert.deepEqual(Array.from(await api.availableSlots('hall', '2026-10-15'), slot => slot.id), ['midday']);
   assert(filters.some(filter => filter.join('/') === 'bookings/dateISO/==/2026-10-15'));
 });
-test('PDF upload completes before callable submission', async () => {
-  const { api, calls } = client(); const file = { name: 'proposal.pdf' };
+test('PDF submission uses Firestore document metadata without paid services', async () => {
+  const { api, calls } = client(); const file = { name: 'proposal.pdf', size: 4, arrayBuffer: async () => new Uint8Array([37,80,68,70]).buffer };
   assert.equal(await api.submit({ requestId: 'request-1', venueId: 'hall' }, file), 'request-1');
-  assert.equal(calls[0].data.checkOnly, true);
-  assert.equal(calls[1].path, 'supportingDocuments/student-1/request-1/proposal.pdf');
-  assert.equal(calls[2].name, 'submitReservation'); assert.equal(calls[2].data.hasAttachment, true);
+  assert.equal(calls[0].name, 'firestore-submit'); assert.equal(calls[0].data.hasAttachment, true);
+  assert.equal(calls[1].path, 'reservations/request-1/documents/proposal');
 });
-test('student cannot invoke admin review; admin uses trusted callable', async () => {
+test('student cannot invoke admin review; admin uses a Firestore transaction', async () => {
   const student = client(); await assert.rejects(student.api.updateStatus('request-1', 'approved'));
   assert.equal(student.calls.length, 0);
   const admin = client(true); await admin.api.updateStatus('request-1', 'approved');
-  assert.equal(admin.calls[0].name, 'reviewReservation');
+  assert.equal(admin.calls[0].name, 'firestore-review');
 });

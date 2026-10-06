@@ -1,13 +1,39 @@
 {
   "indexes": [
-    { "collectionGroup": "bookings", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "venueId", "order": "ASCENDING" },
-      { "fieldPath": "dateISO", "order": "ASCENDING" }
-    ] },
-    { "collectionGroup": "reservationEvents", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "reservationId", "order": "ASCENDING" },
-      { "fieldPath": "ownerUid", "order": "ASCENDING" }
-    ] }
+    {
+      "collectionGroup": "bookings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "venueId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dateISO",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "reservationEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "reservationId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ownerUid",
+          "order": "ASCENDING"
+        }
+      ]
+    }
   ],
-  "fieldOverrides": []
+  "fieldOverrides": [
+    {
+      "collectionGroup": "documents",
+      "fieldPath": "base64",
+      "indexes": []
+    }
+  ]
 }

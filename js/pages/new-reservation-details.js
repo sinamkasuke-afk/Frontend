@@ -96,6 +96,7 @@ document.addEventListener(
       );
 
 
+    const removeDocumentButton = document.getElementById("remove-supporting-document");
     let selectedDocument = null;
     let documentSaving = false;
 
@@ -164,6 +165,27 @@ document.addEventListener(
     }
 
 
+    removeDocumentButton.hidden = !savedReservation.supportingDocument;
+    removeDocumentButton.addEventListener("click", async () => {
+      if (documentSaving) return;
+      documentSaving = true;
+      documentInput.disabled = true;
+      removeDocumentButton.disabled = true;
+      try {
+        await saveDraftDocument(null);
+        selectedDocument = null;
+        savedReservation.supportingDocument = null;
+        updateReservation({ supportingDocument: null });
+        documentInput.value = "";
+        uploadTitle.textContent = "Upload Proposal PDF";
+        uploadBox?.classList.remove("upload-box--selected");
+        clearError(documentInput, "supporting-document-error");
+        removeDocumentButton.hidden = true;
+        uploadBox?.focus();
+      } catch (error) { FRMS.showError(error); }
+      finally { documentSaving = false; documentInput.disabled = false; removeDocumentButton.disabled = false; }
+    });
+
     /* ==========================================================
        DOCUMENT UPLOAD
        ========================================================== */
@@ -181,9 +203,11 @@ document.addEventListener(
         if (documentSaving) return;
         documentSaving = true;
         documentInput.disabled = true;
+        removeDocumentButton.disabled = true;
         try {
         selectedDocument = null;
         savedReservation.supportingDocument = null;
+        updateReservation({ supportingDocument: null });
         const file = documentInput.files[0];
         try { await saveDraftDocument(null); }
         catch (error) { FRMS.showError(error); return; }
@@ -207,7 +231,7 @@ document.addEventListener(
 
 
         const maximumSize =
-          5 * 1024 * 1024;
+          500 * 1024;
 
 
         const isPDF =
@@ -267,7 +291,7 @@ document.addEventListener(
           showError(
             documentInput,
             "supporting-document-error",
-            "The PDF must not exceed 5MB."
+            "The PDF must not exceed 500KB."
           );
 
           return;
@@ -286,6 +310,7 @@ document.addEventListener(
         };
 
 
+        updateReservation({ supportingDocument: selectedDocument });
         uploadTitle.textContent =
           file.name;
 
@@ -293,7 +318,12 @@ document.addEventListener(
         uploadBox?.classList.add(
           "upload-box--selected"
         );
-        } finally { documentSaving = false; documentInput.disabled = false; }
+        } finally {
+          documentSaving = false;
+          documentInput.disabled = false;
+          removeDocumentButton.disabled = false;
+          removeDocumentButton.hidden = !(selectedDocument || savedReservation.supportingDocument);
+        }
       }
     );
 
@@ -472,24 +502,6 @@ document.addEventListener(
       }
 
 
-      if (
-        !selectedDocument &&
-        !savedReservation
-          .supportingDocument
-      ) {
-
-        showError(
-          documentInput,
-          "supporting-document-error",
-          "A supporting proposal PDF is required."
-        );
-
-        valid =
-          false;
-
-      }
-
-
       return valid;
 
     }
@@ -552,16 +564,9 @@ document.addEventListener(
       };
 
 
-      if (
-        includeDocument &&
-        selectedDocument
-      ) {
-
-        details.supportingDocument =
-          selectedDocument;
-
+      if (includeDocument) {
+        details.supportingDocument = selectedDocument || savedReservation.supportingDocument || null;
       }
-
 
       updateReservation(
         details

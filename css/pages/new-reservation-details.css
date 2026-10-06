@@ -1231,3 +1231,17 @@ body {
   }
 
 }
+.remove-attachment-button {
+  margin-top: 12px;
+  padding: 8px 14px;
+  border: 1px solid #d7a4a4;
+  border-radius: 8px;
+  background: #fff;
+  color: #a12d2d;
+  font: inherit;
+  cursor: pointer;
+}
+.remove-attachment-button:hover { background: #fff3f3; }
+.remove-attachment-button:focus-visible { outline: 2px solid #a12d2d; outline-offset: 3px; }
+.remove-attachment-button:disabled { opacity: .6; cursor: wait; }
+.remove-attachment-button[hidden] { display: none; }

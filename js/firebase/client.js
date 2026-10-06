@@ -1,7 +1,7 @@
 /* Shared services. Demo mode is explicit and never connects to Firebase. */
 window.FRMS = (() => {
-  if (window.FRMS_DEMO_MODE === true) return window.FRMS_DEMO;
-  let auth, db, functions, storage, user, admin = false;
+  if (window.FRMS_DEMO_MODE === true && window.FRMS_DEMO) return window.FRMS_DEMO;
+  let auth, db, user, admin = false;
   const requestCache = new Map();
   function showError(error) {
     console.error(error);
@@ -23,8 +23,6 @@ window.FRMS = (() => {
     firebase.initializeApp(config);
     auth = firebase.auth();
     db = firebase.firestore();
-    functions = firebase.app().functions("asia-southeast1");
-    storage = firebase.storage();
     await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     user = await new Promise((resolve, reject) => {
       const unsubscribe = auth.onAuthStateChanged(value => { unsubscribe(); resolve(value); }, reject);
@@ -96,28 +94,45 @@ window.FRMS = (() => {
     return slots.docs.map(doc => ({ ...doc.data(), id: doc.id }))
       .filter(slot => !occupied.has(slot.id)).sort((a, b) => a.startMinutes - b.startMinutes);
   }
+  function actor() { return { uid: user.uid, email: user.email, name: user.displayName, admin }; }
   async function submit(data, file) {
     if (!await requireUser()) throw new Error("Sign in to submit a reservation.");
-    const submitRequest = functions.httpsCallable("submitReservation");
+    let documentData = null;
     if (file) {
-      const committed = await submitRequest({ requestId: data.requestId, checkOnly: true });
-      if (committed.data.id) return committed.data.id;
-      await storage.ref(`supportingDocuments/${user.uid}/${data.requestId}/proposal.pdf`)
-        .put(file, { contentType: "application/pdf", customMetadata: { originalName: file.name } });
+      if (file.size > 500 * 1024) throw new Error("The PDF must not exceed 500KB on the free plan.");
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      let binary = "";
+      for (let offset = 0; offset < bytes.length; offset += 4096) binary += String.fromCharCode(...bytes.subarray(offset, offset + 4096));
+      documentData = { base64: btoa(binary), name: file.name, contentType: "application/pdf", size: file.size };
     }
-    const result = await submitRequest({ ...data, hasAttachment: Boolean(file) });
-    return result.data.id;
+    const transactionalDatabase = {
+      collection: name => db.collection(name),
+      runTransaction: action => db.runTransaction(transaction => action({
+        get: ref => transaction.get(ref),
+        set: (ref, record) => {
+          transaction.set(ref, record);
+          if (documentData && ref.parent.id === "reservations") transaction.set(ref.collection("documents").doc("proposal"), documentData);
+        }
+      }))
+    };
+    const result = await FRMS_RESERVATION_SERVICE.submitReservation({ db: transactionalDatabase, actor: actor(),
+      data: { ...data, hasAttachment: Boolean(file) }, timestamp: () => firebase.firestore.FieldValue.serverTimestamp(),
+      verifyAttachment: async (uid, id) => ({ path: `reservations/${id}/documents/proposal`, name: file.name, size: file.size, contentType: "application/pdf" }) });
+    return result.id;
   }
   async function updateStatus(id, status) {
     if (!await requireUser(true)) throw new Error("Administrator access is required.");
-    await functions.httpsCallable("reviewReservation")({ id, status });
+    await FRMS_RESERVATION_SERVICE.reviewReservation({ db, actor: actor(), data: { id, status }, timestamp: () => firebase.firestore.FieldValue.serverTimestamp() });
   }
   async function openDocument(request) {
     if (!request.attachment?.path) throw new Error("This request has no uploaded supporting document.");
-    const url = await storage.ref(request.attachment.path).getDownloadURL();
-    const link = document.createElement("a");
-    link.href = url; link.target = "_blank"; link.rel = "noopener";
-    link.click();
+    const snapshot = await db.doc(request.attachment.path).get();
+    if (!snapshot.exists) throw new Error("Supporting PDF was not found.");
+    const binary = atob(snapshot.data().base64);
+    const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+    const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+    const link = document.createElement("a"); link.href = url; link.download = snapshot.data().name; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
   async function reservationEvents(id) {
     if (!await requireUser()) return [];

@@ -422,6 +422,8 @@ document.addEventListener(
         try { await saveDraftDocument(null); } catch (error) { console.error("Unable to remove local PDF draft:", error); }
       } catch (error) {
         FRMS.showError(error);
+        const message = document.getElementById("submission-error-message");
+        if (message) message.textContent = error.message || "Your reservation could not be submitted. Please try again.";
         showModal(errorModal);
       } finally { submitting = false; confirmationSubmit.disabled = false; }
     }

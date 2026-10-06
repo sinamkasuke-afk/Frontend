@@ -20,19 +20,5 @@
       "DATABASE_SCHEMA.md",
       "package*.json"
     ]
-  },
-  "storage": {
-    "rules": "storage.rules"
-  },
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "*.log"
-      ]
-    }
-  ]
+  }
 }
