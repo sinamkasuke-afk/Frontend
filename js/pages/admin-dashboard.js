@@ -157,7 +157,7 @@ document.addEventListener(
                   <td>
                     <strong>
                       ${escapeHTML(
-                        request.id
+                        request.requestNumber || request.id
                       )}
                     </strong>
                   </td>
@@ -267,7 +267,7 @@ document.addEventListener(
                       type="button"
                       class="row-action"
                       data-request-id="${escapeHTML(
-                        request.id
+                        request.requestNumber || request.id
                       )}"
                     >
                       •••
@@ -326,7 +326,8 @@ document.addEventListener(
 
                 const searchableText = [
 
-                  request.id,
+                  request.requestNumber,
+              request.id,
                   request.requester,
                   request.requesterType,
                   request.venue,

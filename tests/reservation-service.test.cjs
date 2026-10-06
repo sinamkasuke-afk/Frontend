@@ -91,6 +91,17 @@ test('upload preflight is read-only and returns committed requests even after ev
   assert.deepEqual(await submitReservation(options), { id: null });
   assert.equal(records.size, 2);
   await submit(db);
-  assert.deepEqual(await submitReservation({ ...options, now: new Date('2027-01-01T00:00:00Z') }), { id: 'request-1' });
+  assert.deepEqual(await submitReservation({ ...options, now: new Date('2027-01-01T00:00:00Z') }), { id: 'request-1', requestNumber: 1 });
   await assert.rejects(submitReservation({ ...options, actor: { uid: 'other-user' } }), { code: 'permission-denied' });
+});
+
+test('request numbers increment across slots, remain stable on retries and stop at five digits', async () => {
+  const { db, records } = database();
+  assert.equal((await submit(db)).requestNumber, 1);
+  assert.equal((await submit(db)).requestNumber, 1);
+  assert.equal((await submit(db, { requestId: 'request-2', dateISO: '2026-10-16' })).requestNumber, 2);
+  assert.equal(records.get('counters/reservations').value, 2);
+  records.set('counters/reservations', { value: 99999 });
+  await assert.rejects(submit(db, { requestId: 'request-3', dateISO: '2026-10-17' }), { code: 'failed-precondition' });
+  assert(!records.has('reservations/request-3'));
 });

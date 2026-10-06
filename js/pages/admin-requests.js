@@ -133,6 +133,7 @@ document.addEventListener(
           function (request) {
 
             const text = [
+              request.requestNumber,
               request.id,
               request.requester,
               request.type,
@@ -206,7 +207,7 @@ document.addEventListener(
                   <td>
                     <strong>
                       ${escapeHTML(
-                        request.id
+                        request.requestNumber || request.id
                       )}
                     </strong>
                   </td>

@@ -292,7 +292,7 @@ document.addEventListener(
 
 
               const requestId =
-                request.id ||
+                request.requestNumber || request.id ||
                 request.requestId ||
                 createRequestId(
                   index

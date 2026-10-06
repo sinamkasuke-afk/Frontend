@@ -145,6 +145,7 @@ window.FRMS = (() => {
     const result = await FRMS_RESERVATION_SERVICE.submitReservation({ db: transactionalDatabase, actor: actor(),
       data: { ...data, hasAttachment: Boolean(file) }, timestamp: () => firebase.firestore.FieldValue.serverTimestamp(),
       verifyAttachment: async (uid, id) => ({ path: `reservations/${id}/documents/proposal`, name: file.name, size: file.size, contentType: "application/pdf" }) });
+    requestCache.set(result.id, { ...data, id: result.id, requestNumber: result.requestNumber });
     return result.id;
   }
   async function updateStatus(id, status) {
@@ -203,7 +204,7 @@ window.FRMS = (() => {
     dialog.append(heading, close);
     for (const [label, key] of [["Request ID", "id"], ["Status", "status"], ["Facility", "venue"], ["Date", "date"], ["Time", "time"], ["Requester", "requester"], ["Organization", "organization"], ["Event type", "eventType"], ["Guests", "expectedGuests"], ["Purpose", "purpose"], ["Contact", "contactPerson"], ["Requirements", "facilityRequirements"], ["Setup notes", "setupNotes"]]) {
       const line = document.createElement("p"); const name = document.createElement("strong"); name.textContent = label + ": ";
-      line.append(name, String(request[key] || "—")); dialog.append(line);
+      line.append(name, String((key === "id" ? request.requestNumber || request.id : request[key]) || "—")); dialog.append(line);
     }
     if (request.attachment?.path) {
       const button = document.createElement("button"); button.textContent = "Open supporting PDF";
@@ -249,5 +250,5 @@ window.FRMS = (() => {
     try { await ready; await auth.signOut(); sessionStorage.clear(); location.href = "index.html"; }
     catch (error) { showError(error); }
   }, true);
-  return { ready, requireUser, login, register, requests, watchRequests, venues, availableSlots, submit, updateStatus, deleteReservation, openDocument, reservationEvents, showError };
+  return { requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, requests, watchRequests, venues, availableSlots, submit, updateStatus, deleteReservation, openDocument, reservationEvents, showError };
 })();

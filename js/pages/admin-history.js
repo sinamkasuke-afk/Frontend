@@ -263,7 +263,8 @@ document.addEventListener(
 
               const searchText = [
 
-                request.id,
+                request.requestNumber,
+              request.id,
                 request.requester,
                 request.venue,
                 request.date,
@@ -346,7 +347,7 @@ document.addEventListener(
                   <td>
                     <strong>
                       ${escapeHTML(
-                        request.id
+                        request.requestNumber || request.id
                       )}
                     </strong>
                   </td>

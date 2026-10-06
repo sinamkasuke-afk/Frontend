@@ -28,7 +28,7 @@ async function submitReservation({ db, actor, data, timestamp, now = new Date(),
   const existing = await reservationRef.get();
   if (existing.exists) {
     if (existing.data().ownerUid !== actor.uid) fail('permission-denied', 'Request ID is already used.');
-    return { id };
+    return { id, requestNumber: existing.data().requestNumber };
   }
   if (data.checkOnly === true) return { id: null };
   const venueId = identifier(data.venueId, 'venue');
@@ -42,13 +42,19 @@ async function submitReservation({ db, actor, data, timestamp, now = new Date(),
   const bookingId = `${venueId}_${date}_${slotId}`;
   const bookingRef = db.collection('bookings').doc(bookingId);
   const eventRef = db.collection('reservationEvents').doc(`${id}_submitted`);
+  const counterRef = db.collection('counters').doc('reservations');
   const attachment = data.hasAttachment ? await verifyAttachment(actor.uid, id) : null;
+  let assignedNumber;
   await db.runTransaction(async transaction => {
     const reservation = await transaction.get(reservationRef);
     if (reservation.exists) {
       if (reservation.data().ownerUid !== actor.uid) fail('permission-denied', 'Request ID is already used.');
+      assignedNumber = reservation.data().requestNumber;
       return;
     }
+    const counter = await transaction.get(counterRef);
+    const requestNumber = (counter.exists ? counter.data().value : 0) + 1;
+    if (requestNumber > 99999) fail('failed-precondition', 'Request numbers have reached their limit. Contact the administrator.');
     const venue = await transaction.get(db.collection('venues').doc(venueId));
     const slot = await transaction.get(db.collection('timeSlots').doc(slotId));
     const booking = await transaction.get(bookingRef);
@@ -57,16 +63,18 @@ async function submitReservation({ db, actor, data, timestamp, now = new Date(),
     if (venue.data().capacity && guests > venue.data().capacity) fail('invalid-argument', 'The guest count exceeds this facility’s capacity.');
     if (booking.exists) fail('already-exists', 'This venue and time slot have already been reserved. Choose another slot.');
     const requester = actor.name || actor.email || actor.uid;
-    const record = { ...detail, id, requestId: id, ownerUid: actor.uid, requester,
+    const record = { ...detail, id, requestId: id, requestNumber, ownerUid: actor.uid, requester,
       requesterType: actor.admin ? 'Admin' : 'Student', initials: requester.slice(0, 2).toUpperCase(),
       venueId, venue: venue.data().name, venueDetail: venue.data().location || '',
       slotId, dateISO: date, date, time: slot.data().label, event,
       expectedGuests: guests, status: 'pending', bookingId, createdAt: timestamp(), attachment, lastEventId: eventRef.id };
+    assignedNumber = requestNumber;
+    transaction.set(counterRef, { value: requestNumber, reservationId: id });
     transaction.set(reservationRef, record);
     transaction.set(bookingRef, { reservationId: id, venueId, dateISO: date, slotId, createdAt: timestamp() });
     transaction.set(eventRef, { reservationId: id, ownerUid: actor.uid, actorUid: actor.uid, action: 'submitted', status: 'pending', createdAt: timestamp() });
   });
-  return { id };
+  return { id, requestNumber: assignedNumber };
 }
 async function reviewReservation({ db, actor, data, timestamp }) {
   if (!actor?.uid) fail('unauthenticated', 'Sign in to review reservations.');

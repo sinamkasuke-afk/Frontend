@@ -416,7 +416,7 @@ document.addEventListener(
       try {
         const id = await saveSubmittedRequest();
         progressBar.style.width = "100%";
-        successRequestId.textContent = id;
+        successRequestId.textContent = FRMS.requestLabel ? FRMS.requestLabel(id) : id;
         showModal(successModal);
         clearReservation();
         try { await saveDraftDocument(null); } catch (error) { console.error("Unable to remove local PDF draft:", error); }

@@ -3,6 +3,19 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
     function admin() { return signedIn() && request.auth.token.get('admin', false) == true; }
+    match /counters/reservations {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && request.resource.data.keys().hasOnly(['value','reservationId'])
+        && request.resource.data.value is int
+        && request.resource.data.value >= 1 && request.resource.data.value <= 99999
+        && request.resource.data.value == (exists(/databases/$(database)/documents/counters/reservations) ? resource.data.value + 1 : 1)
+        && !exists(/databases/$(database)/documents/reservations/$(request.resource.data.reservationId))
+        && reservation(request.resource.data.reservationId).ownerUid == request.auth.uid
+        && reservation(request.resource.data.reservationId).requestNumber == request.resource.data.value
+        && reservation(request.resource.data.reservationId).createdAt == request.time;
+      allow delete: if false;
+    }
     match /users/{uid} {
       allow read: if admin() || (signedIn() && request.auth.uid == uid);
       allow create: if signedIn() && request.auth.uid == uid
@@ -35,8 +48,12 @@ service cloud.firestore {
       allow get: if signedIn() && (!exists(/databases/$(database)/documents/reservations/$(id)) || admin() || resource.data.ownerUid == request.auth.uid);
       allow list: if admin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['id','requestId','ownerUid','requester','requesterType','initials','venueId','venue','venueDetail','slotId','dateISO','date','time','event','expectedGuests','organization','eventType','purpose','contactPerson','facilityRequirements','setupNotes','status','bookingId','createdAt','attachment','lastEventId'])
+        && request.resource.data.keys().hasOnly(['id','requestId','requestNumber','ownerUid','requester','requesterType','initials','venueId','venue','venueDetail','slotId','dateISO','date','time','event','expectedGuests','organization','eventType','purpose','contactPerson','facilityRequirements','setupNotes','status','bookingId','createdAt','attachment','lastEventId'])
         && request.resource.data.id == id && request.resource.data.requestId == id
+        && request.resource.data.requestNumber is int
+        && request.resource.data.requestNumber >= 1 && request.resource.data.requestNumber <= 99999
+        && getAfter(/databases/$(database)/documents/counters/reservations).data.value == request.resource.data.requestNumber
+        && getAfter(/databases/$(database)/documents/counters/reservations).data.reservationId == id
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.status == 'pending'
         && request.resource.data.createdAt == request.time

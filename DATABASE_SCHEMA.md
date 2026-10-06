@@ -35,3 +35,5 @@ Local tests cover the transaction logic and client behavior. A live student comm
 ## Mock data
 
 `js/data/sample-data.js` generates eight sample reservations, users, venues, slots, locks and events. Explicit demo mode in `js/firebase/config.js` runs all pages against browser-local copies. The trusted `tools/seed-mock-data.cjs` importer uses real test account UIDs to populate Firestore; see `FIREBASE_SETUP.md`.
+
+Reservations have a numeric `requestNumber` displayed as the Request ID (1–99999). The `counters/reservations` document stores `value` and `reservationId`; the submission transaction increments it together with the new reservation. Security rules validate that both writes match. UUID document IDs remain the references for bookings, PDF attachments and activity records. Deleting a reservation does not reuse its number. Existing records can be numbered using `tools/assign-request-numbers.cjs` with Admin SDK credentials.
