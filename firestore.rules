@@ -58,7 +58,10 @@ service cloud.firestore {
         && audit(request.resource.data.lastEventId).action == request.resource.data.status
         && ((request.resource.data.status == 'approved' && lock(resource.data.bookingId).reservationId == id)
           || (request.resource.data.status == 'declined' && !existsAfter(/databases/$(database)/documents/bookings/$(resource.data.bookingId))));
-      allow delete: if false;
+      allow delete: if (admin() || (signedIn() && resource.data.ownerUid == request.auth.uid))
+        && (!('bookingId' in resource.data)
+          || !existsAfter(/databases/$(database)/documents/bookings/$(resource.data.bookingId))
+          || lock(resource.data.bookingId).reservationId != id);
       match /documents/{documentId} {
         allow read: if admin() || (signedIn() && get(/databases/$(database)/documents/reservations/$(id)).data.ownerUid == request.auth.uid);
         allow create: if signedIn() && documentId == 'proposal'
@@ -67,7 +70,10 @@ service cloud.firestore {
           && request.resource.data.contentType == 'application/pdf'
           && request.resource.data.size <= 512000 && request.resource.data.size > 0
           && request.resource.data.base64 is string && request.resource.data.base64.size() <= 683000;
-        allow update, delete: if false;
+        allow update: if false;
+        allow delete: if admin() || (signedIn()
+          && get(/databases/$(database)/documents/reservations/$(id)).data.ownerUid == request.auth.uid
+          && !existsAfter(/databases/$(database)/documents/reservations/$(id)));
       }
     }
     match /bookings/{id} {
@@ -85,7 +91,11 @@ service cloud.firestore {
       allow update: if admin() && request.resource.data.reservationId == resource.data.reservationId
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['createdAt'])
         && request.resource.data.createdAt == request.time;
-      allow delete: if admin() && reservation(resource.data.reservationId).status == 'declined';
+      allow delete: if (admin() && (!existsAfter(/databases/$(database)/documents/reservations/$(resource.data.reservationId))
+        || reservation(resource.data.reservationId).status == 'declined'))
+        || (signedIn()
+          && get(/databases/$(database)/documents/reservations/$(resource.data.reservationId)).data.ownerUid == request.auth.uid
+          && !existsAfter(/databases/$(database)/documents/reservations/$(resource.data.reservationId)));
     }
     match /reservationEvents/{id} {
       allow read: if admin() || (signedIn() && resource.data.ownerUid == request.auth.uid);

@@ -53,3 +53,5 @@ References: [Firestore pricing](https://firebase.google.com/docs/firestore/prici
 ## Student self-registration
 
 The Register as Student button below Login as Student opens the registration form. Full name, email, password (minimum eight characters), and password confirmation are required. Registration creates a Firebase Authentication user, saves a `users/{uid}` student profile, and signs in to the dashboard. The password is managed only by Authentication. No paid services or additional rules are needed.
+
+Students can use Delete in My Reservations or reservation details to permanently remove their own reservation and supporting PDF. The transaction releases the slot only if the booking still belongs to that reservation. Firestore rules check ownership and require the matching booking to be released in the same transaction. Administrators can delete any reservation. Existing activity records are retained.

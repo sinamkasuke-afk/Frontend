@@ -20,6 +20,7 @@ test('student list shows approved requests by default and refreshes rows and cou
   vm.runInContext(fs.readFileSync('js/pages/my-requests.js', 'utf8'), context);
   await initialize();
   assert(element('request-table-body').innerHTML.includes('Student event'));
+  assert(element('request-table-body').innerHTML.includes('data-delete-reservation="request-1"'));
   assert.equal(element('requests-empty').hidden, true);
   assert.equal(element('approved-count').textContent, 1);
   refresh([{ ...row, status: 'declined' }]);

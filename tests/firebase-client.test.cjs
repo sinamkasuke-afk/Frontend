@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 function client(isAdmin = false) {
-  const calls = [], writes = [], filters = [], subscriptions = [], persistence = [];
+  const calls = [], writes = [], filters = [], subscriptions = [], persistence = [], deletes = [];
   const user = { uid: 'student-1', email: 'student@example.com', updateProfile: async profile => { user.displayName = profile.displayName; }, getIdTokenResult: async () => ({ claims: { admin: isAdmin } }) };
   const records = {
     reservations: [{ id: 'request-1', value: { ownerUid: user.uid, status: 'pending' } }],
@@ -13,7 +13,10 @@ function client(isAdmin = false) {
     reservationEvents: []
   };
   const auth = { setPersistence: async value => persistence.push(value), onAuthStateChanged: callback => { queueMicrotask(() => callback(user)); return () => {}; }, signInWithEmailAndPassword: async () => ({ user }), createUserWithEmailAndPassword: async () => ({ user }), signOut: async () => {} };
-  const db = { collection: name => {
+  const db = { runTransaction: async callback => callback({
+    get: async ref => ({ exists: true, data: () => ref.name === 'reservations' ? { bookingId: 'hall_date_morning', ownerUid: ref.id === 'someone-elses-request' ? 'other-student' : user.uid } : { reservationId: 'request-1' } }),
+    delete: ref => deletes.push(ref.name + '/' + ref.id)
+  }), collection: name => {
     const query = {
       where: (...args) => { filters.push([name, ...args]); return query; },
       get: async () => ({ docs: (records[name] || []).map(record => ({ id: record.id, data: () => record.value })) }),
@@ -21,7 +24,7 @@ function client(isAdmin = false) {
         subscriptions.push({ name, callback });
         return () => subscriptions.push({ stopped: true });
       },
-      doc: id => ({ get: async () => ({ exists: false }), set: async data => writes.push({ name, id, data }) })
+      doc: id => ({ name, id, collection: sub => ({ doc: child => ({ name: sub, id: child }) }), get: async () => ({ exists: false }), set: async data => writes.push({ name, id, data }) })
     }; return query;
   } };
   const firebase = {
@@ -35,9 +38,9 @@ function client(isAdmin = false) {
     submitReservation: async options => { calls.push({ name: 'firestore-submit', data: options.data }); if(options.data.hasAttachment) calls.push(await options.verifyAttachment(user.uid, options.data.requestId)); return { id: options.data.requestId }; },
     reviewReservation: async options => { calls.push({ name: 'firestore-review', data: options.data }); }
   };
-  const sandbox = { FRMS_RESERVATION_SERVICE: reservationService, Uint8Array, btoa: value => Buffer.from(value, 'binary').toString('base64'), window: { FIREBASE_CONFIG: { apiKey: 'test', projectId: 'test', appId: 'test' } }, firebase, console, document: { addEventListener: () => {} }, sessionStorage: { removeItem: () => {} }, location: { replace: () => {} } };
+  const sandbox = { FRMS_RESERVATION_SERVICE: reservationService, Uint8Array, btoa: value => Buffer.from(value, 'binary').toString('base64'), CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } }, window: { dispatchEvent() {}, FIREBASE_CONFIG: { apiKey: 'test', projectId: 'test', appId: 'test' } }, firebase, console, document: { addEventListener: () => {} }, sessionStorage: { removeItem: () => {} }, location: { replace: () => {} } };
   vm.createContext(sandbox); vm.runInContext(fs.readFileSync('js/firebase/client.js', 'utf8'), sandbox);
-  return { api: sandbox.window.FRMS, calls, writes, filters, subscriptions, persistence };
+  return { api: sandbox.window.FRMS, calls, writes, filters, subscriptions, persistence, deletes };
 }
 test('login creates student and admin profiles without storing passwords', async () => {
   for (const admin of [false, true]) {
@@ -92,4 +95,18 @@ test('sessions are tab-specific and student live updates remain owner-scoped', a
   assert.equal(rows[0].status, 'approved');
   unsubscribe();
   assert.equal(subscriptions[1].stopped, true);
+});
+
+test('students can delete their own reservation atomically but cannot delete another student request', async () => {
+  const student = client();
+  await assert.rejects(student.api.deleteReservation('someone-elses-request'));
+  assert.equal(student.deletes.length, 0);
+  await student.api.deleteReservation('request-1');
+  assert.deepEqual(student.deletes, ['bookings/hall_date_morning', 'documents/proposal', 'reservations/request-1']);
+  const admin = client(true);
+  await admin.api.deleteReservation('request-1');
+  assert.deepEqual(admin.deletes, ['bookings/hall_date_morning', 'documents/proposal', 'reservations/request-1']);
+  const other = client(true);
+  await other.api.deleteReservation('old-request');
+  assert(!other.deletes.some(path => path.startsWith('bookings/')));
 });

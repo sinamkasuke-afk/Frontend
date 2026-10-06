@@ -357,6 +357,8 @@ document.addEventListener(
                       )}
                     </span>
 
+                    <button type="button" data-delete-reservation="${escapeHTML(request.id)}"
+                      style="margin-left:8px;padding:7px 10px;background:#b42318;color:white;border:0;border-radius:6px;cursor:pointer">Delete</button>
                   </td>
 
                 </tr>
@@ -493,6 +495,21 @@ document.addEventListener(
        INITIAL RENDER
        ========================================================== */
 
+    tableBody.addEventListener("click", async event => {
+      const button = event.target.closest("[data-delete-reservation]");
+      if (!button) return;
+      event.stopPropagation();
+      if (!window.confirm("Permanently delete your reservation and its attachment? Its time slot will be released.")) return;
+      button.disabled = true;
+      try { await FRMS.deleteReservation(button.dataset.deleteReservation); }
+      catch (error) { button.disabled = false; FRMS.showError(error); }
+    });
+    window.addEventListener("reservation-deleted", event => {
+      const index = requests.findIndex(request => request.id === event.detail.id);
+      if (index !== -1) requests.splice(index, 1);
+      updateCounts();
+      renderRequests();
+    });
     updateCounts();
     renderRequests();
     if (FRMS.watchRequests) {

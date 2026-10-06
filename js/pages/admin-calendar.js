@@ -435,7 +435,7 @@ document.addEventListener(
             ) {
 
               return `
-                <div class="selected-reservation">
+                <div class="selected-reservation" data-reservation-id="${escapeHTML(reservation.id)}" tabindex="0" title="View reservation details">
 
                   <div class="selected-reservation__top">
 
@@ -465,6 +465,8 @@ document.addEventListener(
                       reservation.event
                     )}
                   </small>
+                  <button type="button" data-delete-reservation="${escapeHTML(reservation.id)}"
+                    style="margin-top:10px;padding:8px 12px;background:#b42318;color:white;border:0;border-radius:6px;cursor:pointer">Delete</button>
 
                 </div>
               `;
@@ -692,6 +694,21 @@ document.addEventListener(
 
 
     renderAll();
+    window.addEventListener("reservation-deleted", event => {
+      firebaseRequests = firebaseRequests.filter(request => request.id !== event.detail.id);
+      refreshMonth();
+      renderAll();
+    });
+
+    selectedReservations.addEventListener("click", async event => {
+      const button = event.target.closest("[data-delete-reservation]");
+      if (!button) return;
+      event.stopPropagation();
+      if (!window.confirm("Permanently delete this reservation and its attachment? Its time slot will be released.")) return;
+      button.disabled = true;
+      try { await FRMS.deleteReservation(button.dataset.deleteReservation); }
+      catch (error) { button.disabled = false; FRMS.showError(error); }
+    });
 
   }
 );

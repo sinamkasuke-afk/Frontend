@@ -151,6 +151,24 @@ window.FRMS = (() => {
     if (!await requireUser(true)) throw new Error("Administrator access is required.");
     await FRMS_RESERVATION_SERVICE.reviewReservation({ db, actor: actor(), data: { id, status }, timestamp: () => firebase.firestore.FieldValue.serverTimestamp() });
   }
+  async function deleteReservation(id) {
+    if (!await requireUser()) throw new Error("Sign in to delete your reservation.");
+    const ref = db.collection("reservations").doc(id);
+    await db.runTransaction(async transaction => {
+      const snapshot = await transaction.get(ref);
+      if (!snapshot.exists) return;
+      const record = snapshot.data();
+      if (!admin && record.ownerUid !== user.uid) throw new Error("You can only delete your own reservations.");
+      const bookingRef = record.bookingId ? db.collection("bookings").doc(record.bookingId) : null;
+      const booking = bookingRef ? await transaction.get(bookingRef) : null;
+      // A declined request's old slot may now belong to another reservation.
+      if (booking?.exists && booking.data().reservationId === id) transaction.delete(bookingRef);
+      transaction.delete(ref.collection("documents").doc("proposal"));
+      transaction.delete(ref);
+    });
+    requestCache.delete(id);
+    window.dispatchEvent(new CustomEvent("reservation-deleted", { detail: { id } }));
+  }
   async function openDocument(request) {
     if (!request.attachment?.path) throw new Error("This request has no uploaded supporting document.");
     const snapshot = await db.doc(request.attachment.path).get();
@@ -191,6 +209,20 @@ window.FRMS = (() => {
       const button = document.createElement("button"); button.textContent = "Open supporting PDF";
       button.onclick = () => openDocument(request).catch(showError); dialog.append(button);
     }
+    if (admin || request.ownerUid === user.uid) {
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.textContent = "Delete reservation";
+      remove.style.cssText = "margin:16px 0;padding:10px 16px;border:0;border-radius:8px;background:#b42318;color:white;cursor:pointer";
+      remove.onclick = async () => {
+        if (!window.confirm("Permanently delete this reservation and its attachment? Its time slot will be released.")) return;
+        remove.disabled = true;
+        remove.textContent = "Deleting…";
+        try { await deleteReservation(id); dialog.close(); }
+        catch (error) { remove.disabled = false; remove.textContent = "Delete reservation"; showError(error); }
+      };
+      dialog.append(remove);
+    }
     const history = document.createElement("p"); history.textContent = "Loading activity…"; dialog.append(history);
     if (!dialog.open) dialog.showModal();
     try {
@@ -217,5 +249,5 @@ window.FRMS = (() => {
     try { await ready; await auth.signOut(); sessionStorage.clear(); location.href = "index.html"; }
     catch (error) { showError(error); }
   }, true);
-  return { ready, requireUser, login, register, requests, watchRequests, venues, availableSlots, submit, updateStatus, openDocument, reservationEvents, showError };
+  return { ready, requireUser, login, register, requests, watchRequests, venues, availableSlots, submit, updateStatus, deleteReservation, openDocument, reservationEvents, showError };
 })();

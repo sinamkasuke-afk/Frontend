@@ -22,13 +22,14 @@ test('admin calendar navigates months, filters records and includes leap day', a
     querySelectorAll: () => [element('mini-prev'), element('mini-next')]
   };
   const errors = [];
-  const context = { document, Date: FixedDate, FRMS: {
+  const context = { window: { addEventListener() {} }, document, Date: FixedDate, FRMS: {
     requireUser: async () => true,
     requests: async () => [{ id: 'request-1', dateISO: '2028-02-29', status: 'approved', venue: 'Hall', time: 'Morning', event: 'Leap day event' }],
     showError: error => errors.push(error)
   } };
   vm.createContext(context); vm.runInContext(fs.readFileSync('js/pages/admin-calendar.js', 'utf8'), context); await initialize();
   assert.equal(errors.length, 0);
+  assert.equal(typeof element('selected-reservations').listeners.click, 'function');
   assert.equal(element('current-month-button').textContent, 'October 2026');
   assert(!element('calendar-grid').innerHTML.includes('Leap day event'));
   for (let month = 0; month < 16; month++) element('next-month').listeners.click();
