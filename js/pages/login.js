@@ -1,3 +1,4 @@
+(() => {
 renderNavbar(
   "navbar",
   "",
@@ -94,3 +95,5 @@ registerForm.addEventListener("submit", async event => {
     submit.textContent = "Create Student Account →";
   }
 });
+
+})();

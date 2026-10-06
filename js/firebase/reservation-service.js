@@ -1,3 +1,4 @@
+(() => {
 class ReservationError extends Error {
   constructor(code, message) { super(message); this.code = code; }
 }
@@ -94,3 +95,5 @@ async function reviewReservation({ db, actor, data, timestamp }) {
 const reservationService = { ReservationError, submitReservation, reviewReservation, dateISO };
 if (typeof module !== 'undefined') module.exports = reservationService;
 else window.FRMS_RESERVATION_SERVICE = reservationService;
+
+})();
