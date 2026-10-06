@@ -23,7 +23,7 @@ window.FRMS = (() => {
     firebase.initializeApp(config);
     auth = firebase.auth();
     db = firebase.firestore();
-    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
     user = await new Promise((resolve, reject) => {
       const unsubscribe = auth.onAuthStateChanged(value => { unsubscribe(); resolve(value); }, reject);
     });
@@ -87,15 +87,23 @@ window.FRMS = (() => {
       });
     }
   }
-  async function requests(isAdmin = false) {
-    if (!await requireUser(isAdmin)) return [];
-    let query = db.collection("reservations");
-    if (!isAdmin) query = query.where("ownerUid", "==", user.uid);
-    const snapshot = await query.get();
+  function requestQuery(isAdmin) {
+    const query = db.collection("reservations");
+    return isAdmin ? query : query.where("ownerUid", "==", user.uid);
+  }
+  function requestRecords(snapshot) {
     const records = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }))
       .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     records.forEach(record => requestCache.set(record.id, record));
     return records;
+  }
+  async function requests(isAdmin = false) {
+    if (!await requireUser(isAdmin)) return [];
+    return requestRecords(await requestQuery(isAdmin).get());
+  }
+  async function watchRequests(onChange, isAdmin = false) {
+    if (!await requireUser(isAdmin)) return () => {};
+    return requestQuery(isAdmin).onSnapshot(snapshot => onChange(requestRecords(snapshot)), showError);
   }
   async function venues() {
     await ready;
@@ -209,5 +217,5 @@ window.FRMS = (() => {
     try { await ready; await auth.signOut(); sessionStorage.clear(); location.href = "index.html"; }
     catch (error) { showError(error); }
   }, true);
-  return { ready, requireUser, login, register, requests, venues, availableSlots, submit, updateStatus, openDocument, reservationEvents, showError };
+  return { ready, requireUser, login, register, requests, watchRequests, venues, availableSlots, submit, updateStatus, openDocument, reservationEvents, showError };
 })();

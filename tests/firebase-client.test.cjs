@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 function client(isAdmin = false) {
-  const calls = [], writes = [], filters = [];
+  const calls = [], writes = [], filters = [], subscriptions = [], persistence = [];
   const user = { uid: 'student-1', email: 'student@example.com', updateProfile: async profile => { user.displayName = profile.displayName; }, getIdTokenResult: async () => ({ claims: { admin: isAdmin } }) };
   const records = {
     reservations: [{ id: 'request-1', value: { ownerUid: user.uid, status: 'pending' } }],
@@ -12,17 +12,21 @@ function client(isAdmin = false) {
     bookings: [{ id: 'lock', value: { slotId: 'morning' } }],
     reservationEvents: []
   };
-  const auth = { setPersistence: async () => {}, onAuthStateChanged: callback => { queueMicrotask(() => callback(user)); return () => {}; }, signInWithEmailAndPassword: async () => ({ user }), createUserWithEmailAndPassword: async () => ({ user }), signOut: async () => {} };
+  const auth = { setPersistence: async value => persistence.push(value), onAuthStateChanged: callback => { queueMicrotask(() => callback(user)); return () => {}; }, signInWithEmailAndPassword: async () => ({ user }), createUserWithEmailAndPassword: async () => ({ user }), signOut: async () => {} };
   const db = { collection: name => {
     const query = {
       where: (...args) => { filters.push([name, ...args]); return query; },
       get: async () => ({ docs: (records[name] || []).map(record => ({ id: record.id, data: () => record.value })) }),
+      onSnapshot: callback => {
+        subscriptions.push({ name, callback });
+        return () => subscriptions.push({ stopped: true });
+      },
       doc: id => ({ get: async () => ({ exists: false }), set: async data => writes.push({ name, id, data }) })
     }; return query;
   } };
   const firebase = {
     initializeApp: () => {},
-    auth: Object.assign(() => auth, { Auth: { Persistence: { LOCAL: 'local' } } }),
+    auth: Object.assign(() => auth, { Auth: { Persistence: { LOCAL: 'local', SESSION: 'session' } } }),
     firestore: Object.assign(() => db, { FieldValue: { serverTimestamp: () => 'SERVER' } }),
     app: () => ({ functions: region => { assert.equal(region, 'asia-southeast1'); return { httpsCallable: name => async data => { calls.push({ name, data }); return { data: { id: data.checkOnly ? null : data.requestId } }; } }; } }),
     storage: () => ({ ref: path => ({ put: async (file, metadata) => calls.push({ path, file, metadata }) }) })
@@ -33,7 +37,7 @@ function client(isAdmin = false) {
   };
   const sandbox = { FRMS_RESERVATION_SERVICE: reservationService, Uint8Array, btoa: value => Buffer.from(value, 'binary').toString('base64'), window: { FIREBASE_CONFIG: { apiKey: 'test', projectId: 'test', appId: 'test' } }, firebase, console, document: { addEventListener: () => {} }, sessionStorage: { removeItem: () => {} }, location: { replace: () => {} } };
   vm.createContext(sandbox); vm.runInContext(fs.readFileSync('js/firebase/client.js', 'utf8'), sandbox);
-  return { api: sandbox.window.FRMS, calls, writes, filters };
+  return { api: sandbox.window.FRMS, calls, writes, filters, subscriptions, persistence };
 }
 test('login creates student and admin profiles without storing passwords', async () => {
   for (const admin of [false, true]) {
@@ -76,4 +80,16 @@ test('invalid registration input cannot create a profile', async () => {
   await assert.rejects(api.register('Alex', 'alex', 'TestPass123!'));
   await assert.rejects(api.register('Alex', 'alex@example.com', 'short'));
   assert.equal(writes.length, 0);
+});
+
+test('sessions are tab-specific and student live updates remain owner-scoped', async () => {
+  const { api, filters, subscriptions, persistence } = client();
+  let rows;
+  const unsubscribe = await api.watchRequests(records => { rows = records; });
+  assert.deepEqual(persistence, ['session']);
+  assert(filters.some(filter => filter.join('/') === 'reservations/ownerUid/==/student-1'));
+  subscriptions[0].callback({ docs: [{ id: 'request-1', data: () => ({ status: 'approved' }) }] });
+  assert.equal(rows[0].status, 'approved');
+  unsubscribe();
+  assert.equal(subscriptions[1].stopped, true);
 });

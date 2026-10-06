@@ -58,7 +58,7 @@ document.addEventListener(
        ========================================================== */
 
     let activeStatus =
-      "pending";
+      "all";
 
 
     /* ==========================================================
@@ -75,65 +75,14 @@ document.addEventListener(
        COUNTS
        ========================================================== */
 
-    const pendingCount =
-      countStatus(
-        "pending"
-      );
-
-
-    const approvedCount =
-      countStatus(
-        "approved"
-      );
-
-
-    const declinedCount =
-      countStatus(
-        "declined"
-      );
-
-
-    document.getElementById(
-      "total-count"
-    ).textContent =
-      requests.length;
-
-
-    document.getElementById(
-      "pending-count"
-    ).textContent =
-      pendingCount;
-
-
-    document.getElementById(
-      "approved-count"
-    ).textContent =
-      approvedCount;
-
-
-    document.getElementById(
-      "declined-count"
-    ).textContent =
-      declinedCount;
-
-
-    document.getElementById(
-      "pending-tab-count"
-    ).textContent =
-      pendingCount;
-
-
-    document.getElementById(
-      "approved-tab-count"
-    ).textContent =
-      approvedCount;
-
-
-    document.getElementById(
-      "declined-tab-count"
-    ).textContent =
-      declinedCount;
-
+    function updateCounts() {
+      document.getElementById("total-count").textContent = requests.length;
+      document.getElementById("all-tab-count").textContent = requests.length;
+      for (const status of ["pending", "approved", "declined"]) {
+        document.getElementById(status + "-count").textContent = countStatus(status);
+        document.getElementById(status + "-tab-count").textContent = countStatus(status);
+      }
+    }
 
     /* ==========================================================
        STATUS COUNT
@@ -236,7 +185,7 @@ document.addEventListener(
         requests.filter(
           function (request) {
 
-            const statusMatch =
+            const statusMatch = activeStatus === "all" ||
               String(
                 request.status
               )
@@ -310,7 +259,7 @@ document.addEventListener(
         } else {
 
           emptyMessage.textContent =
-            `You currently have no ${activeStatus} reservation requests.`;
+            activeStatus === "all" ? "You currently have no reservation requests." : `You currently have no ${activeStatus} reservation requests.`;
 
         }
 
@@ -544,7 +493,19 @@ document.addEventListener(
        INITIAL RENDER
        ========================================================== */
 
+    updateCounts();
     renderRequests();
+    if (FRMS.watchRequests) {
+      try {
+        const unsubscribe = await FRMS.watchRequests(records => {
+          requests.splice(0, requests.length, ...records);
+          updateCounts();
+          renderRequests();
+        });
+        window.addEventListener("pagehide", unsubscribe, { once: true });
+      } catch (error) { FRMS.showError(error); }
+    }
+
 
   }
 );
