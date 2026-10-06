@@ -100,6 +100,7 @@ test('an expired pending slot can be reused without an admin; expiration cannot 
     await ctx.firestore().collection('reservations').doc('request-1').update({ createdAt: old });
     await ctx.firestore().collection('bookings').doc('hall_' + dateISO + '_morning').update({ createdAt: old });
   });
+  await assert.rejects(reviewReservation({ db: db('admin1', true, true), actor: { uid: 'admin1', admin: true }, data: { id: 'request-1', status: 'approved' }, timestamp: stamp }), { code: 'failed-precondition' });
   await assertSucceeds(submit(db(), { requestId: 'replacement' }));
   const options = { db: db('admin1', true, true), actor: { uid: 'admin1', admin: true }, data: { id: 'request-1', status: 'expired' }, timestamp: stamp };
   await assertSucceeds(reviewReservation(options));

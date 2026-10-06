@@ -432,3 +432,16 @@
   }
 
 }
+.navbar__student-name {
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #173f31;
+  font-size: 13px;
+  font-weight: 700;
+}
+.navbar__student-name[hidden] { display: none; }
+@media (max-width: 600px) {
+  .navbar__student-name { max-width: 110px; font-size: 12px; }
+}

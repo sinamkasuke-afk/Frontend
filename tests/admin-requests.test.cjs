@@ -3,8 +3,12 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 test('admin request page initializes pagination and uses database totals rather than current-page counts', async () => {
+  const html = fs.readFileSync('admin-requests.html', 'utf8');
+  const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
+  assert.equal(new Set(ids).size, ids.length, 'HTML IDs must be unique');
   const elements = new Map(); let initialize, mounted;
   function element(id) {
+    if (!ids.includes(id)) return null;
     if (!elements.has(id)) elements.set(id, { value: ['status-filter','date-filter'].includes(id) ? 'all' : '', textContent: '', innerHTML: '', listeners: {},
       addEventListener(type, callback) { this.listeners[type] = callback; }, append() {}, classList: { add() {}, remove() {} } });
     return elements.get(id);

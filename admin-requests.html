@@ -370,29 +370,18 @@
 
 
           <!-- STATUS FILTER -->
+          <select id="status-filter" class="requests-filter" aria-label="Reservation status">
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="declined">Declined</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="expired">Expired</option>
+          </select>
 
-          <select id="date-filter" class="requests-filter"><option value="all">All months</option></select>
-
-
-          <!-- DATE FILTER -->
-
-          <select
-            id="date-filter"
-            class="requests-filter"
-          >
-
-            <option value="all">
-              All Dates
-            </option>
-
-            <option value="september">
-              September 2026
-            </option>
-
-            <option value="october">
-              October 2026
-            </option>
-
+          <!-- MONTH FILTER -->
+          <select id="date-filter" class="requests-filter" aria-label="Reservation month">
+            <option value="all">All months</option>
           </select>
 
         </div>
@@ -498,7 +487,7 @@
   <script src="js/firebase/request-pagination.js?v=paging-enrollment-1"></script>
   <script src="js/firebase/client.js?v=paging-enrollment-1"></script>
 <script
-    src="js/pages/admin-requests.js?v=paging-enrollment-1"
+    src="js/pages/admin-requests.js?v=request-filters-2"
   ></script>
 
   <script src="js/components/admin-profile.js?v=admin-name-1"></script>

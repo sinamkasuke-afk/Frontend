@@ -96,6 +96,7 @@ async function reviewReservation({ db, actor, data, timestamp, now = new Date() 
     const record = snapshot.data();
     if (record.status === data.status) return;
     if (record.status !== 'pending') fail('failed-precondition', 'Only pending reservations can be reviewed.');
+    if (data.status === 'approved' && record.createdAt?.seconds !== undefined && now.getTime() >= record.createdAt.seconds * 1000 + 48 * 3600000) fail('failed-precondition', 'This pending reservation has expired.');
     if (data.status === 'expired' && (record.createdAt?.seconds === undefined || now.getTime() < record.createdAt.seconds * 1000 + 48 * 3600000)) fail('failed-precondition', 'Pending reservations expire after 48 hours.');
     if (!record.bookingId) fail('failed-precondition', 'This legacy request has no booking record. Migrate it before reviewing.');
     const bookingRef = db.collection('bookings').doc(record.bookingId);

@@ -309,6 +309,7 @@ function renderNavbar(containerId, activePage, variant = "public") {
         ${links
           .map(
             (link) => `
+              ${variant === "student" && link.label === "Logout" ? '<span class="navbar__student-name" hidden></span>' : ""}
               <a
                 href="${link.href}"
                 class="navbar__link"
@@ -323,5 +324,15 @@ function renderNavbar(containerId, activePage, variant = "public") {
 
     </header>
   `;
+
+  if (variant === "student" && window.FRMS) {
+    FRMS.currentUser().then(user => {
+      const name = container.querySelector(".navbar__student-name");
+      if (!name || !user) return;
+      name.textContent = user.displayName || user.email || "Student";
+      name.title = name.textContent;
+      name.hidden = false;
+    }).catch(FRMS.showError);
+  }
 
 }
