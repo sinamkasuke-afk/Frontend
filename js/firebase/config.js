@@ -13,4 +13,4 @@ window.FIREBASE_CONFIG = {
 window.FIREBASE_STUDENT_EMAIL_DOMAIN = "";
 
 // Explicit local preview with sample data. Set false to use the live Firebase project.
-window.FRMS_DEMO_MODE = true;
+window.FRMS_DEMO_MODE = false;

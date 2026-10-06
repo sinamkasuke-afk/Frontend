@@ -1,6 +1,6 @@
 ## Local mock data — ready to test
 
-`window.FRMS_DEMO_MODE = true` is currently enabled in `js/firebase/config.js`. In this mode, pages use local sample data and do not initialize Firebase. Start Apache and open `http://localhost/Frontend/login.html`.
+`window.FRMS_DEMO_MODE = false` is currently set in `js/firebase/config.js`, so the site uses live Firebase. To preview local samples, change it to `true`. In this mode, pages use local sample data and do not initialize Firebase. Start Apache and open `http://localhost/Frontend/login.html`.
 
 | Account | Email | Password |
 | --- | --- | --- |
@@ -20,7 +20,7 @@ npm run accounts --prefix tools
 npm run mock --prefix tools
 ```
 
-The cloud importer uses the provisioned test accounts and creates records across all six collections. It preserves existing documents and refuses to replace occupied booking slots. Cloud test accounts use their provisioned passwords, not `Demo123!`. The live mock import completed successfully for frontend-d6606: three test account profiles, eight venues, three time slots, and eight sample reservations with matching bookings and audit events. Local demo mode remains enabled until you set FRMS_DEMO_MODE to false.
+The cloud importer uses the provisioned test accounts and creates records across all six collections. It preserves existing documents and refuses to replace occupied booking slots. Cloud test accounts use their provisioned passwords, not `Demo123!`. The live mock import completed successfully for frontend-d6606: three test account profiles, eight venues, three time slots, and eight sample reservations with matching bookings and audit events. Local demo mode is disabled; the frontend uses live Firebase.
 
 # Firebase setup for frontend-d6606
 
