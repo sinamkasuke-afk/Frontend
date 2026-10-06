@@ -370,7 +370,7 @@
 
                 <p>
                   Add facility needs and
-                  supporting documents.
+                  event details.
                 </p>
               </div>
 
@@ -414,61 +414,6 @@
               <small
                 class="field-error"
                 id="setup-notes-error"
-              ></small>
-
-            </div>
-
-
-            <div class="form-group document-group">
-
-              <label for="supporting-document">
-                Supporting Document (optional)
-              </label>
-
-              <label
-                class="upload-box"
-                for="supporting-document"
-                id="upload-box"
-              >
-
-                <span class="upload-icon">
-                  ⇧
-                </span>
-
-                <span
-                  class="upload-title"
-                  id="upload-title"
-                >
-                  Upload Proposal PDF
-                </span>
-
-                <span class="upload-description">
-                  Optional · PDF only · Maximum file size 500KB
-                </span>
-
-              </label>
-
-              <input
-                type="file"
-                id="supporting-document"
-                name="supportingDocument"
-                accept="application/pdf,.pdf"
-                hidden
-              />
-
-              <button
-                type="button"
-                id="remove-supporting-document"
-                class="remove-attachment-button"
-                aria-controls="supporting-document upload-title"
-                hidden
-              >
-                Remove attachment
-              </button>
-
-              <small
-                class="field-error"
-                id="supporting-document-error"
               ></small>
 
             </div>
@@ -527,14 +472,14 @@
     <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase/config.js"></script>
-  <script src="js/data/sample-data.js"></script>
-  <script src="js/firebase/demo.js"></script>
-  <script src="js/firebase/reservation-service.js?v=request-number-1"></script>
-  <script src="js/firebase/client.js?v=request-number-1"></script>
+  <script src="js/firebase/config.js?v=paging-enrollment-1"></script>
+  <script src="js/data/sample-data.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/reservation-service.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/request-pagination.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/client.js?v=paging-enrollment-1"></script>
 <script src="js/components/navbar.js"></script>
-  <script src="js/data/reservation-store.js"></script>
-  <script src="js/pages/new-reservation-details.js?v=remove-pdf-1"></script>
+  <script src="js/data/reservation-store.js?v=paging-enrollment-1"></script>
+  <script src="js/pages/new-reservation-details.js?v=paging-enrollment-1"></script>
 
 </body>
 </html>

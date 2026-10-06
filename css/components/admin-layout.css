@@ -60,3 +60,5 @@
   .admin-profile__text strong { max-width: 100px; font-size: 12px; }
   .admin-profile__text span { display: none; }
 }
+
+.request-status--cancelled, .status-badge--cancelled { background:#eee; color:#555; }

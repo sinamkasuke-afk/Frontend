@@ -65,3 +65,9 @@ adminLoginForm.addEventListener("submit", async function(event) {
   } catch (error) { FRMS.showError(error); }
   finally { button.disabled = false; }
 });
+
+document.getElementById("forgot-password").addEventListener("click", async event => {
+  event.preventDefault();
+  try { await FRMS.resetPassword(adminUsername.value); window.alert("If an account exists, check your email for a password reset link."); }
+  catch (error) { FRMS.showError(error); }
+});

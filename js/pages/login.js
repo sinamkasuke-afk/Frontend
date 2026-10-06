@@ -49,6 +49,11 @@ loginForm.addEventListener("submit", async function(event) {
   finally { button.disabled = false; }
 });
 
+document.getElementById("forgot-password").addEventListener("click", async event => {
+  event.preventDefault();
+  try { await FRMS.resetPassword(identifier.value); window.alert("If an account exists, check your email for a password reset link."); }
+  catch (error) { FRMS.showError(error); }
+});
 const registerSection = document.getElementById("register-section");
 const openRegister = document.getElementById("open-register");
 const registerForm = document.getElementById("register-form");
@@ -79,7 +84,7 @@ registerForm.addEventListener("submit", async event => {
   submit.disabled = true; backToLogin.disabled = true;
   submit.textContent = "Creating account…";
   try {
-    await FRMS.register(document.getElementById("register-name").value, document.getElementById("register-email").value, enteredPassword);
+    await FRMS.register(document.getElementById("register-name").value, document.getElementById("register-email").value, enteredPassword, document.getElementById("register-student-id").value);
     location.href = "dashboard.html";
   } catch (error) {
     const messages = {

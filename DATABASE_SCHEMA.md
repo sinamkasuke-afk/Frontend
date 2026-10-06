@@ -1,39 +1,20 @@
-# Database inventory
+# Database schema
 
-The folder has public facility browsing; student login, a three-step reservation form, a dashboard and request lists; and admin login, dashboard, decisions, history, and a calendar. These features use the following collections. History and dashboard counts are views of reservation records, not duplicate collections.
+| Collection | Document ID | Purpose |
+|---|---|---|
+| users | Auth UID | Email, displayName, studentId, enrollmentStatus, approval actor/time, role, createdAt; no passwords |
+| venues | Venue ID | Name, location, capacity, active and ordering |
+| timeSlots | Slot ID | Label, startMinutes, endMinutes, active; fixed nonoverlapping intervals |
+| reservations | UUID | Owner, canonical venue/date/slot, event fields, status, requestNumber, bookingId, quotaId, audit reference |
+| bookings | venue_date_slot | Venue/date/slot lock with status; pending holds expire after 48 hours |
+| reservationEvents | Event ID | Immutable submitted/approved/declined/cancelled audit records |
+| counters | reservations | Numeric request-number counter and corresponding UUID |
+| submissionLimits | UID_Manila-date | Count of new submissions for that user/day, capped at five |
 
-| Collection | Document ID | Purpose | Created by |
-| --- | --- | --- | --- |
-| `users` | Firebase Auth UID | Email, display name, student/admin profile label, creation time | Login or trusted account tool |
-| `venues` | Stable slug, e.g. `multipurpose-hall` | Public catalog, location, active state, capacity, featured images and tags | Trusted seed tool; admins can manage catalog |
-| `timeSlots` | `morning`, `midday`, `afternoon` | Fixed non-overlapping schedule with start/end minutes | Trusted seed tool |
-| `reservations` | Draft UUID | Event form fields, owner, status, selected venue/date/slot, optional attachment metadata | Student Firestore transaction |
-| `bookings` | `{venueId}_{YYYY-MM-DD}_{slotId}` | Exclusive occupancy, linked reservation ID; no student details | Student/admin Firestore transactions |
-| `reservationEvents` | Submission ID or generated event ID | Immutable submission and approval/decline audit events | Student/admin Firestore transactions |
+New reservations have no attachment field or document subcollection. File access and uploads are denied in rules. Passwords are managed by Firebase Authentication. Admin privilege uses the trusted admin custom claim.
 
-Small PDFs up to 500KB live in the Firestore subcollection `reservations/{id}/documents/proposal`. Parent reservations hold their path and metadata; the child document holds base64 content excluded from indexes. Cloud Storage is not used. Passwords belong to Firebase Authentication, not Firestore. Admin authorization uses a trusted custom claim, not an editable database role label.
+Create, approve/decline and cancellation operations use transactions. Cancellation retains the reservation and its activity instead of deleting them. Booking locks are released on decline or cancellation, never by modifying a list locally. Only pending reservations can be reviewed. Students cannot cancel after the selected slot starts.
 
-## Operations connected to the UI
+Security Rules enforce verified Gmail submissions, canonical catalog fields, valid dates within 90 days, positive capacity-limited guest counts, field size limits, numbering, daily quota, booking consistency and immutable audit. Browser validation helps the user but is not the authorization boundary.
 
-- Landing page: query active venues and render featured facilities.
-- Student login: Firebase Auth, then create a missing `users/{uid}` profile.
-- Venue step: active venues, active time slots minus booking records for the selected venue/date. Pending requests hold a slot until reviewed.
-- Details/review steps: validate fields, keep the PDF temporarily in IndexedDB, upload it, then write a secured Firestore transaction. A stable draft UUID makes retries safe.
-- Student transaction: validates identity, date, capacity and catalog IDs. A Firestore transaction writes the reservation, occupancy and submission event together. Competing submissions cannot take the same slot.
-- Admin transaction: validates the admin claim and atomically records the decision, updates/releases occupancy, and appends an event. Repeated identical decisions are idempotent.
-- Student dashboard/list: owner-filtered reservations; admin pages: all reservations. Click a reservation row or focus it and press Enter for form details, PDF access and activity.
-- Admin calendar: real records filtered by the selected month, with previous/next navigation.
-
-## Free-plan deployment
-
-The frontend requires only Firebase Authentication, Firestore rules and indexes. These have been deployed without upgrading to Blaze. The previously prepared callable functions and Storage files are unused. All cross-document reservation, booking and activity writes are validated by Firestore Security Rules using getAfter().
-
-The seed tool populates venues and time slots; the account tool populates users. Submissions create reservations, bookings, events and the optional documents subcollection. No duplicate history collection is needed. Existing sample records are preserved. Refresh pages to see another session's updates.
-
-Local tests cover the transaction logic and client behavior. A live student commit with a PDF followed by an admin decline and slot release succeeded. The temporary verification records were removed afterward.
-
-## Mock data
-
-`js/data/sample-data.js` generates eight sample reservations, users, venues, slots, locks and events. Explicit demo mode in `js/firebase/config.js` runs all pages against browser-local copies. The trusted `tools/seed-mock-data.cjs` importer uses real test account UIDs to populate Firestore; see `FIREBASE_SETUP.md`.
-
-Reservations have a numeric `requestNumber` displayed as the Request ID (1–99999). The `counters/reservations` document stores `value` and `reservationId`; the submission transaction increments it together with the new reservation. Security rules validate that both writes match. UUID document IDs remain the references for bookings, PDF attachments and activity records. Deleting a reservation does not reuse its number. Existing records can be numbered using `tools/assign-request-numbers.cjs` with Admin SDK credentials.
+Students register with Gmail and require verified email plus administrator-approved enrollment to submit. Expired pending locks can be replaced, while approved locks remain exclusive. Students read only their own reservation/profile/activity. Administrators read all reservations. Lists and calendar subscribe to live changes. See ARCHITECTURE.md for state transitions and verification.

@@ -1,0 +1,16 @@
+node_modules
+**/node_modules
+.git
+.firebase
+functions
+tools
+tests
+*.md
+firebase*.json
+firestore*.json
+*.rules
+*-debug.log
+.env*
+*firebase-adminsdk*.json
+*service-account*.json
+*service_account*.json

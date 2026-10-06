@@ -19,32 +19,13 @@ document.addEventListener(
        COUNTS
        ========================================================== */
 
-    const dashboardCounts = { total: adminRequests.length, pending: adminRequests.filter(r => r.status === "pending").length, approved: adminRequests.filter(r => r.status === "approved").length, declined: adminRequests.filter(r => r.status === "declined").length };
-
-
-    document.getElementById(
-      "total-requests"
-    ).textContent =
-      dashboardCounts.total;
-
-
-    document.getElementById(
-      "pending-requests"
-    ).textContent =
-      dashboardCounts.pending;
-
-
-    document.getElementById(
-      "approved-requests"
-    ).textContent =
-      dashboardCounts.approved;
-
-
-    document.getElementById(
-      "declined-requests"
-    ).textContent =
-      dashboardCounts.declined;
-
+    function refreshCounts() {
+      document.getElementById("total-requests").textContent = adminRequests.length;
+      for (const status of ["pending", "approved", "declined"]) {
+        document.getElementById(status + "-requests").textContent = adminRequests.filter(request => request.status === status).length;
+      }
+    }
+    refreshCounts();
 
     /* ==========================================================
        ELEMENTS
@@ -450,6 +431,16 @@ document.addEventListener(
           "&#039;"
         );
 
+    }
+
+    if (FRMS.watchRequests) {
+      try {
+        const unsubscribe = await FRMS.watchRequests(records => {
+          adminRequests.splice(0, adminRequests.length, ...records);
+          refreshCounts(); renderRequests(adminRequests);
+        }, true);
+        window.addEventListener("pagehide", unsubscribe, { once: true });
+      } catch (error) { FRMS.showError(error); }
     }
 
   }

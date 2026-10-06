@@ -1,57 +1,40 @@
-# Firebase setup — free Spark plan
+# Firebase setup — no file uploads or paid backend
 
-The live frontend now uses Firebase Authentication and Cloud Firestore directly. Cloud Functions and Cloud Storage are not required, and no billing upgrade is needed. Demo mode is disabled.
+The app uses Firebase Authentication and Firestore transactions. It does not upload PDFs, call Cloud Functions, or use Cloud Storage. Keep the project on Spark; its usage quotas still apply.
 
-## What is working
+## Accounts
 
-The deployed Firestore rules allow authenticated students to submit reservations through atomic transactions. Each transaction saves the reservation, its exclusive booking lock, its activity event and any small supporting PDF. Admin decisions update the status and audit history together; declining releases the slot. Student submission with a PDF and admin decline were verified against live Firebase.
+Students register with a `gmail.com` email, full name, school student ID, password (at least eight characters), and matching confirmation. Registration saves a student profile and sends an email verification link. Students can sign in immediately but must verify their email before submitting. The dashboard includes a resend-verification control. A verified Gmail does not prove enrollment: an administrator must verify the student ID against school records and approve it on the Students page.
 
-PDFs are stored in `reservations/{id}/documents/proposal`, encoded within Firestore's document size limit. Maximum upload size is **500KB**. The document's data field is excluded from indexes. Files larger than this need compression or an external file-hosting service. This is suitable for small proposals and testing, within Firestore's free quotas.
+Administrator privileges come from an Auth custom claim set by a trusted provisioning script, not the Firestore profile's role field. Existing test accounts can sign in, but the example.com student accounts cannot submit under the new Gmail policy. Use a real Gmail account for student submission testing. Passwords are never stored in Firestore.
 
-## Test accounts
+Forgot Password on either login page sends an Authentication reset email. Sessions are tab-specific; the unsupported Remember me checkbox has been removed.
 
-Use the real test account credentials provided in chat:
+## Reservation policy
 
-- `frms-test-027efef2@example.com` — student
-- `frms-student2-test@example.com` — second student
-- `frms-admin-test@example.com` — admin
+- Valid Manila dates, from today through 90 days ahead.
+- At most five new submissions per account per Manila day.
+- Pending requests hold the venue/date/slot immediately.
+- Only administrators approve or decline a pending request.
+- Students cancel only their own pending/approved request before its start time; administrators can cancel after start.
+- Cancellation releases the booking and writes an audit record in the same transaction. Closed requests cannot be reopened or permanently deleted through the app.
+- Numeric request numbers are unique and range from 1 to 99999.
 
-Start Apache and open `http://localhost/Frontend/login.html` or `admin-login.html`. Choose a venue, date, available slot, event details and optionally attach a PDF up to 500KB, then submit. Admin can review the request and open its document from the detail view.
+Pending holds expire after 48 hours. Slot availability ignores expired holds, and Security Rules allow a new reservation to replace only a proven expired pending booking. This works even with no administrator online. The original record is displayed as expired; administrators later reconcile the stored status and audit, without deleting any replacement booking. No paid scheduler is used.
 
-## Updating rules and indexes
+## Deploy and test
 
-```sh
-npx firebase-tools login
+```
+node --test tests/*.test.cjs
 npx firebase-tools deploy --project frontend-d6606 --only firestore
 ```
 
-Do not deploy the old `functions` or `storage` files for this free-plan flow. They are no longer referenced by the frontend or deployment configuration.
+Redeploy the static website separately to Vercel after frontend changes. See ARCHITECTURE.md for the role matrix and Security Rules emulator test instructions. Emulator tests need Java 21 and the Firebase test dependencies; they use a demo project and do not touch production.
 
-## Sample data and local preview
+## Credentials and cleanup
 
-The live project already contains three test profiles, eight venues, three time slots and eight sample reservations with matching booking locks and activity records. The trusted import tools remain available; they require administrator credentials. They preserve existing records.
+Service-account credentials must stay outside the repository. The previously shared private key was revoked on 2026-10-06 after validating a replacement saved outside the repository. Use the replacement credential file for maintenance scripts. `.gitignore` excludes typical service-account filenames.
 
-```sh
-npm install --prefix tools
-npm run seed --prefix tools
-npm run accounts --prefix tools
-npm run mock --prefix tools
-```
+`tools/remove-legacy-pdfs.cjs` removes legacy supporting-document records and attachment metadata using trusted Admin SDK credentials. `tools/assign-request-numbers.cjs` numbers legacy reservations without changing their UUID references. Existing maintenance scripts require an external service-account file via GOOGLE_APPLICATION_CREDENTIALS.
 
-To use local samples, set `window.FRMS_DEMO_MODE = true` in `js/firebase/config.js`. Student `student@example.com`, second student `student2@example.com`, and admin `admin@example.com` all use `Demo123!` in local preview only. The public index loads live services. Use false for live testing.
-
-## Checks
-
-```sh
-node --test tests/*.test.cjs
-```
-
-Firestore has free storage, read and write quotas. Monitor Firebase Console > Firestore > Usage; free quota is finite. Passwords remain in Firebase Authentication, never in user profiles. Keep service-account private keys outside the web folder.
-
-References: [Firestore pricing](https://firebase.google.com/docs/firestore/pricing), [Transactions and rules](https://firebase.google.com/docs/firestore/manage-data/transactions), [Storage billing requirements](https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024).
-
-## Student self-registration
-
-The Register as Student button below Login as Student opens the registration form. Full name, email, password (minimum eight characters), and password confirmation are required. Registration creates a Firebase Authentication user, saves a `users/{uid}` student profile, and signs in to the dashboard. The password is managed only by Authentication. No paid services or additional rules are needed.
-
-Students can use Delete in My Reservations or reservation details to permanently remove their own reservation and supporting PDF. The transaction releases the slot only if the booking still belongs to that reservation. Firestore rules check ownership and require the matching booking to be released in the same transaction. Administrators can delete any reservation. Existing activity records are retained.
+Student reservations, admin requests, history and student enrollment use cursor pagination (25 rows plus one lookahead). Status and month filters run in Firestore; text search applies to the visible page. Summary counts use database aggregation queries rather than the loaded page. Admin lists, calendar and student reservations receive live updates.

@@ -8,5 +8,9 @@
   },
   "dependencies": {
     "firebase-admin": "^13.0.0"
+  },
+  "devDependencies": {
+    "firebase": "12.19.0",
+    "@firebase/rules-unit-testing": "5.0.2"
   }
 }

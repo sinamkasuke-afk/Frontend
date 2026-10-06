@@ -465,8 +465,8 @@ document.addEventListener(
                       reservation.event
                     )}
                   </small>
-                  <button type="button" data-delete-reservation="${escapeHTML(reservation.id)}"
-                    style="margin-top:10px;padding:8px 12px;background:#b42318;color:white;border:0;border-radius:6px;cursor:pointer">Delete</button>
+                  ${["pending", "approved"].includes(reservation.status) ? `<button type="button" data-cancel-reservation="${escapeHTML(reservation.id)}"
+                    style="margin-top:10px;padding:8px 12px;background:#b42318;color:white;border:0;border-radius:6px;cursor:pointer">Cancel</button>` : ""}
 
                 </div>
               `;
@@ -632,21 +632,29 @@ document.addEventListener(
 
 
     renderAll();
-    window.addEventListener("reservation-deleted", event => {
-      firebaseRequests = firebaseRequests.filter(request => request.id !== event.detail.id);
+    window.addEventListener("reservation-cancelled", event => {
+      firebaseRequests = firebaseRequests.map(request => request.id === event.detail.id ? { ...request, status: "cancelled" } : request);
       refreshMonth();
       renderAll();
     });
 
     selectedReservations.addEventListener("click", async event => {
-      const button = event.target.closest("[data-delete-reservation]");
+      const button = event.target.closest("[data-cancel-reservation]");
       if (!button) return;
       event.stopPropagation();
-      if (!window.confirm("Permanently delete this reservation and its attachment? Its time slot will be released.")) return;
+      if (!window.confirm("Cancel this reservation and release its time slot? Its history will be kept.")) return;
       button.disabled = true;
-      try { await FRMS.deleteReservation(button.dataset.deleteReservation); }
+      try { await FRMS.cancelReservation(button.dataset.cancelReservation); }
       catch (error) { button.disabled = false; FRMS.showError(error); }
     });
+    if (FRMS.watchRequests) {
+      try {
+        const unsubscribe = await FRMS.watchRequests(records => {
+          firebaseRequests = records; refreshMonth(); renderAll();
+        }, true);
+        window.addEventListener("pagehide", unsubscribe, { once: true });
+      } catch (error) { FRMS.showError(error); }
+    }
 
   }
 );

@@ -9,7 +9,7 @@
   />
 
   <title>
-    History | School Facilities Reservation System
+    Student Enrollment | School Facilities Reservation System
   </title>
 
   <link
@@ -35,7 +35,7 @@
 
   <link
     rel="stylesheet"
-    href="css/pages/admin-history.css"
+    href="css/pages/admin-requests.css"
   />
   <link rel="stylesheet" href="css/components/admin-layout.css?v=admin-name-1" />
 </head>
@@ -71,7 +71,7 @@
     <div class="admin-header__right">
 
 
-      <!-- SEARCH -->
+      <!-- GLOBAL SEARCH -->
 
       <div class="admin-header-search">
 
@@ -110,7 +110,7 @@
 
 
   <!-- =====================================================
-       PAGE SHELL
+       APP SHELL
        ===================================================== -->
 
   <main class="admin-shell">
@@ -124,6 +124,8 @@
 
       <nav class="admin-sidebar__nav">
 
+
+        <!-- DASHBOARD -->
 
         <a
           href="admin-dashboard.html"
@@ -141,9 +143,14 @@
         </a>
 
 
+        <!-- REQUESTS -->
+
         <a
           href="admin-requests.html"
-          class="admin-sidebar__link"
+          class="
+            admin-sidebar__link
+            
+          "
         >
 
           <span class="admin-sidebar__icon">
@@ -157,12 +164,11 @@
         </a>
 
 
+        <!-- HISTORY -->
+
         <a
           href="admin-history.html"
-          class="
-            admin-sidebar__link
-            admin-sidebar__link--active
-          "
+          class="admin-sidebar__link"
         >
 
           <span class="admin-sidebar__icon">
@@ -175,6 +181,8 @@
 
         </a>
 
+
+        <!-- CALENDAR -->
 
         <a
           href="admin-calendar.html"
@@ -191,216 +199,38 @@
 
         </a>
 
-        <a href="admin-students.html" class="admin-sidebar__link">
+        <a href="admin-students.html" class="admin-sidebar__link admin-sidebar__link--active">
           <span class="admin-sidebar__icon" aria-hidden="true">♙</span>
           <span class="admin-sidebar__text">Students</span>
         </a>
       </nav>
 
 
+      <!-- LOGOUT -->
+
     </aside>
 
 
     <!-- ===================================================
-         HISTORY CONTENT
+         MAIN REQUESTS CONTENT
          =================================================== -->
 
-    <section class="history-main">
-
-
-      <!-- PAGE HEADER -->
-
-      <div class="history-heading">
-
-        <div>
-
-          <p class="history-heading__label">
-            RESERVATION ARCHIVE
-          </p>
-
-          <h1>
-            History
-          </h1>
-
-          <p>
-            Approved and declined reservation records.
-          </p>
-
-        </div>
-
-
-        <div class="history-heading__icon">
-          ◷
-        </div>
-
+    <section class="requests-main">
+      <h1>Student enrollment</h1>
+      <p>Check the student's ID against your school records before approving enrollment. Email verification is required separately.</p>
+      <div class="requests-panel" style="margin-top:24px;padding:20px">
+        <table class="requests-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Student ID</th><th>Enrollment</th><th>Actions</th></tr></thead>
+          <tbody id="student-rows"></tbody>
+        </table>
+        <nav aria-label="Student pages" style="display:flex;gap:16px;justify-content:center;padding:20px">
+          <button id="students-previous" type="button" disabled>Previous</button>
+          <span id="students-page">Loading…</span>
+          <button id="students-next" type="button" disabled>Next</button>
+        </nav>
       </div>
-
-
-      <!-- =================================================
-           CONTROLS
-           ================================================= -->
-
-      <section class="history-controls">
-
-
-        <!-- TABS -->
-
-        <div class="history-tabs">
-
-          <button
-            type="button"
-            class="history-tab history-tab--active"
-            data-status="approved"
-          >
-
-            Approved
-
-            <span id="approved-count">
-              0
-            </span>
-
-          </button>
-
-
-          <button
-            type="button"
-            class="history-tab"
-            data-status="declined"
-          >
-
-            Declined
-
-            <span id="declined-count">
-              0
-            </span>
-
-          </button><button type="button" class="history-tab" data-status="cancelled">Cancelled</button><button type="button" class="history-tab" data-status="expired">Expired</button>
-
-        </div>
-
-
-        <!-- MONTH FILTER -->
-
-        <select id="history-month-filter" class="requests-filter"><option value="all">All months</option></select>
-
-      </section>
-
-
-      <!-- =================================================
-           HISTORY TABLE
-           ================================================= -->
-
-      <section class="history-card">
-
-        <div class="history-table-wrap">
-
-          <table class="history-table">
-
-            <thead>
-
-              <tr>
-
-                <th>
-                  Request ID
-                </th>
-
-                <th>
-                  Requester
-                </th>
-
-                <th>
-                  Venue
-                </th>
-
-                <th>
-                  Date
-                </th>
-
-                <th>
-                  Time
-                </th>
-
-                <th>
-                  Final Status
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody id="history-table-body">
-            </tbody>
-
-          </table>
-
-        </div>
-
-
-        <!-- EMPTY STATE -->
-
-        <div
-          class="history-empty"
-          id="history-empty"
-          hidden
-        >
-
-          <div class="history-empty__icon">
-            ◷
-          </div>
-
-          <h3>
-            No history found
-          </h3>
-
-          <p>
-            There are no reservation records under this category.
-          </p>
-
-        </div>
-
-
-        <!-- TABLE FOOTER -->
-
-        <div class="history-card__footer">
-
-          <p id="history-result-text">
-            Showing 0 records
-          </p>
-
-
-          <div class="history-pagination">
-
-            <button
-              type="button"
-              class="pagination-button"
-            >
-              ‹
-            </button>
-
-            <button
-              type="button"
-              class="pagination-button pagination-button--active"
-            >
-              1
-            </button>
-
-            <button
-              type="button"
-              class="pagination-button"
-            >
-              ›
-            </button>
-
-          </div>
-
-        </div>
-
-      </section>
-
     </section>
-
   </main>
-
 
     <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
@@ -410,8 +240,9 @@
   <script src="js/firebase/reservation-service.js?v=paging-enrollment-1"></script>
   <script src="js/firebase/request-pagination.js?v=paging-enrollment-1"></script>
   <script src="js/firebase/client.js?v=paging-enrollment-1"></script>
-
-  <script src="js/pages/admin-history.js?v=paging-enrollment-1"></script>
+<script
+    src="js/pages/admin-students.js?v=paging-enrollment-1"
+  ></script>
 
   <script src="js/components/admin-profile.js?v=admin-name-1"></script>
 </body>

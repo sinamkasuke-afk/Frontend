@@ -199,6 +199,10 @@
 
         </a>
 
+        <a href="admin-students.html" class="admin-sidebar__link">
+          <span class="admin-sidebar__icon" aria-hidden="true">♙</span>
+          <span class="admin-sidebar__text">Students</span>
+        </a>
       </nav>
 
 
@@ -359,7 +363,7 @@
             <input
               type="text"
               id="request-search"
-              placeholder="Search by requester, venue, or ID..."
+              placeholder="Search this page by requester, venue, or ID..."
             />
 
           </div>
@@ -367,28 +371,7 @@
 
           <!-- STATUS FILTER -->
 
-          <select
-            id="status-filter"
-            class="requests-filter"
-          >
-
-            <option value="all">
-              All Statuses
-            </option>
-
-            <option value="pending">
-              Pending
-            </option>
-
-            <option value="approved">
-              Approved
-            </option>
-
-            <option value="declined">
-              Declined
-            </option>
-
-          </select>
+          <select id="date-filter" class="requests-filter"><option value="all">All months</option></select>
 
 
           <!-- DATE FILTER -->
@@ -509,13 +492,13 @@
     <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase/config.js"></script>
-  <script src="js/data/sample-data.js"></script>
-  <script src="js/firebase/demo.js"></script>
-  <script src="js/firebase/reservation-service.js?v=request-number-1"></script>
-  <script src="js/firebase/client.js?v=admin-name-1"></script>
+  <script src="js/firebase/config.js?v=paging-enrollment-1"></script>
+  <script src="js/data/sample-data.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/reservation-service.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/request-pagination.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/client.js?v=paging-enrollment-1"></script>
 <script
-    src="js/pages/admin-requests.js?v=logout-layout-1"
+    src="js/pages/admin-requests.js?v=paging-enrollment-1"
   ></script>
 
   <script src="js/components/admin-profile.js?v=admin-name-1"></script>

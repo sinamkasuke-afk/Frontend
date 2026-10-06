@@ -143,6 +143,17 @@ document.addEventListener("DOMContentLoaded", async function () {
   );
 
 
+  if (FRMS.watchRequests) {
+    let signature = JSON.stringify(reservationRequests.map(request => [request.id, request.status]));
+    try {
+      const unsubscribe = await FRMS.watchRequests(records => {
+        const next = JSON.stringify(records.map(request => [request.id, request.status]));
+        if (next !== signature) { signature = next; window.location.reload(); }
+      });
+      window.addEventListener("pagehide", unsubscribe, { once: true });
+    } catch (error) { FRMS.showError(error); }
+  }
+
   /* ==========================================================
      CHECK DASHBOARD BODY
      ========================================================== */

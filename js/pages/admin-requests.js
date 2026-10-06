@@ -1,9 +1,10 @@
 document.addEventListener(
   "DOMContentLoaded",
   async function () {
+    let summaryCounts = null;
     try {
       if (!await FRMS.requireUser(true)) return;
-      var firebaseRequests = await FRMS.requests(true);
+      var firebaseRequests = FRMS.mountRequestPagination ? [] : await FRMS.requests(true);
     } catch (error) { FRMS.showError(error); return; }
 
 
@@ -68,45 +69,20 @@ document.addEventListener(
     updateCounts();
 
 
-    function updateCounts() {
-
-      document.getElementById(
-        "all-count"
-      ).textContent =
-        requests.length;
-
-
-      document.getElementById(
-        "pending-count"
-      ).textContent =
-        requests.filter(
-          request =>
-            request.status ===
-            "pending"
-        ).length;
-
-
-      document.getElementById(
-        "approved-count"
-      ).textContent =
-        requests.filter(
-          request =>
-            request.status ===
-            "approved"
-        ).length;
-
-
-      document.getElementById(
-        "declined-count"
-      ).textContent =
-        requests.filter(
-          request =>
-            request.status ===
-            "declined"
-        ).length;
-
+    for (let offset = -24; offset <= 3; offset++) {
+      const now = new Date();
+      const date = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+      const option = document.createElement("option");
+      option.value = date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0");
+      option.textContent = date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      dateFilter.append(option);
     }
-
+    function updateCounts() {
+      document.getElementById("all-count").textContent = summaryCounts?.total ?? requests.length;
+      for (const status of ["pending", "approved", "declined"]) {
+        document.getElementById(status + "-count").textContent = summaryCounts?.[status] ?? requests.filter(request => request.status === status).length;
+      }
+    }
 
     /* ==========================================================
        RENDER
@@ -161,7 +137,7 @@ document.addEventListener(
 
             const matchesMonth =
               month === "all" ||
-              request.month === month;
+              String(request.dateISO || request.date).slice(0, 7) === month;
 
 
             return (
@@ -342,7 +318,7 @@ document.addEventListener(
 
 
       resultText.textContent =
-        `Showing ${filtered.length} of ${requests.length} requests`;
+        `Showing ${filtered.length} of ${requests.length} requests on this page`;
 
     }
 
@@ -522,6 +498,23 @@ document.addEventListener(
        ========================================================== */
 
     renderRequests();
+
+    if (FRMS.mountRequestPagination) {
+      const unsubscribe = await FRMS.mountRequestPagination({ isAdmin: true, tableBody: rows,
+        controls: [statusFilter, dateFilter], filters: () => ({ status: statusFilter.value, month: dateFilter.value }),
+        onChange: records => { requests.splice(0, requests.length, ...records); renderRequests(); },
+        onCounts: counts => { summaryCounts = counts; updateCounts(); }
+      });
+      window.addEventListener("pagehide", unsubscribe, { once: true });
+    } else     if (FRMS.watchRequests) {
+      try {
+        const unsubscribe = await FRMS.watchRequests(records => {
+          requests.splice(0, requests.length, ...records);
+          updateCounts(); renderRequests();
+        }, true);
+        window.addEventListener("pagehide", unsubscribe, { once: true });
+      } catch (error) { FRMS.showError(error); }
+    }
 
   }
 );

@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { submitReservation, reviewReservation, dateISO } = require('../functions/reservation-service.cjs');
+const { submitReservation, reviewReservation, cancelReservation, dateISO } = require('../functions/reservation-service.cjs');
 function database() {
   const records = new Map([
     ['venues/hall', { name: 'Hall', active: true, capacity: 50 }],
@@ -59,7 +59,7 @@ test('decline releases lock; later request prevents reapproval of old request', 
   const { db, records } = database(); await submit(db); await review(db, 'declined');
   assert(!records.has('bookings/hall_2026-10-15_morning'));
   await submit(db, { requestId: 'request-2' });
-  await assert.rejects(review(db, 'approved'), { code: 'already-exists' });
+  await assert.rejects(review(db, 'approved'), { code: 'failed-precondition' });
   assert.equal(records.get('reservations/request-1').status, 'declined');
 });
 test('approval retains booking; duplicate review does not duplicate audit', async () => {
@@ -79,10 +79,10 @@ test('rejects missing auth, student decisions, malformed dates, inactive venues 
   await assert.rejects(submit(db), { code: 'failed-precondition' });
   assert.equal([...records.keys()].filter(key => key.startsWith('reservations/')).length, 0);
 });
-test('date boundary follows Manila timezone and attachments are recorded', async () => {
+test('date boundary follows Manila timezone and submissions omit attachments', async () => {
   assert.throws(() => dateISO('2026-10-06', new Date('2026-10-06T17:00:00Z')), { code: 'invalid-argument' });
   const { db, records } = database(); await submit(db, { hasAttachment: true });
-  assert.equal(records.get('reservations/request-1').attachment.path, 'proposal.pdf');
+  assert(!('attachment' in records.get('reservations/request-1')));
 });
 
 test('upload preflight is read-only and returns committed requests even after event date', async () => {
@@ -104,4 +104,29 @@ test('request numbers increment across slots, remain stable on retries and stop 
   records.set('counters/reservations', { value: 99999 });
   await assert.rejects(submit(db, { requestId: 'request-3', dateISO: '2026-10-17' }), { code: 'failed-precondition' });
   assert(!records.has('reservations/request-3'));
+});
+
+test('cancellation preserves reservation and audit, frees slot, and rejects other owners', async () => {
+  const { db, records } = database(); await submit(db);
+  const options = { db, actor: student, data: { id: 'request-1' }, timestamp: () => 'SERVER', now: new Date('2026-10-06T00:00:00Z') };
+  await assert.rejects(cancelReservation({ ...options, actor: { uid: 'other' } }), { code: 'permission-denied' });
+  await cancelReservation(options);
+  assert.equal(records.get('reservations/request-1').status, 'cancelled');
+  assert.equal(records.get('reservations/request-1').cancelledBy, student.uid);
+  assert(!records.has('bookings/hall_2026-10-15_morning'));
+  assert([...records.values()].some(record => record.action === 'cancelled'));
+  await assert.rejects(review(db, 'approved'), { code: 'failed-precondition' });
+});
+test('submission quota is five per Manila day and retries do not increment it', async () => {
+  const { db, records } = database();
+  for (let day = 15; day < 20; day++) await submit(db, { requestId: 'request-' + day, dateISO: '2026-10-' + day });
+  await submit(db, { requestId: 'request-15', dateISO: '2026-10-15' });
+  assert.equal(records.get('submissionLimits/student-1_2026-10-06').count, 5);
+  await assert.rejects(submit(db, { requestId: 'request-20', dateISO: '2026-10-20' }), { code: 'resource-exhausted' });
+});
+test('students cannot cancel after event starts; administrators can', async () => {
+  const { db } = database(); await submit(db);
+  const options = { db, actor: student, data: { id: 'request-1' }, timestamp: () => 'SERVER', now: new Date('2026-10-16T00:00:00Z') };
+  await assert.rejects(cancelReservation(options), { code: 'failed-precondition' });
+  await cancelReservation({ ...options, actor: admin });
 });

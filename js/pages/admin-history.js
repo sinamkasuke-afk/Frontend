@@ -1,15 +1,18 @@
 const HISTORY_STATUS_LABELS = {
   approved: "Approved",
-  declined: "Declined"
+  declined: "Declined",
+  cancelled: "Cancelled",
+  expired: "Expired"
 };
 
 
 document.addEventListener(
   "DOMContentLoaded",
   async function () {
+    let summaryCounts = null;
     try {
       if (!await FRMS.requireUser(true)) return;
-      var firebaseRequests = await FRMS.requests(true);
+      var firebaseRequests = FRMS.mountRequestPagination ? [] : await FRMS.requests(true);
     } catch (error) { FRMS.showError(error); return; }
 
 
@@ -93,6 +96,14 @@ document.addEventListener(
     updateCounts();
 
 
+    for (let offset = -24; offset <= 3; offset++) {
+      const now = new Date();
+      const date = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+      const option = document.createElement("option");
+      option.value = date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0");
+      option.textContent = date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      monthFilter.append(option);
+    }
     function updateCounts() {
 
       approvedCount.textContent =
@@ -113,6 +124,7 @@ document.addEventListener(
       status
     ) {
 
+      if (summaryCounts) return summaryCounts[status] || 0;
       return historyRequests.filter(
         function (
           request
@@ -455,7 +467,7 @@ document.addEventListener(
           filtered.length === 1
             ? ""
             : "s"
-        }`;
+        } on this page`;
 
     }
 
@@ -611,49 +623,11 @@ document.addEventListener(
        MONTH
        ========================================================== */
 
-    function getMonthKey(
-      dateValue
-    ) {
-
-      const text =
-        String(
-          dateValue || ""
-        )
-          .toLowerCase();
-
-
-      if (
-        text.includes(
-          "september"
-        ) ||
-        text.includes(
-          "sep"
-        )
-      ) {
-
-        return "september";
-
-      }
-
-
-      if (
-        text.includes(
-          "october"
-        ) ||
-        text.includes(
-          "oct"
-        )
-      ) {
-
-        return "october";
-
-      }
-
-
-      return "";
-
+    function getMonthKey(value) {
+      if (/^\d{4}-\d{2}/.test(value || "")) return value.slice(0, 7);
+      const date = new Date(value);
+      return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0");
     }
-
 
     /* ==========================================================
        PROFILE DROPDOWN
@@ -704,6 +678,23 @@ document.addEventListener(
        ========================================================== */
 
     renderHistory();
+
+    if (FRMS.mountRequestPagination) {
+      const unsubscribe = await FRMS.mountRequestPagination({ isAdmin: true, tableBody,
+        controls: [...tabs, monthFilter], filters: () => ({ status: activeStatus, month: monthFilter.value }),
+        onChange: records => { historyRequests.splice(0, historyRequests.length, ...records); renderHistory(); },
+        onCounts: counts => { summaryCounts = counts; updateCounts(); }
+      });
+      window.addEventListener("pagehide", unsubscribe, { once: true });
+    } else     if (FRMS.watchRequests) {
+      try {
+        const unsubscribe = await FRMS.watchRequests(records => {
+          historyRequests.splice(0, historyRequests.length, ...records);
+          updateCounts(); renderHistory();
+        }, true);
+        window.addEventListener("pagehide", unsubscribe, { once: true });
+      } catch (error) { FRMS.showError(error); }
+    }
 
   }
 );

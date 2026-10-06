@@ -1,16 +1,6 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    function owner(uid) { return request.auth != null && request.auth.uid == uid; }
-    function admin() { return request.auth != null && request.auth.token.get('admin', false) == true; }
-    match /supportingDocuments/{uid}/{requestId}/proposal.pdf {
-      allow read: if owner(uid) || admin();
-      allow create, update: if owner(uid)
-        && !firestore.exists(/databases/(default)/documents/reservations/$(requestId))
-        && request.resource.size <= 5 * 1024 * 1024
-        && request.resource.contentType == 'application/pdf';
-      allow delete: if owner(uid)
-        && !firestore.exists(/databases/(default)/documents/reservations/$(requestId));
-    }
+    match /{allPaths=**} { allow read, write: if false; }
   }
 }

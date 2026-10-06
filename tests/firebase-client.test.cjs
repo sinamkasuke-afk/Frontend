@@ -2,9 +2,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-function client(isAdmin = false) {
-  const calls = [], writes = [], filters = [], subscriptions = [], persistence = [], deletes = [];
-  const user = { uid: 'student-1', email: 'student@example.com', updateProfile: async profile => { user.displayName = profile.displayName; }, getIdTokenResult: async () => ({ claims: { admin: isAdmin } }) };
+function client(isAdmin = false, verified = true) {
+  const calls = [], writes = [], filters = [], subscriptions = [], persistence = [], deletes = [], fetches = [];
+  const user = { emailVerified: verified, reload: async () => {}, getIdToken: async () => 'token', sendEmailVerification: async () => calls.push({ name: 'verification-email' }), uid: 'student-1', email: 'student@example.com', updateProfile: async profile => { user.displayName = profile.displayName; }, getIdTokenResult: async () => ({ claims: { admin: isAdmin } }) };
   const records = {
     reservations: [{ id: 'request-1', value: { ownerUid: user.uid, status: 'pending' } }],
     venues: [{ id: 'hall', value: { active: true, name: 'Hall', order: 1 } }],
@@ -24,7 +24,7 @@ function client(isAdmin = false) {
         subscriptions.push({ name, callback });
         return () => subscriptions.push({ stopped: true });
       },
-      doc: id => ({ name, id, collection: sub => ({ doc: child => ({ name: sub, id: child }) }), get: async () => ({ exists: false }), set: async data => writes.push({ name, id, data }) })
+      doc: id => ({ name, id, collection: sub => ({ doc: child => ({ name: sub, id: child }) }), get: async () => ({ exists: false, data: () => ({ displayName: user.displayName || user.email, enrollmentStatus: 'approved' }) }), set: async data => writes.push({ name, id, data }) })
     }; return query;
   } };
   const firebase = {
@@ -36,11 +36,12 @@ function client(isAdmin = false) {
   };
   const reservationService = {
     submitReservation: async options => { calls.push({ name: 'firestore-submit', data: options.data }); if(options.data.hasAttachment) calls.push(await options.verifyAttachment(user.uid, options.data.requestId)); return { id: options.data.requestId }; },
+    cancelReservation: async options => { calls.push({ name: 'firestore-cancel', data: options.data }); },
     reviewReservation: async options => { calls.push({ name: 'firestore-review', data: options.data }); }
   };
-  const sandbox = { FRMS_RESERVATION_SERVICE: reservationService, Uint8Array, btoa: value => Buffer.from(value, 'binary').toString('base64'), CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } }, window: { dispatchEvent() {}, FIREBASE_CONFIG: { apiKey: 'test', projectId: 'test', appId: 'test' } }, firebase, console, document: { addEventListener: () => {} }, sessionStorage: { removeItem: () => {} }, location: { replace: () => {} } };
+  const sandbox = { fetch: async (url, options) => { fetches.push({ url, options }); return { ok: true, json: async () => [{ result: { aggregateFields: { count: { integerValue: '3' } } } }] }; }, FRMS_RESERVATION_SERVICE: reservationService, Uint8Array, btoa: value => Buffer.from(value, 'binary').toString('base64'), CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } }, window: { dispatchEvent() {}, FIREBASE_CONFIG: { apiKey: 'test', projectId: 'test', appId: 'test' } }, firebase, console, document: { addEventListener: () => {}, createElement: () => ({ style: {}, append() {} }), body: { prepend() {} } }, sessionStorage: { removeItem: () => {} }, location: { replace: () => {} } };
   vm.createContext(sandbox); vm.runInContext(fs.readFileSync('js/firebase/client.js', 'utf8'), sandbox);
-  return { api: sandbox.window.FRMS, calls, writes, filters, subscriptions, persistence, deletes };
+  return { api: sandbox.window.FRMS, calls, writes, filters, subscriptions, persistence, deletes, fetches, records };
 }
 test('login creates student and admin profiles without storing passwords', async () => {
   for (const admin of [false, true]) {
@@ -55,11 +56,15 @@ test('student list queries are scoped to owner and available slots omit bookings
   assert.deepEqual(Array.from(await api.availableSlots('hall', '2026-10-15'), slot => slot.id), ['midday']);
   assert(filters.some(filter => filter.join('/') === 'bookings/dateISO/==/2026-10-15'));
 });
-test('PDF submission uses Firestore document metadata without paid services', async () => {
-  const { api, calls } = client(); const file = { name: 'proposal.pdf', size: 4, arrayBuffer: async () => new Uint8Array([37,80,68,70]).buffer };
-  assert.equal(await api.submit({ requestId: 'request-1', venueId: 'hall' }, file), 'request-1');
-  assert.equal(calls[0].name, 'firestore-submit'); assert.equal(calls[0].data.hasAttachment, true);
-  assert.equal(calls[1].path, 'reservations/request-1/documents/proposal');
+test('submission uses verified email and has no PDF support', async () => {
+  const { api, calls } = client();
+  assert.equal(await api.submit({ requestId: 'request-1', venueId: 'hall' }), 'request-1');
+  assert.equal(calls[0].name, 'firestore-submit');
+  assert(!('hasAttachment' in calls[0].data));
+  assert.equal(api.openDocument, undefined);
+  const unverified = client(false, false);
+  await assert.rejects(unverified.api.submit({ requestId: 'request-1' }), /Verify your email/);
+  assert.equal(unverified.calls.length, 0);
 });
 test('student cannot invoke admin review; admin uses a Firestore transaction', async () => {
   const student = client(); await assert.rejects(student.api.updateStatus('request-1', 'approved'));
@@ -70,7 +75,7 @@ test('student cannot invoke admin review; admin uses a Firestore transaction', a
 
 test('registration saves a student profile and name without copying passwords', async () => {
   const { api, writes } = client(true);
-  await api.register(' Alex Student ', 'alex@example.com', 'TestPass123!');
+  await api.register(' Alex Student ', 'alex@gmail.com', 'TestPass123!', '2026-001');
   assert.equal(writes[0].name, 'users');
   assert.equal(writes[0].data.role, 'student');
   assert.equal(writes[0].data.displayName, 'Alex Student');
@@ -79,9 +84,9 @@ test('registration saves a student profile and name without copying passwords', 
 });
 test('invalid registration input cannot create a profile', async () => {
   const { api, writes } = client();
-  await assert.rejects(api.register('', 'alex@example.com', 'TestPass123!'));
+  await assert.rejects(api.register('', 'alex@gmail.com', 'TestPass123!'));
   await assert.rejects(api.register('Alex', 'alex', 'TestPass123!'));
-  await assert.rejects(api.register('Alex', 'alex@example.com', 'short'));
+  await assert.rejects(api.register('Alex', 'alex@gmail.com', 'short'));
   assert.equal(writes.length, 0);
 });
 
@@ -97,16 +102,31 @@ test('sessions are tab-specific and student live updates remain owner-scoped', a
   assert.equal(subscriptions[1].stopped, true);
 });
 
-test('students can delete their own reservation atomically but cannot delete another student request', async () => {
-  const student = client();
-  await assert.rejects(student.api.deleteReservation('someone-elses-request'));
-  assert.equal(student.deletes.length, 0);
-  await student.api.deleteReservation('request-1');
-  assert.deepEqual(student.deletes, ['bookings/hall_date_morning', 'documents/proposal', 'reservations/request-1']);
-  const admin = client(true);
-  await admin.api.deleteReservation('request-1');
-  assert.deepEqual(admin.deletes, ['bookings/hall_date_morning', 'documents/proposal', 'reservations/request-1']);
-  const other = client(true);
-  await other.api.deleteReservation('old-request');
-  assert(!other.deletes.some(path => path.startsWith('bookings/')));
+test('cancellation calls the audited service without deleting documents', async () => {
+  const { api, calls, deletes } = client();
+  await api.cancelReservation('request-1');
+  assert.equal(calls[0].name, 'firestore-cancel');
+  assert.equal(calls[0].data.id, 'request-1');
+  assert.equal(deletes.length, 0);
+  assert.equal(api.deleteReservation, undefined);
+});
+
+test('global totals use owner-scoped aggregation queries instead of downloading all reservations', async () => {
+  const { api, fetches } = client();
+  const counts = await api.requestCounts();
+  assert.equal(counts.total, 3);
+  assert.equal(fetches.length, 6);
+  for (const request of fetches) {
+    const body = JSON.parse(request.options.body);
+    assert.equal(body.structuredAggregationQuery.aggregations[0].alias, 'count');
+    assert(request.options.body.includes('student-1'));
+    assert.equal(request.options.headers.Authorization, 'Bearer token');
+  }
+});
+test('slot availability ignores expired pending holds but preserves old approved bookings', async () => {
+  const { api, records } = client();
+  records.bookings[0].value = { slotId: 'morning', status: 'pending', createdAt: { seconds: Math.floor(Date.now() / 1000) - 49 * 3600 } };
+  assert.deepEqual(Array.from(await api.availableSlots('hall', '2026-10-15'), slot => slot.id), ['morning', 'midday']);
+  records.bookings[0].value.status = 'approved';
+  assert.deepEqual(Array.from(await api.availableSlots('hall', '2026-10-15'), slot => slot.id), ['midday']);
 });

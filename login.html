@@ -144,13 +144,13 @@
               for="identifier"
               id="identifier-label"
             >
-              Student ID or Email
+              Email
             </label>
 
 <input
   type="text"
   id="identifier"
-  placeholder="Enter your email or student ID"
+  placeholder="Enter your Gmail email address"
   inputmode="email"
   
   maxlength="254"
@@ -189,21 +189,10 @@
 
           <div class="login-options">
 
-            <label class="remember">
-
-              <input
-                type="checkbox"
-                id="remember"
-              >
-
-              <span>
-                Remember me
-              </span>
-
-            </label>
 
 
-            <a href="#">
+
+            <a href="#" id="forgot-password">
               Forgot password?
             </a>
 
@@ -229,6 +218,10 @@
             <div class="login-field">
               <label for="register-name">Full name</label>
               <input id="register-name" type="text" autocomplete="name" maxlength="100" required>
+            </div>
+            <div class="login-field">
+              <label for="register-student-id">Student ID</label>
+              <input id="register-student-id" type="text" maxlength="50" pattern="[a-zA-Z0-9-]+" required placeholder="Your school student ID">
             </div>
             <div class="login-field">
               <label for="register-email">Email</label>
@@ -259,13 +252,13 @@
     <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase/config.js"></script>
-  <script src="js/data/sample-data.js"></script>
-  <script src="js/firebase/demo.js"></script>
-  <script src="js/firebase/reservation-service.js?v=request-number-1"></script>
-  <script src="js/firebase/client.js?v=request-number-1"></script>
+  <script src="js/firebase/config.js?v=paging-enrollment-1"></script>
+  <script src="js/data/sample-data.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/reservation-service.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/request-pagination.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/client.js?v=paging-enrollment-1"></script>
 <script src="js/components/navbar.js"></script>
-  <script src="js/pages/login.js?v=register-2"></script>
+  <script src="js/pages/login.js?v=paging-enrollment-1"></script>
 
 </body>
 </html>

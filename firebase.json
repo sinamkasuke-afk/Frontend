@@ -18,7 +18,9 @@
       "storage.rules",
       "firestore.indexes.json",
       "DATABASE_SCHEMA.md",
-      "package*.json"
+      "package*.json",
+      "firebase.test.json",
+      "ARCHITECTURE.md"
     ]
   }
 }

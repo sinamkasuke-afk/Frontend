@@ -85,10 +85,7 @@ document.addEventListener(
       );
 
 
-    const documentElement =
-      document.getElementById(
-        "review-document"
-      );
+
 
 
     const backButton =
@@ -283,14 +280,6 @@ document.addEventListener(
       "No additional setup notes.";
 
 
-    documentElement.textContent =
-      reservation.supportingDocument
-        ? reservation
-            .supportingDocument
-            .name
-        : "No supporting document attached.";
-
-
     /* Modal preview */
 
     confirmVenue.textContent =
@@ -419,7 +408,7 @@ document.addEventListener(
         successRequestId.textContent = FRMS.requestLabel ? FRMS.requestLabel(id) : id;
         showModal(successModal);
         clearReservation();
-        try { await saveDraftDocument(null); } catch (error) { console.error("Unable to remove local PDF draft:", error); }
+
       } catch (error) {
         FRMS.showError(error);
         const message = document.getElementById("submission-error-message");
@@ -494,9 +483,7 @@ document.addEventListener(
       if (!submissionId) { submissionId = crypto.randomUUID(); updateReservation({ submissionId }); reservation.submissionId = submissionId; }
       submittedRequest.requestId = submissionId;
       submittedRequest.venueId = reservation.venue?.id || null;
-      const file = reservation.supportingDocument ? await readDraftDocument() : null;
-      if (reservation.supportingDocument && !file) throw new Error("Select your supporting PDF again in Event Details before submitting.");
-      return FRMS.submit(submittedRequest, file);
+      return FRMS.submit(submittedRequest);
     }
 
 

@@ -31,13 +31,13 @@ test('shared reservation script and login script coexist; register button opens 
 });
 test('registration submit validates confirmation and calls Firebase registration', async () => {
   const { element, context, calls } = page();
-  element('register-name').value = 'Alex Student'; element('register-email').value = 'alex@example.com';
+  element('register-student-id').value = '2026-001'; element('register-name').value = 'Alex Student'; element('register-email').value = 'alex@example.com';
   element('register-password').value = 'TestPass123!'; element('register-confirm').value = 'different';
   await element('register-form').listeners.submit({ preventDefault() {} });
   assert.equal(calls.length, 0); assert.equal(element('register-error').hidden, false);
   element('register-confirm').value = 'TestPass123!';
   await element('register-form').listeners.submit({ preventDefault() {} });
-  assert.deepEqual(Array.from(calls[0]), ['Alex Student', 'alex@example.com', 'TestPass123!']);
+  assert.deepEqual(Array.from(calls[0]), ['Alex Student', 'alex@example.com', 'TestPass123!', '2026-001']);
   assert.equal(context.location.href, 'dashboard.html');
   assert.equal(element('register-submit').disabled, false);
 });

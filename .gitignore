@@ -5,3 +5,12 @@ node_modules/
 .env
 .env.*
 *service-account*.json
+
+*firebase-adminsdk*.json
+*service_account*.json
+firestore-debug.log
+ui-debug.log
+
+.vercel/
+.vercel
+.env*

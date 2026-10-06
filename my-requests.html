@@ -347,7 +347,7 @@
             <input
               type="text"
               id="request-search"
-              placeholder="Search request or venue..."
+              placeholder="Search this page by request or venue..."
             />
 
           </div>
@@ -421,6 +421,7 @@
 
           </button>
 
+          <button type="button" class="request-tab" data-status="cancelled">Cancelled</button><button type="button" class="request-tab" data-status="expired">Expired</button>
         </div>
 
 
@@ -533,17 +534,17 @@
     <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase/config.js"></script>
-  <script src="js/data/sample-data.js"></script>
-  <script src="js/firebase/demo.js"></script>
-  <script src="js/firebase/reservation-service.js?v=request-number-1"></script>
-  <script src="js/firebase/client.js?v=request-number-1"></script>
+  <script src="js/firebase/config.js?v=paging-enrollment-1"></script>
+  <script src="js/data/sample-data.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/reservation-service.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/request-pagination.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/client.js?v=paging-enrollment-1"></script>
 
   <!-- COMPONENT -->
   <script src="js/components/navbar.js"></script>
 
   <!-- PAGE -->
-  <script src="js/pages/my-requests.js?v=request-number-1"></script>
+  <script src="js/pages/my-requests.js?v=paging-enrollment-1"></script>
 
 </body>
 </html>

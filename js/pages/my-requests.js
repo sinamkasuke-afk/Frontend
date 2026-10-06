@@ -3,7 +3,7 @@ document.addEventListener(
   async function () {
     try {
       if (!await FRMS.requireUser(false)) return;
-      var reservationRequests = await FRMS.requests();
+      var reservationRequests = FRMS.mountRequestPagination ? [] : await FRMS.requests();
     } catch (error) { FRMS.showError(error); return; }
 
 
@@ -75,12 +75,13 @@ document.addEventListener(
        COUNTS
        ========================================================== */
 
+    let summaryCounts = null;
     function updateCounts() {
-      document.getElementById("total-count").textContent = requests.length;
-      document.getElementById("all-tab-count").textContent = requests.length;
+      document.getElementById("total-count").textContent = summaryCounts?.total ?? requests.length;
+      document.getElementById("all-tab-count").textContent = summaryCounts?.total ?? requests.length;
       for (const status of ["pending", "approved", "declined"]) {
-        document.getElementById(status + "-count").textContent = countStatus(status);
-        document.getElementById(status + "-tab-count").textContent = countStatus(status);
+        document.getElementById(status + "-count").textContent = summaryCounts?.[status] ?? countStatus(status);
+        document.getElementById(status + "-tab-count").textContent = summaryCounts?.[status] ?? countStatus(status);
       }
     }
 
@@ -357,8 +358,8 @@ document.addEventListener(
                       )}
                     </span>
 
-                    <button type="button" data-delete-reservation="${escapeHTML(request.id)}"
-                      style="margin-left:8px;padding:7px 10px;background:#b42318;color:white;border:0;border-radius:6px;cursor:pointer">Delete</button>
+                    ${["pending", "approved"].includes(status) ? `<button type="button" data-cancel-reservation="${escapeHTML(request.id)}"
+                      style="margin-left:8px;padding:7px 10px;background:#b42318;color:white;border:0;border-radius:6px;cursor:pointer">Cancel</button>` : ""}
                   </td>
 
                 </tr>
@@ -496,23 +497,30 @@ document.addEventListener(
        ========================================================== */
 
     tableBody.addEventListener("click", async event => {
-      const button = event.target.closest("[data-delete-reservation]");
+      const button = event.target.closest("[data-cancel-reservation]");
       if (!button) return;
       event.stopPropagation();
-      if (!window.confirm("Permanently delete your reservation and its attachment? Its time slot will be released.")) return;
+      if (!window.confirm("Cancel your reservation and release its time slot? Its history will be kept.")) return;
       button.disabled = true;
-      try { await FRMS.deleteReservation(button.dataset.deleteReservation); }
+      try { await FRMS.cancelReservation(button.dataset.cancelReservation); }
       catch (error) { button.disabled = false; FRMS.showError(error); }
     });
-    window.addEventListener("reservation-deleted", event => {
+    window.addEventListener("reservation-cancelled", event => {
       const index = requests.findIndex(request => request.id === event.detail.id);
-      if (index !== -1) requests.splice(index, 1);
+      if (index !== -1) requests[index].status = "cancelled";
       updateCounts();
       renderRequests();
     });
     updateCounts();
     renderRequests();
-    if (FRMS.watchRequests) {
+    if (FRMS.mountRequestPagination) {
+      const unsubscribe = await FRMS.mountRequestPagination({
+        tableBody, controls: [...tabs], filters: () => ({ status: activeStatus }),
+        onChange: records => { requests.splice(0, requests.length, ...records); renderRequests(); },
+        onCounts: counts => { summaryCounts = counts; updateCounts(); }
+      });
+      window.addEventListener("pagehide", unsubscribe, { once: true });
+    } else     if (FRMS.watchRequests) {
       try {
         const unsubscribe = await FRMS.watchRequests(records => {
           requests.splice(0, requests.length, ...records);
