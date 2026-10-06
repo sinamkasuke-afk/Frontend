@@ -308,8 +308,17 @@ function renderNavbar(containerId, activePage, variant = "public") {
 
         ${links
           .map(
-            (link) => `
-              ${variant === "student" && link.label === "Logout" ? '<span class="navbar__student-name" hidden></span>' : ""}
+            (link) => variant === "student" && link.label === "Logout" ? `
+              <div class="navbar__student-profile">
+                <button type="button" class="navbar__student-toggle" aria-expanded="false" aria-controls="student-logout-menu">
+                  <span class="navbar__student-name">Student</span>
+                  <span class="navbar__student-arrow" aria-hidden="true">⌄</span>
+                </button>
+                <div id="student-logout-menu" class="navbar__student-menu" hidden>
+                  <a href="index.html" data-logout>↪ Logout</a>
+                </div>
+              </div>
+            ` : `
               <a
                 href="${link.href}"
                 class="navbar__link"
@@ -325,6 +334,28 @@ function renderNavbar(containerId, activePage, variant = "public") {
     </header>
   `;
 
+  if (variant === "student") {
+    const wrapper = container.querySelector(".navbar__student-profile");
+    const button = wrapper.querySelector("button");
+    const menu = wrapper.querySelector(".navbar__student-menu");
+    const setOpen = open => {
+      button.setAttribute("aria-expanded", String(open));
+      menu.hidden = !open;
+    };
+    button.addEventListener("click", () => setOpen(menu.hidden));
+    document.addEventListener("click", event => {
+      if (!wrapper.contains(event.target)) setOpen(false);
+    });
+    wrapper.addEventListener("focusout", event => {
+      if (!wrapper.contains(event.relatedTarget)) setOpen(false);
+    });
+    wrapper.addEventListener("keydown", event => {
+      if (event.key === "Escape") { setOpen(false); button.focus(); }
+      if (event.key === "ArrowDown" && event.target === button) {
+        event.preventDefault(); setOpen(true); menu.querySelector("a").focus();
+      }
+    });
+  }
   if (variant === "student" && window.FRMS) {
     FRMS.currentUser().then(user => {
       const name = container.querySelector(".navbar__student-name");

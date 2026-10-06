@@ -445,3 +445,19 @@
 @media (max-width: 600px) {
   .navbar__student-name { max-width: 110px; font-size: 12px; }
 }
+
+.navbar__student-profile { position: relative; }
+.navbar__student-toggle {
+  display: flex; align-items: center; gap: 10px; padding: 12px 0;
+  border: 0; background: transparent; font: inherit; color: #173f31; cursor: pointer;
+}
+.navbar__student-arrow { transition: transform .2s ease; }
+.navbar__student-toggle[aria-expanded="true"] .navbar__student-arrow { transform: rotate(180deg); }
+.navbar__student-toggle:focus-visible { outline: 2px solid #173f31; outline-offset: 4px; border-radius: 6px; }
+.navbar__student-menu {
+  position: absolute; top: calc(100% + 10px); right: 0; min-width: 180px;
+  padding: 8px; background: #fff; border: 1px solid #e7e4da; border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(20, 46, 37, .14); z-index: 1000;
+}
+.navbar__student-menu a { display: block; padding: 12px 16px; border-radius: 8px; color: #b52229; font-weight: 600; }
+.navbar__student-menu a:hover, .navbar__student-menu a:focus-visible { background: #fff1f1; }
