@@ -233,7 +233,6 @@ async function refreshTimeSlots() {
     const dateISO = `${reservation.date.getFullYear()}-${String(reservation.date.getMonth() + 1).padStart(2, "0")}-${String(reservation.date.getDate()).padStart(2, "0")}`;
     const slots = await FRMS.availableSlots(reservation.venue.id, dateISO);
     if (version !== slotLoadVersion) return;
-    if (!slots.length) { timeSlotsElement.textContent = "No slots are available for this date."; return; }
     renderTimeSlots(
     "time-slots",
     reservation.date,

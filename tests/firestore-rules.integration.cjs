@@ -22,7 +22,7 @@ beforeEach(async () => {
     const database = ctx.firestore();
     await database.collection('venues').doc('hall').set({ name: 'Hall', active: true, capacity: 50, location: 'Campus' });
     await database.collection('venues').doc('other-hall').set({ name: 'Other Hall', active: true, capacity: 50, location: 'Campus' });
-    await database.collection('timeSlots').doc('morning').set({ label: 'Morning', active: true, startMinutes: 420 });
+    await database.collection('timeSlots').doc('morning').set({ label: 'Morning', active: true, startMinutes: 420, endMinutes:600 });
     await database.collection('users').doc(uid).set({ uid, email, displayName: actor.name, role: 'student', studentId: '2026-001', confirmedStudentId: '2026-001', enrollmentStatus: 'approved' });
   });
 });
@@ -46,7 +46,8 @@ test('owner cancellation retains audit and releases slot; other users cannot can
 });
 test('same slot at different venues succeeds and same venue cannot be double booked', async () => {
   await submit();
-  await assertSucceeds(submit(db(), { requestId: 'request-2', venueId: 'other-hall' }));
+  await env.withSecurityRulesDisabled(async ctx=>{await ctx.firestore().collection('users').doc('student2').set({uid:'student2',email:'student2@gmail.com',displayName:'Second Student',role:'student',enrollmentStatus:'approved',studentId:'2026-002',confirmedStudentId:'2026-002'});});
+  await assertSucceeds(submitReservation({db:db('student2'),actor:{uid:'student2',email:'student2@gmail.com',name:'Second Student'},data:{...data,requestId:'request-2',venueId:'other-hall'},timestamp:stamp}));
   await assert.rejects(submit(db(), { requestId: 'request-3' }), { code: 'already-exists' });
 });
 test('direct writes cannot forge displayed venue, dates, quotas or attach PDFs', async () => {
@@ -161,4 +162,39 @@ test('administrator registration is pending and cannot grant itself privileges',
   await assertFails(db('other').collection('adminApplications').doc(uid).get());
   await assertSucceeds(db('admin1', true, true).collection('adminApplications').doc(uid).get());
   await assertFails(db().collection('users').doc(uid).update({ role: 'admin' }));
+});
+
+test('invalid overlapping catalog intervals cannot create reservations', async () => {
+  await env.withSecurityRulesDisabled(async ctx=>{await ctx.firestore().collection('timeSlots').doc('morning').update({endMinutes:780});});
+  await assert.rejects(submit(),/Time-slot configuration is invalid/);
+});
+
+test('Firestore rejects invalid slot boundaries even if browser validation is bypassed', async () => {
+  await env.withSecurityRulesDisabled(async ctx=>{await ctx.firestore().collection('timeSlots').doc('morning').update({endMinutes:780});});
+  const database=db();
+  const bypass={collection:name=>database.collection(name),runTransaction:action=>database.runTransaction(tx=>action({
+    get:async ref=>{const snap=await tx.get(ref);return ref.parent.id==='timeSlots'?{exists:snap.exists,data:()=>({...snap.data(),endMinutes:600})}:snap;},
+    set:(ref,value)=>tx.set(ref,value)
+  }))};
+  await assertFails(submit(bypass));
+});
+test('invitation records cannot be read or written directly from browsers', async () => {
+  for(const database of [db(),db('admin1',true,true)]) {
+    await assertFails(database.collection('adminInvitations').doc('hash').set({email:'other@gmail.com'}));
+    await assertFails(database.collection('adminInvitations').doc('hash').get());
+  }
+});
+
+test('server custom ranges can be approved and cancelled; managed days block legacy browser submissions', async () => {
+  await env.withSecurityRulesDisabled(async ctx => {
+    const serverRequire=require('node:module').createRequire(require('node:path').resolve('functions/package.json'));
+    const {initializeApp,getApps}=serverRequire('firebase-admin/app');
+    const {getFirestore,FieldValue}=serverRequire('firebase-admin/firestore');
+    const app=getApps()[0]||initializeApp({projectId:'demo-frms-rules'});
+    await submitReservation({db:getFirestore(app),actor,data:{...data,startMinutes:480,endMinutes:1200},timestamp:()=>FieldValue.serverTimestamp(),flexible:true});
+  });
+  await assertFails(submit(db(),{requestId:'legacy',slotId:'morning'}));
+  await assertSucceeds(reviewReservation({db:db('admin',true,true),actor:{uid:'admin',admin:true},data:{id:'request-1',status:'approved'},timestamp:stamp}));
+  assert.equal((await db().collection('reservations').doc('request-1').get()).data().endMinutes,1200);
+  await assertSucceeds(cancelReservation({db:db(),actor,data:{id:'request-1'},timestamp:stamp}));
 });

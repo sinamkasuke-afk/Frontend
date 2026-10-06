@@ -24,7 +24,12 @@ test('admin calendar navigates months, filters records and includes leap day', a
   const errors = [];
   const context = { window: { addEventListener() {} }, document, Date: FixedDate, FRMS: {
     requireUser: async () => true,
-    requests: async () => [{ id: 'request-1', dateISO: '2028-02-29', status: 'approved', venue: 'Hall', time: 'Morning', event: 'Leap day event' }],
+    requests: async () => { throw Error('Calendar must not load all records'); },
+    watchRequests: async (callback, isAdmin, options) => {
+      assert.equal(isAdmin, true); assert(options.month);
+      callback(options.month === '2028-02' ? [{id:'request-1',dateISO:'2028-02-29',status:'approved',venue:'Hall',time:'Morning',event:'Leap day event'}] : []);
+      return () => {};
+    },
     showError: error => errors.push(error)
   } };
   vm.createContext(context); vm.runInContext(fs.readFileSync('js/pages/admin-calendar.js', 'utf8'), context); await initialize();

@@ -1,4 +1,3 @@
-(() => {
 class ReservationError extends Error {
   constructor(code, message) { super(message); this.code = code; }
 }
@@ -21,7 +20,7 @@ function dateISO(value, now) {
   if (value < today) fail('invalid-argument', 'Past dates cannot be reserved.');
   return value;
 }
-async function submitReservation({ db, actor, data, timestamp, now = new Date(), onProgress = () => {} }) {
+async function submitReservation({ db, actor, data, timestamp, now = new Date(), onProgress = () => {}, flexible = false }) {
   onProgress(40, "Validating reservation details…");
   if (!actor?.uid) fail('unauthenticated', 'Sign in to submit a reservation.');
   const id = identifier(data.requestId, 'request ID');
@@ -34,7 +33,10 @@ async function submitReservation({ db, actor, data, timestamp, now = new Date(),
   }
   if (data.checkOnly === true) return { id: null };
   const venueId = identifier(data.venueId, 'venue');
-  const slotId = identifier(data.slotId, 'time slot');
+  const custom = flexible && data.startMinutes !== undefined;
+  const start = data.startMinutes, end = data.endMinutes;
+  if (custom && (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end > 1380 || start % 60 || end % 60 || end <= start)) fail('invalid-argument', 'Choose whole hours with an end time later than the start time on the same day.');
+  const slotId = custom ? `hours-${start}-${end}` : identifier(data.slotId, 'time slot');
   const date = dateISO(data.dateISO, now);
   const event = text(data.event, 'event name', true);
   const guests = Number(data.expectedGuests);
@@ -63,25 +65,43 @@ async function submitReservation({ db, actor, data, timestamp, now = new Date(),
     const requestNumber = (counter.exists ? counter.data().value : 0) + 1;
     if (requestNumber > 99999) fail('failed-precondition', 'Request numbers have reached their limit. Contact the administrator.');
     const venue = await transaction.get(db.collection('venues').doc(venueId));
-    const slot = await transaction.get(db.collection('timeSlots').doc(slotId));
+    const slot = custom ? null : await transaction.get(db.collection('timeSlots').doc(slotId));
     const booking = await transaction.get(bookingRef);
     if (!venue.exists || venue.data().active !== true) fail('failed-precondition', 'This facility is unavailable.');
-    if (!slot.exists || slot.data().active !== true) fail('failed-precondition', 'This time slot is unavailable.');
+    if (!custom && (!slot.exists || slot.data().active !== true)) fail('failed-precondition', 'This time slot is unavailable.');
+    const interval = { morning: [420, 600], midday: [600, 780], afternoon: [780, 960] }[slotId];
+    if (!custom && (!interval || slot.data().startMinutes !== interval[0] || slot.data().endMinutes !== interval[1])) fail('failed-precondition', 'Time-slot configuration is invalid. Contact the facilities office.');
     if (venue.data().capacity && guests > venue.data().capacity) fail('invalid-argument', 'The guest count exceeds this facility’s capacity.');
     const staleHold = booking.exists && booking.data().status === 'pending' && booking.data().createdAt?.seconds !== undefined && now.getTime() >= booking.data().createdAt.seconds * 1000 + 48 * 3600000;
     if (booking.exists && !staleHold) fail('already-exists', 'This venue and time slot have already been reserved. Choose another slot.');
+    const range = custom ? [start, end] : interval;
+    if (flexible) {
+      const occupied = await transaction.get(db.collection('bookings').where('venueId', '==', venueId).where('dateISO', '==', date));
+      for (const document of occupied.docs) {
+        const value = document.data();
+        if (value.status === 'pending' && value.createdAt?.seconds !== undefined && now.getTime() >= value.createdAt.seconds * 1000 + 48 * 3600000) continue;
+        const other = Number.isInteger(value.startMinutes) && Number.isInteger(value.endMinutes) ? [value.startMinutes, value.endMinutes] : { morning: [420,600], midday: [600,780], afternoon: [780,960] }[value.slotId];
+        if (!other) fail('failed-precondition', 'A booking has an unknown time range. Contact the administrator.');
+        if (range[0] < other[1] && range[1] > other[0]) fail('already-exists', 'This facility is already reserved during part of your selected time. Choose another time or facility.');
+      }
+      const starts = new Date(date + 'T00:00:00+08:00').getTime() + range[0] * 60000;
+      if (now.getTime() >= starts) fail('invalid-argument', 'Choose a start time in the future.');
+    }
+    const formatHour = minutes => `${(minutes / 60) % 12 || 12}:00 ${minutes < 720 ? 'AM' : 'PM'}`;
     const requester = actor.name || actor.email || actor.uid;
     const record = { ...detail, id, requestId: id, requestNumber, ownerUid: actor.uid, requester,
       requesterType: actor.admin ? 'Admin' : 'Student', initials: requester.slice(0, 2).toUpperCase(),
       venueId, venue: venue.data().name, venueDetail: venue.data().location || '',
-      slotId, dateISO: date, date, time: slot.data().label, event,
+      slotId, dateISO: date, date, time: custom ? `${formatHour(start)} – ${formatHour(end)}` : slot.data().label, event,
       expectedGuests: guests, status: 'pending', bookingId, createdAt: timestamp(), quotaId, lastEventId: eventRef.id };
+    if (flexible) { record.startMinutes = range[0]; record.endMinutes = range[1]; }
     assignedNumber = requestNumber;
     onProgress(85, "Saving your reservation…");
     transaction.set(quotaRef, { count: dailyCount, ownerUid: actor.uid, reservationId: id, updatedAt: timestamp() });
     transaction.set(counterRef, { value: requestNumber, reservationId: id });
     transaction.set(reservationRef, record);
-    transaction.set(bookingRef, { reservationId: id, venueId, dateISO: date, slotId, status: 'pending', createdAt: timestamp() });
+    if (flexible) transaction.set(db.collection('bookingDays').doc(`${venueId}_${date}`), { updatedAt: timestamp() });
+    transaction.set(bookingRef, { reservationId: id, venueId, dateISO: date, slotId, status: 'pending', createdAt: timestamp(), ...(flexible ? { startMinutes: range[0], endMinutes: range[1] } : {}) });
     transaction.set(eventRef, { reservationId: id, ownerUid: actor.uid, actorUid: actor.uid, action: 'submitted', status: 'pending', createdAt: timestamp() });
   });
   return { id, requestNumber: assignedNumber };
@@ -106,7 +126,7 @@ async function reviewReservation({ db, actor, data, timestamp, now = new Date() 
     const booking = await transaction.get(bookingRef);
     if (data.status === 'approved') {
       if (booking.exists && booking.data().reservationId !== id) fail('already-exists', 'Another request now holds this slot.');
-      transaction.set(bookingRef, { reservationId: id, venueId: record.venueId, dateISO: record.dateISO, slotId: record.slotId, status: 'approved', createdAt: timestamp() });
+      transaction.set(bookingRef, { reservationId: id, venueId: record.venueId, dateISO: record.dateISO, slotId: record.slotId, status: 'approved', createdAt: timestamp(), ...(Number.isInteger(record.startMinutes) ? { startMinutes: record.startMinutes, endMinutes: record.endMinutes } : {}) });
     } else if (booking.exists && booking.data().reservationId === id) transaction.delete(bookingRef);
     transaction.update(ref, { status: data.status, updatedAt: timestamp(), reviewedBy: actor.uid, lastEventId: eventRef.id });
     transaction.set(eventRef, { reservationId: id, ownerUid: record.ownerUid, actorUid: actor.uid, action: data.status, status: data.status, createdAt: timestamp() });
@@ -126,7 +146,7 @@ async function cancelReservation({ db, actor, data, timestamp, now = new Date() 
     if (record.status === 'cancelled') return;
     if (!['pending', 'approved'].includes(record.status)) fail('failed-precondition', 'This reservation is already closed.');
     const slot = await transaction.get(db.collection('timeSlots').doc(record.slotId));
-    const starts = new Date(record.dateISO + 'T00:00:00+08:00').getTime() + (slot.data()?.startMinutes || 0) * 60000;
+    const starts = new Date(record.dateISO + 'T00:00:00+08:00').getTime() + (record.startMinutes ?? slot.data()?.startMinutes ?? 0) * 60000;
     if (!actor.admin && now.getTime() >= starts) fail('failed-precondition', 'The event has started. Contact the administrator to cancel.');
     const bookingRef = db.collection('bookings').doc(record.bookingId);
     const booking = await transaction.get(bookingRef);
@@ -139,5 +159,3 @@ async function cancelReservation({ db, actor, data, timestamp, now = new Date() 
 const reservationService = { ReservationError, submitReservation, reviewReservation, cancelReservation, dateISO };
 if (typeof module !== 'undefined') module.exports = reservationService;
 else window.FRMS_RESERVATION_SERVICE = reservationService;
-
-})();

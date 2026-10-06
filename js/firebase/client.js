@@ -49,7 +49,7 @@ window.FRMS = (() => {
     admin = (await user.getIdTokenResult(true)).claims.admin === true;
     if (isAdmin && !admin) {
       try {
-        await activateAdminRegistration();
+        await activateAdminRegistration(document.getElementById("admin-login-invitation")?.value || "");
         admin = (await user.getIdTokenResult(true)).claims.admin === true;
         if (!admin) throw new Error("Administrator access is not enabled. Register as Administrator first.");
       } catch (error) { await auth.signOut(); user = null; admin = false; throw error; }
@@ -59,6 +59,7 @@ window.FRMS = (() => {
       throw new Error("This is an administrator account. Use Admin Login, or sign in with your student account.");
     }
     await ensureProfile();
+    requestCache.clear();
     sessionStorage.removeItem("frms_reservation");
   }
   async function register(displayName, email, password, studentId) {
@@ -80,16 +81,18 @@ window.FRMS = (() => {
       await auth.signOut(); user = null;
       throw new Error("Your account was created, but your profile could not be saved. Sign in again to finish setup.");
     }
+    requestCache.clear();
     sessionStorage.removeItem("frms_reservation");
   }
-  async function activateAdminRegistration() {
-    const response = await fetch("/api/admin-register", { method: "POST", headers: { Authorization: "Bearer " + await user.getIdToken(), "Content-Type": "application/json" }, body: "{}" });
+  async function activateAdminRegistration(invitationCode) {
+    const response = await fetch("/api/admin-register", { method: "POST", headers: { Authorization: "Bearer " + await user.getIdToken(), "Content-Type": "application/json" }, body: JSON.stringify({ invitationCode }) });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Could not register administrator access.");
   }
-  async function registerAdmin(displayName, email, password) {
+  async function registerAdmin(displayName, email, password, invitationCode) {
     await ready;
     displayName = displayName.trim(); email = email.trim();
+    if (!/^[a-f0-9]{48}$/.test((invitationCode || "").trim())) throw new Error("Enter the invitation code supplied by an authorized administrator.");
     if (!displayName || displayName.length > 100) throw new Error("Enter your full name (up to 100 characters).");
     if (!email.includes("@")) throw new Error("Enter a valid email address.");
     if (password.length < 8) throw new Error("Use at least eight characters for your password.");
@@ -105,10 +108,11 @@ window.FRMS = (() => {
       throw error;
     }
     try {
-      await activateAdminRegistration();
+      await activateAdminRegistration(invitationCode);
       admin = (await user.getIdTokenResult(true)).claims.admin === true;
       if (!admin) throw new Error("Your account is saved. Sign in through Admin Login to finish registration.");
     } catch (error) { await auth.signOut(); user = null; admin = false; throw error; }
+    requestCache.clear();
     sessionStorage.removeItem("frms_reservation");
   }
   async function ensureProfile(studentId = "") {
@@ -138,17 +142,43 @@ window.FRMS = (() => {
       return record;
     })
       .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-    requestCache.clear();
     records.forEach(record => requestCache.set(record.id, record));
+    while (requestCache.size > 500) requestCache.delete(requestCache.keys().next().value);
     return records;
   }
-  async function requests(isAdmin = false) {
-    if (!await requireUser(isAdmin)) return [];
-    return requestRecords(await requestQuery(isAdmin).get());
+  function scopedRequestQuery(isAdmin, options) {
+    let query = requestQuery(isAdmin);
+    if (!options) return query;
+    if (options.month) {
+      const [year, month] = options.month.split('-').map(Number);
+      const end = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
+      query = query.where('dateISO', '>=', options.month + '-01').where('dateISO', '<', end).orderBy('dateISO', 'desc');
+    }
+    query = query.orderBy('createdAt', 'desc');
+    if (options.limit) query = query.limit(options.limit);
+    return query;
   }
-  async function watchRequests(onChange, isAdmin = false) {
+  function upcomingQuery(isAdmin) {
+    const today = new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);
+    return requestQuery(isAdmin).where('status','==','approved').where('dateISO','>=',today).orderBy('dateISO','asc').limit(1);
+  }
+  async function upcomingReservation(isAdmin = false) {
+    if (!await requireUser(isAdmin)) return null;
+    return requestRecords(await upcomingQuery(isAdmin).get())[0] || null;
+  }
+  async function watchUpcoming(onChange) {
+    if (!await requireUser()) return () => {};
+    return upcomingQuery(false).onSnapshot(snapshot => onChange(requestRecords(snapshot)[0] || null), showError);
+  }
+  async function requests(isAdmin = false, options = null) {
+    if (!await requireUser(isAdmin)) return [];
+    return requestRecords(await scopedRequestQuery(isAdmin, options).get());
+  }
+  async function watchRequests(onChange, isAdmin = false, options = null) {
     if (!await requireUser(isAdmin)) return () => {};
+    let latestRecords = [];
     const refresh = records => {
+      latestRecords = records;
       onChange(records);
       if (isAdmin) for (const record of records) {
         if ((record.storedStatus || record.status) !== "pending" || !record.createdAt?.seconds || Date.now() < record.createdAt.seconds * 1000 + 48 * 3600000 || expiring.has(record.id)) continue;
@@ -156,8 +186,8 @@ window.FRMS = (() => {
         updateStatus(record.id, "expired").catch(showError).finally(() => expiring.delete(record.id));
       }
     };
-    const unsubscribe = requestQuery(isAdmin).onSnapshot(snapshot => refresh(requestRecords(snapshot)), showError);
-    const interval = isAdmin ? setInterval(() => refresh([...requestCache.values()]), 60000) : null;
+    const unsubscribe = scopedRequestQuery(isAdmin, options).onSnapshot(snapshot => refresh(requestRecords(snapshot)), showError);
+    const interval = isAdmin ? setInterval(() => refresh(latestRecords), 60000) : null;
     return () => { unsubscribe(); if (interval) clearInterval(interval); };
   }
   async function requestCounts(isAdmin = false) {
@@ -184,6 +214,19 @@ window.FRMS = (() => {
       return [status, Number(result.find(item => item.result)?.result.aggregateFields.count.integerValue || 0)];
     }));
     return Object.fromEntries(counts);
+  }
+  function watchCounts(onChange, isAdmin, initial) {
+    let signature = JSON.stringify(initial), closed = false, running = false;
+    const interval = setInterval(async () => {
+      if (closed || running || document.hidden) return;
+      running = true;
+      try {
+        const counts = await requestCounts(isAdmin), next = JSON.stringify(counts);
+        if (!closed && next !== signature) { signature = next; onChange(counts); }
+      } catch(error) { if (!closed) showError(error); }
+      finally { running = false; }
+    }, 60000);
+    return () => { closed = true; clearInterval(interval); };
   }
   async function mountRequestPagination({ onChange, onCounts, isAdmin = false, tableBody, filters, controls = [] }) {
     if (!await requireUser(isAdmin)) return () => {};
@@ -234,13 +277,22 @@ window.FRMS = (() => {
       db.collection("timeSlots").where("active", "==", true).get(),
       db.collection("bookings").where("venueId", "==", venueId).where("dateISO", "==", dateISO).get()
     ]);
-    const occupied = new Set(bookings.docs.filter(doc => {
+    const canonical = { morning: [420,600], midday: [600,780], afternoon: [780,960] };
+    const blocked = bookings.docs.filter(doc => {
       const booking = doc.data();
       return !(booking.status === "pending" && booking.createdAt?.seconds !== undefined && Date.now() >= booking.createdAt.seconds * 1000 + 48 * 3600000);
-    }).map(doc => doc.data().slotId));
-    return slots.docs.map(doc => ({ ...doc.data(), id: doc.id }))
-      .filter(slot => !occupied.has(slot.id)).sort((a, b) => a.startMinutes - b.startMinutes);
+    }).map(doc => {
+      const value = doc.data();
+      const range = Number.isInteger(value.startMinutes) ? [value.startMinutes,value.endMinutes] : canonical[value.slotId];
+      return range ? { startMinutes: range[0], endMinutes: range[1] } : { startMinutes: 0, endMinutes: 1440 };
+    });
+    const available = slots.docs.map(doc => ({ ...doc.data(), id: doc.id }))
+      .filter(slot => canonical[slot.id] && slot.startMinutes === canonical[slot.id][0] && slot.endMinutes === canonical[slot.id][1])
+      .filter(slot => !blocked.some(range => slot.startMinutes < range.endMinutes && slot.endMinutes > range.startMinutes)).sort((a,b) => a.startMinutes-b.startMinutes);
+    available.blocked = blocked;
+    return available;
   }
+
   function actor() { return { uid: user.uid, email: user.email, name: user.displayName, admin }; }
   async function submit(data, onProgress = () => {}) {
     onProgress(10, "Checking your account…");
@@ -251,9 +303,11 @@ window.FRMS = (() => {
     const profile = await db.collection("users").doc(user.uid).get();
     if (!admin && profile.data()?.enrollmentStatus !== "approved") throw new Error("Your student enrollment is awaiting administrator approval. Contact the facilities office with your student ID.");
     if (!admin && profile.data()?.confirmedStudentId !== profile.data()?.studentId) throw new Error("Confirm your approved student ID at the top of this page before reserving.");
-    const submittingActor = { ...actor(), name: profile.data()?.displayName || user.email };
-    const result = await FRMS_RESERVATION_SERVICE.submitReservation({ db, actor: submittingActor, data,
-      timestamp: () => firebase.firestore.FieldValue.serverTimestamp(), onProgress });
+    onProgress(40, "Validating reservation details…");
+    onProgress(60, "Checking availability and saving your reservation…");
+    const response = await fetch("/api/reservation-submit", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${await user.getIdToken()}` }, body: JSON.stringify(data) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Could not save your reservation.");
     onProgress(100, "Reservation saved successfully.");
     requestCache.set(result.id, { ...data, id: result.id, requestNumber: result.requestNumber });
     return result.id;
@@ -278,10 +332,20 @@ window.FRMS = (() => {
     if (!/^[a-zA-Z0-9-]{1,50}$/.test(studentId)) throw new Error("Enter a valid student ID.");
     await db.collection("users").doc(uid).update({ studentId, enrollmentStatus: approved ? "approved" : "rejected", confirmedStudentId: firebase.firestore.FieldValue.delete(), studentIdConfirmedAt: firebase.firestore.FieldValue.delete(), approvedBy: user.uid, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
   }
+  async function createAdminInvitation(email) {
+    if (!await requireUser(true)) throw new Error("Administrator access is required.");
+    const response = await fetch("/api/admin-invite", { method: "POST", headers: { Authorization: "Bearer " + await user.getIdToken(true), "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Could not create invitation.");
+    return result;
+  }
   async function watchEnrollment(callback) {
     await ready;
     if (!user || admin) return () => {};
-    return db.collection("users").doc(user.uid).onSnapshot(snapshot => callback(snapshot.data() || {}), showError);
+    return db.collection("users").doc(user.uid).onSnapshot({ includeMetadataChanges: true }, snapshot => {
+      // Keep confirmation visible until Firestore acknowledges it; navigation must not discard an optimistic write.
+      if (!snapshot.metadata.hasPendingWrites) callback(snapshot.data() || {});
+    }, showError);
   }
   async function confirmStudentId(studentId) {
     if (!await requireUser()) throw new Error("Sign in first.");
@@ -397,5 +461,5 @@ window.FRMS = (() => {
     if (!user) return null;
     const profile = await db.collection("users").doc(user.uid).get();
     return { displayName: profile.data()?.displayName || user.displayName || "", email: user.email, role: admin ? "admin" : "student" };
-  }, requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, registerAdmin, requests, watchRequests, requestCounts, mountRequestPagination, venues, availableSlots, submit, updateStatus, cancelReservation, approveEnrollment, watchEnrollment, confirmStudentId, studentQuery, resetPassword, reservationEvents, showError };
+  }, requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, registerAdmin, createAdminInvitation, upcomingReservation, watchUpcoming, requests, watchRequests, requestCounts, watchCounts, mountRequestPagination, venues, availableSlots, submit, updateStatus, cancelReservation, approveEnrollment, watchEnrollment, confirmStudentId, studentQuery, resetPassword, reservationEvents, showError };
 })();

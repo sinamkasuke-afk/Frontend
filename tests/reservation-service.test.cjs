@@ -4,18 +4,18 @@ const { submitReservation, reviewReservation, cancelReservation, dateISO } = req
 function database() {
   const records = new Map([
     ['venues/hall', { name: 'Hall', active: true, capacity: 50 }],
-    ['timeSlots/morning', { label: '7:00 AM – 10:00 AM', active: true }]
+    ['timeSlots/morning', { label: '7:00 AM – 10:00 AM', active: true, startMinutes:420, endMinutes:600 }]
   ]);
   let sequence = 0, queue = Promise.resolve();
   const ref = key => ({ key, id: key.split('/').at(-1), get: async () => snapshot(key) });
   const snapshot = key => ({ exists: records.has(key), data: () => records.get(key) });
   const db = {
-    collection: name => ({ doc: id => ref(`${name}/${id || 'event-' + ++sequence}`) }),
+    collection: name => { const query = { name, filters: [], where: function(key, op, value) { this.filters.push([key,value]); return this; }, doc: id => ref(`${name}/${id || 'event-' + ++sequence}`) }; return query; },
     runTransaction: action => {
       const result = queue.then(async () => {
         const changes = [];
         const result = await action({
-          get: async ref => snapshot(ref.key),
+          get: async ref => ref.key ? snapshot(ref.key) : {docs:[...records].filter(([key,value])=>key.startsWith(ref.name+'/') && ref.filters.every(([field,expected])=>value[field]===expected)).map(([key,value])=>({id:key.split('/').at(-1),data:()=>value}))},
           set: (ref, data) => changes.push(() => records.set(ref.key, data)),
           update: (ref, data) => changes.push(() => records.set(ref.key, { ...records.get(ref.key), ...data })),
           delete: ref => changes.push(() => records.delete(ref.key))
@@ -129,4 +129,38 @@ test('students cannot cancel after event starts; administrators can', async () =
   const options = { db, actor: student, data: { id: 'request-1' }, timestamp: () => 'SERVER', now: new Date('2026-10-16T00:00:00Z') };
   await assert.rejects(cancelReservation(options), { code: 'failed-precondition' });
   await cancelReservation({ ...options, actor: admin });
+});
+
+test('overlapping catalog intervals are rejected instead of creating conflicting bookings', async () => {
+  const {db,records}=database();
+  records.set('timeSlots/morning',{label:'Invalid overlapping slot',active:true,startMinutes:420,endMinutes:780});
+  await assert.rejects(submit(db), /Time-slot configuration is invalid/);
+  assert(!records.has('reservations/request-1'));
+});
+
+function flexible(db, changes = {}, actor = student) { return submitReservation({ db, actor, data: {...data, startMinutes:480, endMinutes:960, ...changes}, flexible:true, timestamp:()=>({seconds:1791244800}), now:new Date('2026-10-06T00:00:00Z') }); }
+test('8 and 12 hour bookings persist ranges; overlap is rejected but adjacent times and other facilities work', async () => {
+  const {db,records}=database();
+  await flexible(db);
+  assert.equal(records.get('reservations/request-1').time,'8:00 AM – 4:00 PM');
+  assert.equal(records.get('reservations/request-1').endMinutes,960);
+  await assert.rejects(flexible(db,{requestId:'overlap',startMinutes:720,endMinutes:1200}),{code:'already-exists'});
+  await flexible(db,{requestId:'adjacent',startMinutes:960,endMinutes:1200});
+  records.set('venues/other',{name:'Other',active:true,capacity:50});
+  await flexible(db,{requestId:'other',venueId:'other',endMinutes:1200});
+  assert.equal(records.get('reservations/other').time,'8:00 AM – 8:00 PM');
+  await review(db,'approved');
+  assert.equal(records.get('bookings/hall_2026-10-15_hours-480-960').startMinutes,480);
+  await cancelReservation({db,actor:student,data:{id:'request-1'},timestamp:()=>({seconds:1791244800}),now:new Date('2026-10-06T00:00:00Z')});
+  assert(!records.has('bookings/hall_2026-10-15_hours-480-960'));
+});
+test('custom hours reject non-integers, reversed ranges and past start times', async () => {
+  for (const change of [{startMinutes:'480'},{startMinutes:481},{endMinutes:480},{endMinutes:1500},{startMinutes:-60},{dateISO:'2026-10-06',startMinutes:420}]) await assert.rejects(flexible(database().db,change),{code:'invalid-argument'});
+});
+test('custom ranges also conflict with existing fixed slots and simultaneous requests', async () => {
+  const {db}=database(); await submit(db);
+  await assert.rejects(flexible(db,{requestId:'custom'}),{code:'already-exists'});
+  const fresh=database().db;
+  const results=await Promise.allSettled([flexible(fresh),flexible(fresh,{requestId:'other',startMinutes:540,endMinutes:1200})]);
+  assert.equal(results.filter(result=>result.status==='fulfilled').length,1);
 });

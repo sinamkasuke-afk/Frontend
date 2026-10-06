@@ -1,9 +1,12 @@
 document.addEventListener("DOMContentLoaded", async function () {
     try {
       if (!await FRMS.requireUser(false)) return;
-      var reservationRequests = await FRMS.requests();
+      var [reservationRequests, globalCounts, upcomingRecord] = await Promise.all([FRMS.requests(false, { limit:25 }), FRMS.requestCounts(false), FRMS.upcomingReservation(false)]);
     } catch (error) { FRMS.showError(error); return; }
 
+
+  const stopCounts = FRMS.watchCounts(() => window.location.reload(), false, globalCounts);
+  window.addEventListener('pagehide', stopCounts, {once:true});
 
   renderNavbar(
     "navbar",
@@ -149,7 +152,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       const unsubscribe = await FRMS.watchRequests(records => {
         const next = JSON.stringify(records.map(request => [request.id, request.status]));
         if (next !== signature) { signature = next; window.location.reload(); }
-      });
+      }, false, { limit:25 });
+      const stopUpcoming = await FRMS.watchUpcoming(record => { if ((record?.id || null) !== (upcomingRecord?.id || null) || record?.status !== upcomingRecord?.status) window.location.reload(); });
+      window.addEventListener("pagehide", stopUpcoming, {once:true});
       window.addEventListener("pagehide", unsubscribe, { once: true });
     } catch (error) { FRMS.showError(error); }
   }
@@ -240,29 +245,23 @@ document.addEventListener("DOMContentLoaded", async function () {
      ========================================================== */
 
   const totalCount =
-    reservationRequests.length;
+    globalCounts.total;
 
 
   const pendingCount =
-    countStatus(
-      "pending"
-    );
+    globalCounts.pending;
 
 
   const approvedCount =
-    countStatus(
-      "approved"
-    );
+    globalCounts.approved;
 
 
   const declinedCount =
-    countStatus(
-      "declined"
-    );
+    globalCounts.declined;
 
 
   const upcoming =
-    getUpcomingReservation();
+    upcomingRecord;
 
 
   const recent =

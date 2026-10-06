@@ -490,6 +490,8 @@ document.addEventListener(
       const selectedDate = new Date(reservation.date);
       submittedRequest.dateISO = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
       submittedRequest.slotId = String(reservation.slot.id);
+      submittedRequest.startMinutes = reservation.slot.startMinutes;
+      submittedRequest.endMinutes = reservation.slot.endMinutes;
       let submissionId = reservation.submissionId;
       if (!submissionId) { submissionId = crypto.randomUUID(); updateReservation({ submissionId }); reservation.submissionId = submissionId; }
       submittedRequest.requestId = submissionId;

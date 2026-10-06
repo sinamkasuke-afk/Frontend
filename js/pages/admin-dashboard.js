@@ -3,7 +3,7 @@ document.addEventListener(
   async function () {
     try {
       if (!await FRMS.requireUser(true)) return;
-      var firebaseRequests = await FRMS.requests(true);
+      var [firebaseRequests, globalCounts] = await Promise.all([FRMS.requests(true, { limit: 10 }), FRMS.requestCounts(true)]);
     } catch (error) { FRMS.showError(error); return; }
 
 
@@ -20,12 +20,14 @@ document.addEventListener(
        ========================================================== */
 
     function refreshCounts() {
-      document.getElementById("total-requests").textContent = adminRequests.length;
+      document.getElementById("total-requests").textContent = globalCounts.total;
       for (const status of ["pending", "approved", "declined"]) {
-        document.getElementById(status + "-requests").textContent = adminRequests.filter(request => request.status === status).length;
+        document.getElementById(status + "-requests").textContent = globalCounts[status];
       }
     }
     refreshCounts();
+    const stopCounts = FRMS.watchCounts(counts => { globalCounts = counts; refreshCounts(); }, true, globalCounts);
+    window.addEventListener('pagehide', stopCounts, {once:true});
 
     /* ==========================================================
        ELEMENTS
@@ -435,10 +437,11 @@ document.addEventListener(
 
     if (FRMS.watchRequests) {
       try {
-        const unsubscribe = await FRMS.watchRequests(records => {
+        const unsubscribe = await FRMS.watchRequests(async records => {
           adminRequests.splice(0, adminRequests.length, ...records);
-          refreshCounts(); renderRequests(adminRequests);
-        }, true);
+          renderRequests(adminRequests);
+          try { globalCounts = await FRMS.requestCounts(true); refreshCounts(); } catch(error) { FRMS.showError(error); }
+        }, true, { limit: 10 });
         window.addEventListener("pagehide", unsubscribe, { once: true });
       } catch (error) { FRMS.showError(error); }
     }

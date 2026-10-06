@@ -1,6 +1,20 @@
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     if (!await FRMS.requireUser(true)) return;
+    const inviteButton = document.createElement('button');
+    inviteButton.type = 'button'; inviteButton.textContent = 'Invite Administrator';
+    inviteButton.style.cssText = 'padding:12px 18px;margin:16px 0;background:#173f31;color:white;border:0;border-radius:10px;cursor:pointer';
+    document.getElementById('student-rows').closest('table').parentElement.before(inviteButton);
+    inviteButton.onclick = async () => {
+      const email = window.prompt('Email address of the administrator you want to invite:');
+      if (!email) return;
+      inviteButton.disabled = true;
+      try {
+        const result = await FRMS.createAdminInvitation(email);
+        window.prompt('Share this invitation code privately with ' + result.email + '. It expires in 7 days and works only for that email:', result.invitationCode);
+      } catch (error) { FRMS.showError(error); }
+      finally { inviteButton.disabled = false; }
+    };
     const base = await FRMS.studentQuery();
     const body = document.getElementById('student-rows');
     const previous = document.getElementById('students-previous'), next = document.getElementById('students-next');

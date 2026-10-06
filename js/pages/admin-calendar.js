@@ -3,7 +3,7 @@ document.addEventListener(
   async function () {
     try {
       if (!await FRMS.requireUser(true)) return;
-      var firebaseRequests = await FRMS.requests(true);
+      var firebaseRequests = [];
     } catch (error) { FRMS.showError(error); return; }
 
 
@@ -21,6 +21,7 @@ document.addEventListener(
     let viewYear = today.getFullYear();
     let viewMonth = today.getMonth();
     let selectedDay = today.getDate();
+    let calendarStop = () => {}, calendarVersion = 0;
     let reservations = [];
     let previousMonthDays = [];
     let currentMonthDays = [];
@@ -42,7 +43,7 @@ document.addEventListener(
     function changeMonth(offset) {
       const date = new Date(viewYear, viewMonth + offset, 1);
       viewYear = date.getFullYear(); viewMonth = date.getMonth();
-      refreshMonth(); renderAll();
+      refreshMonth(); renderAll(); watchMonth();
     }
 
     /* ==========================================================
@@ -647,14 +648,19 @@ document.addEventListener(
       try { await FRMS.cancelReservation(button.dataset.cancelReservation); }
       catch (error) { button.disabled = false; FRMS.showError(error); }
     });
-    if (FRMS.watchRequests) {
+    async function watchMonth() {
+      const version = ++calendarVersion;
+      calendarStop(); firebaseRequests = []; refreshMonth(); renderAll();
       try {
-        const unsubscribe = await FRMS.watchRequests(records => {
+        const stop = await FRMS.watchRequests(records => {
+          if (version !== calendarVersion) return;
           firebaseRequests = records; refreshMonth(); renderAll();
-        }, true);
-        window.addEventListener("pagehide", unsubscribe, { once: true });
+        }, true, { month: viewYear + '-' + String(viewMonth + 1).padStart(2,'0') });
+        if (version !== calendarVersion) stop(); else calendarStop = stop;
       } catch (error) { FRMS.showError(error); }
     }
+    await watchMonth();
+    window.addEventListener('pagehide', () => { calendarVersion++; calendarStop(); }, {once:true});
 
   }
 );

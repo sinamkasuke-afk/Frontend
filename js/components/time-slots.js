@@ -46,5 +46,48 @@ function renderTimeSlots(containerId, date, slots, onSlotSelect) {
     list.appendChild(chip);
   });
 
-  container.append(heading, list);
+  heading.textContent = `Choose a time on ${dateText}:`;
+  const custom = document.createElement("div");
+  custom.className = "custom-time";
+  custom.innerHTML = `<p class="custom-time__hint">Enter whole hours and choose AM or PM. For example, 8 AM–4 PM is 8 hours; 8 AM–8 PM is 12 hours. Start and end must be on the same day.</p>
+    <div class="custom-time__fields">
+      <label>Start time <span><input aria-label="Start hour" type="number" min="1" max="12" step="1" inputmode="numeric" value="8"><select aria-label="Start AM or PM"><option>AM</option><option>PM</option></select></span></label>
+      <label>End time <span><input aria-label="End hour" type="number" min="1" max="12" step="1" inputmode="numeric" value="4"><select aria-label="End AM or PM"><option>AM</option><option selected>PM</option></select></span></label>
+    </div><p class="custom-time__feedback" role="status" aria-live="polite"></p>
+    <button class="time-slot" type="button">Use this time</button>`;
+  const inputs = custom.querySelectorAll("input");
+  const periods = custom.querySelectorAll("select");
+  const feedback = custom.querySelector(".custom-time__feedback");
+  const use = custom.querySelector("button");
+  const format = minutes => `${minutes / 60 % 12 || 12}:00 ${minutes < 720 ? "AM" : "PM"}`;
+  let chosen = null;
+  function validate() {
+    const hours = Array.from(inputs, input => Number(input.value));
+    chosen = null;
+    use.disabled = true;
+    if (hours.some((hour, index) => !Number.isInteger(hour) || hour < 1 || hour > 12 || !/^\d{1,2}$/.test(inputs[index].value))) { feedback.textContent = "Enter an hour from 1 to 12 using numbers only."; return; }
+    const minutes = hours.map((hour, index) => (hour % 12 + (periods[index].value === "PM" ? 12 : 0)) * 60);
+    if (minutes[1] <= minutes[0]) { feedback.textContent = "End time must be later than start time on the same day."; return; }
+    if ((slots.blocked || []).some(range => minutes[0] < range.endMinutes && minutes[1] > range.startMinutes)) { feedback.textContent = "This time overlaps an existing reservation. Choose another time or facility."; return; }
+    if (new Date(date.getFullYear(), date.getMonth(), date.getDate(), minutes[0] / 60).getTime() <= Date.now()) { feedback.textContent = "Choose a start time in the future."; return; }
+    chosen = { id: `hours-${minutes[0]}-${minutes[1]}`, startMinutes: minutes[0], endMinutes: minutes[1], label: `${format(minutes[0])} – ${format(minutes[1])}` };
+    feedback.textContent = `${chosen.label} · ${(minutes[1] - minutes[0]) / 60} hours`;
+    use.disabled = false;
+  }
+  inputs.forEach(input => input.addEventListener("keydown", event => { if (["e", "E", "+", "-", "."].includes(event.key)) event.preventDefault(); }));
+  custom.addEventListener("input", () => { use.classList.remove("time-slot--selected"); onSlotSelect(null); validate(); });
+  custom.addEventListener("change", validate);
+  use.addEventListener("click", () => {
+    validate();
+    if (!chosen) return;
+    list.querySelectorAll(".time-slot").forEach(chip => chip.classList.remove("time-slot--selected"));
+    use.classList.add("time-slot--selected");
+    onSlotSelect(chosen);
+  });
+  list.addEventListener("click", () => use.classList.remove("time-slot--selected"));
+  const presetsTitle = document.createElement("p");
+  presetsTitle.className = "custom-time__hint";
+  presetsTitle.textContent = slots.length ? "Or choose an available suggested time:" : "No suggested times available. You can check another time above.";
+  container.append(heading, custom, presetsTitle, list);
+  validate();
 }

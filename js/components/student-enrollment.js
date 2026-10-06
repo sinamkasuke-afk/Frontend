@@ -16,7 +16,7 @@
       form.style.cssText = 'display:flex;align-items:center;gap:12px;flex-wrap:wrap';
       const label = document.createElement('label');
       label.htmlFor = 'confirm-student-id';
-      label.textContent = 'Enrollment approved. Enter the student ID confirmed by your administrator:';
+      label.textContent = 'Your enrollment was checked by an administrator. Confirm your approved student ID to continue:';
       const input = document.createElement('input');
       input.id = 'confirm-student-id'; input.name = 'studentId'; input.required = true;
       input.maxLength = 50; input.autocomplete = 'off'; input.placeholder = 'Student ID';
