@@ -2084,3 +2084,14 @@ body {
   }
 
 }
+.submission-progress__bar { position:relative; transition:width .3s ease; }
+.submission-progress__bar--waiting::after {
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent);
+  animation:submission-shimmer 1.3s linear infinite;
+}
+@keyframes submission-shimmer { from { transform:translateX(-100%); } to { transform:translateX(100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .submission-progress__bar { transition:none; }
+  .submission-progress__bar--waiting::after { animation:none; }
+}

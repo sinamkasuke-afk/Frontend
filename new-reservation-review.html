@@ -35,8 +35,9 @@
 
   <link
     rel="stylesheet"
-    href="css/pages/new-reservation-review.css"
+    href="css/pages/new-reservation-review.css?v=submission-progress-1"
   />
+  <link rel="stylesheet" href="css/components/reservation-detail.css?v=detail-modal-1">
 </head>
 
 <body>
@@ -868,12 +869,13 @@
         <div
           class="submission-progress__bar"
           id="submission-progress-bar"
+          role="progressbar" aria-label="Reservation submission" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
         ></div>
 
       </div>
 
 
-      <p>
+      <p id="submission-progress-text" role="status" aria-live="polite">
         Processing your request...
       </p>
 
@@ -1045,12 +1047,12 @@
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase/config.js?v=paging-enrollment-1"></script>
   <script src="js/data/sample-data.js?v=paging-enrollment-1"></script>
-  <script src="js/firebase/reservation-service.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/reservation-service.js?v=submission-progress-1"></script>
   <script src="js/firebase/request-pagination.js?v=paging-enrollment-1"></script>
-  <script src="js/firebase/client.js?v=instant-admin-2"></script>
-<script src="js/components/navbar.js?v=profile-name-2"></script>
+  <script src="js/firebase/client.js?v=submission-progress-1"></script>
+<script src="js/components/navbar.js?v=brand-text-1"></script>
   <script src="js/data/reservation-store.js?v=paging-enrollment-1"></script>
-  <script src="js/pages/new-reservation-review.js?v=paging-enrollment-1"></script>
+  <script src="js/pages/new-reservation-review.js?v=submission-progress-1"></script>
 
 <script src="js/components/student-enrollment.js?v=id-confirmation-1"></script>
 </body>

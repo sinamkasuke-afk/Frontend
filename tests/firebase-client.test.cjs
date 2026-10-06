@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-function client(isAdmin = false, verified = true, profileName = null) {
+function client(isAdmin = false, verified = true, profileName = null, submissionError = null) {
   const calls = [], writes = [], filters = [], subscriptions = [], persistence = [], deletes = [], fetches = [];
   const user = { emailVerified: verified, reload: async () => {}, getIdToken: async () => 'token', sendEmailVerification: async () => calls.push({ name: 'verification-email' }), uid: 'student-1', email: 'student@example.com', updateProfile: async profile => { user.displayName = profile.displayName; }, getIdTokenResult: async () => ({ claims: { admin: isAdmin } }) };
   const records = {
@@ -35,7 +35,7 @@ function client(isAdmin = false, verified = true, profileName = null) {
     storage: () => ({ ref: path => ({ put: async (file, metadata) => calls.push({ path, file, metadata }) }) })
   };
   const reservationService = {
-    submitReservation: async options => { calls.push({ name: 'firestore-submit', data: options.data }); if(options.data.hasAttachment) calls.push(await options.verifyAttachment(user.uid, options.data.requestId)); return { id: options.data.requestId }; },
+    submitReservation: async options => { options.onProgress?.(85, 'Saving your reservation…'); if (submissionError) throw submissionError; calls.push({ name: 'firestore-submit', data: options.data }); if(options.data.hasAttachment) calls.push(await options.verifyAttachment(user.uid, options.data.requestId)); return { id: options.data.requestId }; },
     cancelReservation: async options => { calls.push({ name: 'firestore-cancel', data: options.data }); },
     reviewReservation: async options => { calls.push({ name: 'firestore-review', data: options.data }); }
   };
@@ -152,4 +152,15 @@ test('administrator registration saves an application and immediately enables ad
   assert.equal(writes[0].data.displayName, 'New Administrator');
   assert(!('password' in writes[0].data));
   assert.equal((await api.currentUser()).role, 'admin');
+});
+
+test('submission progress reaches completion only after a successful save', async () => {
+  const progress = [];
+  await client().api.submit({ requestId: 'progress-request' }, percent => progress.push(percent));
+  assert.deepEqual(progress, [10, 25, 85, 100]);
+});
+test('failed submission never reports 100 percent', async () => {
+  const progress = [];
+  await assert.rejects(client(false, true, null, new Error('Slot occupied')).api.submit({ requestId: 'progress-request' }, percent => progress.push(percent)), /Slot occupied/);
+  assert(!progress.includes(100));
 });

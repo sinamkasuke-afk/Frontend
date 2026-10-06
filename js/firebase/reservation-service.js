@@ -21,7 +21,8 @@ function dateISO(value, now) {
   if (value < today) fail('invalid-argument', 'Past dates cannot be reserved.');
   return value;
 }
-async function submitReservation({ db, actor, data, timestamp, now = new Date() }) {
+async function submitReservation({ db, actor, data, timestamp, now = new Date(), onProgress = () => {} }) {
+  onProgress(40, "Validating reservation details…");
   if (!actor?.uid) fail('unauthenticated', 'Sign in to submit a reservation.');
   const id = identifier(data.requestId, 'request ID');
   const reservationRef = db.collection('reservations').doc(id);
@@ -47,6 +48,7 @@ async function submitReservation({ db, actor, data, timestamp, now = new Date() 
   const quotaId = actor.uid + '_' + new Date(now.getTime() + 8 * 3600000).toISOString().slice(0, 10);
   const quotaRef = db.collection('submissionLimits').doc(quotaId);
   let assignedNumber;
+  onProgress(60, "Checking venue and time-slot availability…");
   await db.runTransaction(async transaction => {
     const reservation = await transaction.get(reservationRef);
     if (reservation.exists) {
@@ -75,6 +77,7 @@ async function submitReservation({ db, actor, data, timestamp, now = new Date() 
       slotId, dateISO: date, date, time: slot.data().label, event,
       expectedGuests: guests, status: 'pending', bookingId, createdAt: timestamp(), quotaId, lastEventId: eventRef.id };
     assignedNumber = requestNumber;
+    onProgress(85, "Saving your reservation…");
     transaction.set(quotaRef, { count: dailyCount, ownerUid: actor.uid, reservationId: id, updatedAt: timestamp() });
     transaction.set(counterRef, { value: requestNumber, reservationId: id });
     transaction.set(reservationRef, record);

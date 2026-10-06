@@ -242,16 +242,19 @@ window.FRMS = (() => {
       .filter(slot => !occupied.has(slot.id)).sort((a, b) => a.startMinutes - b.startMinutes);
   }
   function actor() { return { uid: user.uid, email: user.email, name: user.displayName, admin }; }
-  async function submit(data) {
+  async function submit(data, onProgress = () => {}) {
+    onProgress(10, "Checking your account…");
     if (!await requireUser()) throw new Error("Sign in to submit a reservation.");
     await user.reload();
     await user.getIdToken(true);
+    onProgress(25, "Checking enrollment and student ID…");
     const profile = await db.collection("users").doc(user.uid).get();
     if (!admin && profile.data()?.enrollmentStatus !== "approved") throw new Error("Your student enrollment is awaiting administrator approval. Contact the facilities office with your student ID.");
     if (!admin && profile.data()?.confirmedStudentId !== profile.data()?.studentId) throw new Error("Confirm your approved student ID at the top of this page before reserving.");
     const submittingActor = { ...actor(), name: profile.data()?.displayName || user.email };
     const result = await FRMS_RESERVATION_SERVICE.submitReservation({ db, actor: submittingActor, data,
-      timestamp: () => firebase.firestore.FieldValue.serverTimestamp() });
+      timestamp: () => firebase.firestore.FieldValue.serverTimestamp(), onProgress });
+    onProgress(100, "Reservation saved successfully.");
     requestCache.set(result.id, { ...data, id: result.id, requestNumber: result.requestNumber });
     return result.id;
   }
@@ -308,31 +311,62 @@ window.FRMS = (() => {
     if (!dialog) {
       dialog = document.createElement("dialog");
       dialog.id = "reservation-detail-dialog";
-      dialog.style.cssText = "width:min(640px,90vw);max-height:85vh;overflow:auto;border:1px solid #ddd;border-radius:12px;padding:24px";
+      dialog.setAttribute("aria-labelledby", "reservation-detail-title");
+      dialog.addEventListener("click", event => {
+        const bounds = dialog.getBoundingClientRect();
+        if (event.target === dialog && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) dialog.close();
+      });
       document.body.append(dialog);
     }
     dialog.replaceChildren();
-    const heading = document.createElement("h2"); heading.textContent = request.event || "Reservation details";
-    const close = document.createElement("button"); close.textContent = "Close"; close.onclick = () => dialog.close();
-    dialog.append(heading, close);
-    for (const [label, key] of [["Request ID", "id"], ["Status", "status"], ["Facility", "venue"], ["Date", "date"], ["Time", "time"], ["Requester", "requester"], ["Organization", "organization"], ["Event type", "eventType"], ["Guests", "expectedGuests"], ["Purpose", "purpose"], ["Contact", "contactPerson"], ["Requirements", "facilityRequirements"], ["Setup notes", "setupNotes"]]) {
-      const line = document.createElement("p"); const name = document.createElement("strong"); name.textContent = label + ": ";
-      line.append(name, String((key === "id" ? request.requestNumber || request.id : request[key]) || "—")); dialog.append(line);
+    const element = (tag, className, text) => {
+      const node = document.createElement(tag); node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    };
+    const header = element("header", "reservation-detail__header");
+    const titles = element("div", "reservation-detail__titles");
+    const label = element("p", "reservation-detail__eyebrow", "RESERVATION DETAILS");
+    const heading = element("h2", "reservation-detail__title", request.event || "Reservation details");
+    heading.id = "reservation-detail-title";
+    titles.append(label, heading);
+    const close = element("button", "reservation-detail__close", "×");
+    close.type = "button"; close.setAttribute("aria-label", "Close reservation details"); close.onclick = () => dialog.close();
+    header.append(titles, close);
+    const content = element("div", "reservation-detail__content");
+    const summary = element("div", "reservation-detail__summary");
+    const number = element("span", "reservation-detail__number", "Request #" + (request.requestNumber || request.id));
+    const status = element("span", "reservation-detail__status", (request.status || "pending").replace(/^./, value => value.toUpperCase()));
+    status.dataset.status = request.status;
+    summary.append(number, status);
+    const details = element("dl", "reservation-detail__grid");
+    for (const [label, key] of [["Facility", "venue"], ["Date", "date"], ["Time", "time"], ["Requester", "requester"], ["Organization", "organization"], ["Event type", "eventType"], ["Guests", "expectedGuests"], ["Contact", "contactPerson"], ["Purpose", "purpose"], ["Requirements", "facilityRequirements"], ["Setup notes", "setupNotes"]]) {
+      const item = element("div", "reservation-detail__field" + (["purpose", "facilityRequirements", "setupNotes"].includes(key) ? " reservation-detail__field--wide" : ""));
+      item.append(element("dt", "", label), element("dd", "", String(request[key] ?? "—") || "—"));
+      details.append(item);
     }
+    content.append(summary, details);
+    const footer = element("footer", "reservation-detail__footer");
+    const done = element("button", "reservation-detail__done", "Close details");
+    done.type = "button"; done.onclick = () => dialog.close();
+    dialog.append(header, content, footer);
     if ((admin || request.ownerUid === user.uid) && ['pending', 'approved'].includes(request.status)) {
       const cancel = document.createElement("button");
       cancel.type = "button";
       cancel.textContent = "Cancel reservation";
-      cancel.style.cssText = "margin:16px 0;padding:10px 16px;border:0;border-radius:8px;background:#b42318;color:white;cursor:pointer";
+      cancel.className = "reservation-detail__cancel";
       cancel.onclick = async () => {
         if (!window.confirm("Cancel this reservation and release its time slot? Its history will be kept.")) return;
         cancel.disabled = true;
         try { await cancelReservation(id); dialog.close(); }
         catch (error) { cancel.disabled = false; showError(error); }
       };
-      dialog.append(cancel);
+      footer.append(cancel);
     }
-    const history = document.createElement("p"); history.textContent = "Loading activity…"; dialog.append(history);
+    footer.append(done);
+    const activity = element("section", "reservation-detail__activity");
+    activity.append(element("h3", "", "Request activity"));
+    const history = element("p", "", "Loading activity…"); activity.append(history); content.append(activity);
     if (!dialog.open) dialog.showModal();
     try {
       const events = await reservationEvents(id);

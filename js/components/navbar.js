@@ -14,7 +14,7 @@ function renderNavbar(containerId, activePage, variant = "public") {
     container.innerHTML = `
       <header class="navbar">
 
-        <a href="index.html" class="navbar__brand">
+        <div class="navbar__brand">
 
           <div class="navbar__logo">
             <span>▥</span>
@@ -26,7 +26,7 @@ function renderNavbar(containerId, activePage, variant = "public") {
             <span>Facilities Reservation System</span>
           </div>
 
-        </a>
+        </div>
 
 
         <nav class="navbar__links">
@@ -289,7 +289,7 @@ function renderNavbar(containerId, activePage, variant = "public") {
   container.innerHTML = `
     <header class="navbar">
 
-      <a href="index.html" class="navbar__brand">
+      <div class="navbar__brand">
 
         <div class="navbar__logo">
           <span>▥</span>
@@ -301,7 +301,7 @@ function renderNavbar(containerId, activePage, variant = "public") {
           <span>Facilities Reservation System</span>
         </div>
 
-      </a>
+      </div>
 
 
       <nav class="navbar__links">

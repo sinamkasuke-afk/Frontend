@@ -401,10 +401,21 @@ document.addEventListener(
       if (submitting) return;
       submitting = true;
       confirmationSubmit.disabled = true;
-      progressBar.style.width = "30%";
+      const progressText = document.getElementById("submission-progress-text");
+      let currentProgress = 0;
+      const updateProgress = (percent, message) => {
+        currentProgress = Math.max(currentProgress, percent);
+        progressBar.style.width = currentProgress + "%";
+        progressBar.setAttribute("aria-valuenow", String(currentProgress));
+        progressBar.setAttribute("aria-valuetext", message);
+        progressBar.classList.toggle("submission-progress__bar--waiting", currentProgress < 100);
+        progressText.textContent = message;
+      };
+      updateProgress(0, "Preparing your reservation…");
       try {
-        const id = await saveSubmittedRequest();
-        progressBar.style.width = "100%";
+        const id = await saveSubmittedRequest(updateProgress);
+        updateProgress(100, "Reservation saved successfully.");
+        await new Promise(resolve => setTimeout(resolve, 350));
         successRequestId.textContent = FRMS.requestLabel ? FRMS.requestLabel(id) : id;
         showModal(successModal);
         clearReservation();
@@ -414,14 +425,14 @@ document.addEventListener(
         const message = document.getElementById("submission-error-message");
         if (message) message.textContent = error.message || "Your reservation could not be submitted. Please try again.";
         showModal(errorModal);
-      } finally { submitting = false; confirmationSubmit.disabled = false; }
+      } finally { progressBar.classList.remove("submission-progress__bar--waiting"); submitting = false; confirmationSubmit.disabled = false; }
     }
 
     /* ==========================================================
        STORE SUBMITTED REQUEST
        ========================================================== */
 
-    async function saveSubmittedRequest() {
+    async function saveSubmittedRequest(onProgress) {
 
       const submittedRequest = {
 
@@ -483,7 +494,7 @@ document.addEventListener(
       if (!submissionId) { submissionId = crypto.randomUUID(); updateReservation({ submissionId }); reservation.submissionId = submissionId; }
       submittedRequest.requestId = submissionId;
       submittedRequest.venueId = reservation.venue?.id || null;
-      return FRMS.submit(submittedRequest);
+      return FRMS.submit(submittedRequest, onProgress);
     }
 
 
