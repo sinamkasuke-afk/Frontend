@@ -21,10 +21,6 @@ Students register with Gmail and require administrator-approved enrollment to su
 
 After administrator enrollment approval, students must enter the approved student ID in the portal confirmation form. Firestore stores `confirmedStudentId` and `studentIdConfirmedAt`. Submissions require the confirmed ID to match the current approved ID. Approval or rejection through the admin Students page resets confirmation. Students cannot change their approved ID or enrollment status. This is a one-time ID confirmation, not a replacement for checking school records.
 
-Administrator registration is available below Admin Login. It creates a Firebase Authentication account and a pending `adminApplications/{uid}` document; passwords are handled by Authentication. Registration does not grant administrator access. The project owner checks the applicant and runs the trusted approval tool using credentials outside the website:
+Administrator registration is available below Admin Login and grants immediate access, as requested. Firebase Authentication stores credentials; `adminApplications/{uid}` is a registration record. The Vercel `/api/admin-register` endpoint verifies the caller's Firebase ID token, checks their registration record, creates the admin profile, and grants the `admin` custom claim. Existing pending applicants are activated when they next sign in through Admin Login. No project-owner approval step is required.
 
-```sh
-GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json" NODE_PATH=./functions/node_modules node tools/approve-admin-account.cjs administrator@example.com
-```
-
-The tool writes an administrator profile, grants the Firebase `admin` custom claim, and marks the application approved. The applicant then signs in through Admin Login. Browser users cannot approve administrator applications or grant themselves administrator claims. This uses no paid Cloud Functions backend.
+The Firebase Admin service account is stored only in the Vercel production server environment variable `FIREBASE_ADMIN_SERVICE_ACCOUNT`; never place it in frontend config or Git. Firestore still forbids browser-side privilege changes. This endpoint uses Vercel server functions, not Firebase Cloud Functions. Public administrator registration means anyone registering there can manage the database's reservations.

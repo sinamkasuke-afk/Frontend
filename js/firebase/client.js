@@ -48,8 +48,11 @@ window.FRMS = (() => {
     user = credential.user;
     admin = (await user.getIdTokenResult(true)).claims.admin === true;
     if (isAdmin && !admin) {
-      await auth.signOut(); user = null;
-      throw new Error("Administrator access is not enabled for this account. If you registered, ask the project owner to approve it.");
+      try {
+        await activateAdminRegistration();
+        admin = (await user.getIdTokenResult(true)).claims.admin === true;
+        if (!admin) throw new Error("Administrator access is not enabled. Register as Administrator first.");
+      } catch (error) { await auth.signOut(); user = null; admin = false; throw error; }
     }
     if (!isAdmin && admin) {
       await auth.signOut(); user = null; admin = false;
@@ -79,6 +82,11 @@ window.FRMS = (() => {
     }
     sessionStorage.removeItem("frms_reservation");
   }
+  async function activateAdminRegistration() {
+    const response = await fetch("/api/admin-register", { method: "POST", headers: { Authorization: "Bearer " + await user.getIdToken(), "Content-Type": "application/json" }, body: "{}" });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Could not register administrator access.");
+  }
   async function registerAdmin(displayName, email, password) {
     await ready;
     displayName = displayName.trim(); email = email.trim();
@@ -92,12 +100,16 @@ window.FRMS = (() => {
       await db.collection("adminApplications").doc(user.uid).set({ uid: user.uid, email: user.email,
         displayName, status: "pending", createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     } catch (error) {
-      // Roll back the newly created Auth account so registration can be retried.
       try { await credential.user.delete(); } catch (_) {}
+      await auth.signOut(); user = null;
       throw error;
-    } finally {
-      await auth.signOut(); user = null; admin = false;
     }
+    try {
+      await activateAdminRegistration();
+      admin = (await user.getIdTokenResult(true)).claims.admin === true;
+      if (!admin) throw new Error("Your account is saved. Sign in through Admin Login to finish registration.");
+    } catch (error) { await auth.signOut(); user = null; admin = false; throw error; }
+    sessionStorage.removeItem("frms_reservation");
   }
   async function ensureProfile(studentId = "") {
     if (!user) return;

@@ -39,7 +39,7 @@ function client(isAdmin = false, verified = true, profileName = null) {
     cancelReservation: async options => { calls.push({ name: 'firestore-cancel', data: options.data }); },
     reviewReservation: async options => { calls.push({ name: 'firestore-review', data: options.data }); }
   };
-  const sandbox = { fetch: async (url, options) => { fetches.push({ url, options }); return { ok: true, json: async () => [{ result: { aggregateFields: { count: { integerValue: '3' } } } }] }; }, FRMS_RESERVATION_SERVICE: reservationService, Uint8Array, btoa: value => Buffer.from(value, 'binary').toString('base64'), CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } }, window: { dispatchEvent() {}, FIREBASE_CONFIG: { apiKey: 'test', projectId: 'test', appId: 'test' } }, firebase, console, document: { addEventListener: () => {}, createElement: () => ({ style: {}, append() {} }), body: { prepend() {} } }, sessionStorage: { removeItem: () => {} }, location: { replace: () => {} } };
+  const sandbox = { fetch: async (url, options) => { fetches.push({ url, options }); if (url === '/api/admin-register') isAdmin = true; return { ok: true, json: async () => [{ result: { aggregateFields: { count: { integerValue: '3' } } } }] }; }, FRMS_RESERVATION_SERVICE: reservationService, Uint8Array, btoa: value => Buffer.from(value, 'binary').toString('base64'), CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } }, window: { dispatchEvent() {}, FIREBASE_CONFIG: { apiKey: 'test', projectId: 'test', appId: 'test' } }, firebase, console, document: { addEventListener: () => {}, createElement: () => ({ style: {}, append() {} }), body: { prepend() {} } }, sessionStorage: { removeItem: () => {} }, location: { replace: () => {} } };
   vm.createContext(sandbox); vm.runInContext(fs.readFileSync('js/firebase/client.js', 'utf8'), sandbox);
   return { api: sandbox.window.FRMS, calls, writes, filters, subscriptions, persistence, deletes, fetches, records };
 }
@@ -143,7 +143,7 @@ test('student login rejects an administrator account', async () => {
   assert.equal(writes.length, 0);
 });
 
-test('administrator registration saves only a pending application and signs out', async () => {
+test('administrator registration saves an application and immediately enables admin login', async () => {
   const { api, writes } = client();
   await api.registerAdmin('New Administrator', 'newadmin@example.com', 'Password123!');
   assert.equal(writes.length, 1);
@@ -151,5 +151,5 @@ test('administrator registration saves only a pending application and signs out'
   assert.equal(writes[0].data.status, 'pending');
   assert.equal(writes[0].data.displayName, 'New Administrator');
   assert(!('password' in writes[0].data));
-  assert.equal(await api.currentUser(), null);
+  assert.equal((await api.currentUser()).role, 'admin');
 });

@@ -95,7 +95,7 @@ adminRegisterForm.addEventListener('submit', async event => {
   try {
     await FRMS.registerAdmin(document.getElementById('admin-register-name').value, document.getElementById('admin-register-email').value, password);
     adminRegisterForm.reset();
-    message.textContent = 'Account registered. Ask the project owner to approve administrator access, then return to Admin Login.';
-  } catch (error) { message.textContent = error.code === 'auth/email-already-in-use' ? 'This email already has an account. Contact the project owner if you need administrator access.' : error.message; }
+    location.href = 'admin-dashboard.html';
+  } catch (error) { message.textContent = error.code === 'auth/email-already-in-use' ? 'This email already has an account. Sign in through Admin Login if you already registered as an administrator.' : error.message; }
   finally { button.disabled = adminRegisterBack.disabled = false; }
 });
