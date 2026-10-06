@@ -96,8 +96,8 @@ document.addEventListener(
       );
 
 
-    let selectedDocument =
-      null;
+    let selectedDocument = null;
+    let documentSaving = false;
 
 
     /* ==========================================================
@@ -170,7 +170,7 @@ document.addEventListener(
 
     documentInput.addEventListener(
       "change",
-      function () {
+      async function () {
 
         clearError(
           documentInput,
@@ -178,8 +178,15 @@ document.addEventListener(
         );
 
 
-        const file =
-          documentInput.files[0];
+        if (documentSaving) return;
+        documentSaving = true;
+        documentInput.disabled = true;
+        try {
+        selectedDocument = null;
+        savedReservation.supportingDocument = null;
+        const file = documentInput.files[0];
+        try { await saveDraftDocument(null); }
+        catch (error) { FRMS.showError(error); return; }
 
 
         if (!file) {
@@ -268,6 +275,8 @@ document.addEventListener(
         }
 
 
+        try { await saveDraftDocument(file); }
+        catch (error) { FRMS.showError(error); documentInput.value = ""; return; }
         selectedDocument = {
           name: file.name,
           size: file.size,
@@ -284,7 +293,7 @@ document.addEventListener(
         uploadBox?.classList.add(
           "upload-box--selected"
         );
-
+        } finally { documentSaving = false; documentInput.disabled = false; }
       }
     );
 
@@ -320,6 +329,7 @@ document.addEventListener(
         event.preventDefault();
 
 
+        if (documentSaving) { showError(documentInput, "supporting-document-error", "Wait for your PDF to finish loading."); return; }
         clearAllErrors();
 
 
@@ -412,7 +422,7 @@ document.addEventListener(
 
       if (
         !expectedGuestsInput.value ||
-        !Number.isFinite(
+        !Number.isInteger(
           guests
         ) ||
         guests < 1

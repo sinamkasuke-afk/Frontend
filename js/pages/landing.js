@@ -1,84 +1,15 @@
-const featuredSpaces = [
+function escapeFacilityText(value) {
+  return String(value || "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+}
 
-  {
-    id: "multipurpose-hall",
-    name: "Multipurpose Hall",
-    capacity: "300 guests",
-
-    description:
-      "Ideal for seminars and organizational conferences.",
-
-    image:
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80",
-
-    tags: [
-      "Seminars",
-      "Conferences",
-      "Events"
-    ]
-  },
-
-
-  {
-    id: "school-gymnasium",
-    name: "School Gymnasium",
-    capacity: "1000 guests",
-
-    description:
-      "Perfect for sports tournaments, pep rallies, and large events.",
-
-    image:
-      "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=900&q=80",
-
-    tags: [
-      "Sports",
-      "Tournaments",
-      "Exhibitions"
-    ]
-  },
-
-
-  {
-    id: "social-hall",
-    name: "Social Hall",
-    capacity: "150 guests",
-
-    description:
-      "Tailored for banquets and academic celebrations.",
-
-    image:
-      "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=900&q=80",
-
-    tags: [
-      "Banquets",
-      "Academic Events",
-      "Meetings"
-    ]
-  },
-
-
-  {
-    id: "open-courtyard",
-    name: "Open Courtyard",
-    capacity: "400 guests",
-
-    description:
-      "Ideal for outdoor fairs, concerts, and campus festivals.",
-
-    image:
-      "https://images.unsplash.com/photo-1574958269340-fa927503f3dd?auto=format&fit=crop&w=900&q=80",
-
-    tags: [
-      "Fairs",
-      "Concerts",
-      "Outdoor Events"
-    ]
-  }
-
-];
-
-
-function createFacilityCard(space) {
+function createFacilityCard(record) {
+  const space = {
+    name: escapeFacilityText(record.name),
+    capacity: record.capacity ? `${Number(record.capacity)} guests` : "Contact PFMO for capacity",
+    description: escapeFacilityText(record.description),
+    image: /^https:\/\//.test(record.image || "") ? escapeFacilityText(record.image) : "",
+    tags: (record.tags || []).map(escapeFacilityText)
+  };
 
   const card = document.createElement("article");
 
@@ -148,12 +79,12 @@ function createFacilityCard(space) {
 
     sessionStorage.setItem(
       "selectedFacility",
-      space.name
+      record.name
     );
 
 
     window.location.href =
-      `new-reservation-venue.html?venue=${encodeURIComponent(space.name)}`;
+      `new-reservation-venue.html?venue=${encodeURIComponent(record.name)}`;
 
   });
 
@@ -163,7 +94,7 @@ function createFacilityCard(space) {
 }
 
 
-function renderFeaturedSpaces() {
+async function renderFeaturedSpaces() {
 
   const grid =
     document.getElementById("featured-spaces");
@@ -172,14 +103,18 @@ function renderFeaturedSpaces() {
   if (!grid) return;
 
 
-  featuredSpaces.forEach(space => {
+  try {
+    const featuredSpaces = (await FRMS.venues()).filter(space => space.featured);
+    grid.innerHTML = "";
+    if (!featuredSpaces.length) grid.textContent = "Facilities will appear here once the catalog is configured.";
+    featuredSpaces.forEach(space => {
 
     grid.appendChild(
       createFacilityCard(space)
     );
 
   });
-
+  } catch (error) { grid.textContent = "Unable to load facilities."; FRMS.showError(error); }
 }
 
 

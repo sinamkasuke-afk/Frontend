@@ -1,0 +1,12 @@
+{
+  "name": "frms-database-tools",
+  "private": true,
+  "scripts": {
+    "seed": "node seed-database.cjs",
+    "accounts": "node provision-test-accounts.cjs",
+    "mock": "node seed-mock-data.cjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

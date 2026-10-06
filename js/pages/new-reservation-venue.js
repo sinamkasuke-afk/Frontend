@@ -1,7 +1,7 @@
 (async () => {
   try {
     if (!await FRMS.requireUser()) return;
-    const venues = await FRMS.venues(mockVenues);
+    const venues = await FRMS.venues();
 /* ==========================================================
    new-reservation-venue.js
    Page script for new-reservation-venue.html.
@@ -83,7 +83,12 @@ function loadVenueList(venues) {
 /* Load all venues initially */
 
 loadVenueList(venues);
-
+if (!venues.length) venueListElement.textContent = "No facilities are configured yet. Ask your administrator to populate the venue catalog.";
+const selectedName = new URLSearchParams(location.search).get("venue");
+if (selectedName) {
+  const selectedIndex = venues.findIndex(venue => venue.name === selectedName);
+  if (selectedIndex >= 0) venueListElement.querySelectorAll(".venue-item")[selectedIndex]?.click();
+}
 
 /* ==========================================================
    VENUE SEARCH
@@ -196,7 +201,9 @@ createCalendar(
    REFRESH TIME SLOTS
    ========================================================== */
 
-function refreshTimeSlots() {
+let slotLoadVersion = 0;
+async function refreshTimeSlots() {
+  const version = ++slotLoadVersion;
 
   if (!timeSlotsElement) {
     return;
@@ -221,10 +228,16 @@ function refreshTimeSlots() {
   }
 
 
-  renderTimeSlots(
+  timeSlotsElement.textContent = "Loading available slots…";
+  try {
+    const dateISO = `${reservation.date.getFullYear()}-${String(reservation.date.getMonth() + 1).padStart(2, "0")}-${String(reservation.date.getDate()).padStart(2, "0")}`;
+    const slots = await FRMS.availableSlots(reservation.venue.id, dateISO);
+    if (version !== slotLoadVersion) return;
+    if (!slots.length) { timeSlotsElement.textContent = "No slots are available for this date."; return; }
+    renderTimeSlots(
     "time-slots",
     reservation.date,
-    mockSlots,
+    slots,
     function (slot) {
 
       reservation.slot = slot;
@@ -237,6 +250,7 @@ function refreshTimeSlots() {
     }
   );
 
+  } catch (error) { if (version === slotLoadVersion) { timeSlotsElement.textContent = "Unable to load available slots."; FRMS.showError(error); } }
 }
 
 

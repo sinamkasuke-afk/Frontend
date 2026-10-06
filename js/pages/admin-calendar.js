@@ -17,21 +17,33 @@ document.addEventListener(
       // Parse a date-only value in local time so it keeps its selected day.
       return new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? value + "T00:00:00" : value);
     }
-    const reservations = firebaseRequests
-      .filter(request => {
+    const today = new Date();
+    let viewYear = today.getFullYear();
+    let viewMonth = today.getMonth();
+    let selectedDay = today.getDate();
+    let reservations = [];
+    let previousMonthDays = [];
+    let currentMonthDays = [];
+    function refreshMonth() {
+      const days = new Date(viewYear, viewMonth + 1, 0).getDate();
+      selectedDay = Math.min(selectedDay, days);
+      currentMonthDays = Array.from({ length: days }, (_, index) => index + 1);
+      const leadingDays = new Date(viewYear, viewMonth, 1).getDay();
+      const previousDays = new Date(viewYear, viewMonth, 0).getDate();
+      previousMonthDays = Array.from({ length: leadingDays }, (_, index) => previousDays - leadingDays + index + 1);
+      reservations = firebaseRequests.filter(request => {
         const date = reservationDate(request);
-        return date.getFullYear() === 2026 && date.getMonth() === 9;
-      })
-      .map(request => ({ ...request, day: reservationDate(request).getDate() }));
-
-
-    /* ==========================================================
-       STATE
-       ========================================================== */
-
-    let selectedDay =
-      4;
-
+        return date.getFullYear() === viewYear && date.getMonth() === viewMonth;
+      }).map(request => ({ ...request, day: reservationDate(request).getDate() }));
+      const label = new Date(viewYear, viewMonth, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      document.getElementById("current-month-button").textContent = label;
+      document.querySelector(".mini-calendar__header h3, .mini-calendar-header h3, [data-mini-month]")?.replaceChildren(label);
+    }
+    function changeMonth(offset) {
+      const date = new Date(viewYear, viewMonth + offset, 1);
+      viewYear = date.getFullYear(); viewMonth = date.getMonth();
+      refreshMonth(); renderAll();
+    }
 
     /* ==========================================================
        ELEMENTS
@@ -82,30 +94,6 @@ document.addEventListener(
     /* ==========================================================
        CALENDAR CELLS
        ========================================================== */
-
-    const previousMonthDays = [
-      27,
-      28,
-      29,
-      30
-    ];
-
-
-    const currentMonthDays =
-      Array.from(
-        {
-          length: 31
-        },
-        function (
-          _,
-          index
-        ) {
-
-          return index + 1;
-
-        }
-      );
-
 
     /* ==========================================================
        FILTER CHECK
@@ -395,7 +383,7 @@ document.addEventListener(
     function renderSelectedReservations() {
 
       selectedDateTitle.textContent =
-        `October ${selectedDay}, 2026`;
+        new Date(viewYear, viewMonth, selectedDay).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
 
       const dayReservations =
@@ -487,6 +475,11 @@ document.addEventListener(
 
     }
 
+
+    document.getElementById("prev-month").addEventListener("click", () => changeMonth(-1));
+    document.getElementById("next-month").addEventListener("click", () => changeMonth(1));
+    document.querySelectorAll(".mini-nav-button").forEach((button, index) => button.addEventListener("click", () => changeMonth(index === 0 ? -1 : 1)));
+    refreshMonth();
 
     /* ==========================================================
        DAY CLICK

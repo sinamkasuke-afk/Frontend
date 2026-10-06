@@ -201,7 +201,7 @@ document.addEventListener(
             function (request) {
 
               return `
-                <tr>
+                <tr data-reservation-id="${escapeHTML(request.id)}" tabindex="0" title="View reservation details" style="cursor:pointer">
 
                   <td>
                     <strong>

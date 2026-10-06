@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async function () {
     try {
       if (!await FRMS.requireUser(false)) return;
-      var mockRequests = await FRMS.requests();
+      var reservationRequests = await FRMS.requests();
     } catch (error) { FRMS.showError(error); return; }
 
 
@@ -163,12 +163,12 @@ document.addEventListener("DOMContentLoaded", async function () {
      ========================================================== */
 
   if (
-    typeof mockRequests === "undefined" ||
-    !Array.isArray(mockRequests)
+    typeof reservationRequests === "undefined" ||
+    !Array.isArray(reservationRequests)
   ) {
 
     console.error(
-      "mockRequests is not available."
+      "reservationRequests is not available."
     );
 
 
@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", async function () {
      ========================================================== */
 
   if (
-    mockRequests.length === 0
+    reservationRequests.length === 0
   ) {
 
     dashboardBody.innerHTML = `
@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", async function () {
      ========================================================== */
 
   const totalCount =
-    mockRequests.length;
+    reservationRequests.length;
 
 
   const pendingCount =
@@ -255,7 +255,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
   const recent =
-    mockRequests.slice(
+    reservationRequests.slice(
       0,
       3
     );
@@ -354,7 +354,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     status
   ) {
 
-    return mockRequests.filter(
+    return reservationRequests.filter(
       function (request) {
 
         return (
@@ -387,7 +387,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
     const approvedRequests =
-      mockRequests.filter(
+      reservationRequests.filter(
         function (request) {
 
           return (
@@ -707,7 +707,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
             return `
-              <tr>
+              <tr data-reservation-id="${escapeHTML(request.id)}" tabindex="0" title="View reservation details" style="cursor:pointer">
 
                 <td>
                   ${escapeHTML(

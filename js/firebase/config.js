@@ -11,3 +11,6 @@ window.FIREBASE_CONFIG = {
 // Optional: Student ID 12345 becomes 12345@your-school-domain.
 // Leave blank to sign in with an email address instead.
 window.FIREBASE_STUDENT_EMAIL_DOMAIN = "";
+
+// Explicit local preview with sample data. Set false to use the live Firebase project.
+window.FRMS_DEMO_MODE = true;

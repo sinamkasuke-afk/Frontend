@@ -3,7 +3,7 @@ document.addEventListener(
   async function () {
     try {
       if (!await FRMS.requireUser(false)) return;
-      var mockRequests = await FRMS.requests();
+      var reservationRequests = await FRMS.requests();
     } catch (error) { FRMS.showError(error); return; }
 
 
@@ -66,8 +66,8 @@ document.addEventListener(
        ========================================================== */
 
     const requests =
-      Array.isArray(mockRequests)
-        ? mockRequests
+      Array.isArray(reservationRequests)
+        ? reservationRequests
         : [];
 
 
@@ -351,7 +351,7 @@ document.addEventListener(
 
 
               return `
-                <tr>
+                <tr data-reservation-id="${escapeHTML(request.id)}" tabindex="0" title="View reservation details" style="cursor:pointer">
 
                   <td>
                     <span class="request-id">

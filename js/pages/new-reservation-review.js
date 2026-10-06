@@ -397,18 +397,18 @@ document.addEventListener(
         );
 
 
-        runSubmissionDemo();
+        runSubmission();
 
       }
     );
 
 
     /* ==========================================================
-       DEMO SUBMISSION
+       SUBMIT RESERVATION
        ========================================================== */
 
     let submitting = false;
-    async function runSubmissionDemo() {
+    async function runSubmission() {
       if (submitting) return;
       submitting = true;
       confirmationSubmit.disabled = true;
@@ -417,8 +417,9 @@ document.addEventListener(
         const id = await saveSubmittedRequest();
         progressBar.style.width = "100%";
         successRequestId.textContent = id;
-        clearReservation();
         showModal(successModal);
+        clearReservation();
+        try { await saveDraftDocument(null); } catch (error) { console.error("Unable to remove local PDF draft:", error); }
       } catch (error) {
         FRMS.showError(error);
         showModal(errorModal);
@@ -429,17 +430,9 @@ document.addEventListener(
        STORE SUBMITTED REQUEST
        ========================================================== */
 
-    async function saveSubmittedRequest(
-      requestId
-    ) {
+    async function saveSubmittedRequest() {
 
       const submittedRequest = {
-
-        id:
-          requestId,
-
-        requestId:
-          requestId,
 
         venue:
           venueName,
@@ -492,9 +485,16 @@ document.addEventListener(
       };
 
 
-      submittedRequest.dateISO = reservation.date;
+      const selectedDate = new Date(reservation.date);
+      submittedRequest.dateISO = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+      submittedRequest.slotId = String(reservation.slot.id);
+      let submissionId = reservation.submissionId;
+      if (!submissionId) { submissionId = crypto.randomUUID(); updateReservation({ submissionId }); reservation.submissionId = submissionId; }
+      submittedRequest.requestId = submissionId;
       submittedRequest.venueId = reservation.venue?.id || null;
-      return FRMS.submit(submittedRequest);
+      const file = reservation.supportingDocument ? await readDraftDocument() : null;
+      if (reservation.supportingDocument && !file) throw new Error("Select your supporting PDF again in Event Details before submitting.");
+      return FRMS.submit(submittedRequest, file);
     }
 
 
@@ -594,7 +594,7 @@ document.addEventListener(
         );
 
 
-        runSubmissionDemo();
+        runSubmission();
 
       }
     );

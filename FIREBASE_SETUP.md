@@ -1,36 +1,88 @@
-# Firebase setup
+## Local mock data — ready to test
 
-The frontend is wired for Firebase Authentication and Cloud Firestore. A live connection requires your project's configuration and deployed rules.
+`window.FRMS_DEMO_MODE = true` is currently enabled in `js/firebase/config.js`. In this mode, pages use local sample data and do not initialize Firebase. Start Apache and open `http://localhost/Frontend/login.html`.
 
-1. Create/select a project in Firebase Console and register a Web app.
-2. Copy its config into `js/firebase/config.js`. These are public web configuration values; do not put service account credentials here.
-3. Enable Authentication > Sign-in method > Email/Password. Create student and admin accounts in Authentication > Users. There is no public registration page.
-4. Login accepts an email address. To keep numeric Student IDs, set `FIREBASE_STUDENT_EMAIL_DOMAIN` to your chosen domain and provision matching Firebase email accounts. Admin login always uses email.
-5. Create the default Cloud Firestore database. Publish `firestore.rules` in its Rules tab, or use the Firebase CLI command below.
-6. Give administrators the `admin: true` custom claim using Firebase Admin SDK in a trusted environment. This is not a Firestore user profile field. For an existing user, preserve other claims:
+| Account | Email | Password |
+| --- | --- | --- |
+| Student | `student@example.com` | `Demo123!` |
+| Second student | `student2@example.com` | `Demo123!` |
+| Admin | `admin@example.com` | `Demo123!` |
 
-   ```js
-   const user = await getAuth().getUser(uid);
-   await getAuth().setCustomUserClaims(uid, { ...user.customClaims, admin: true });
-   ```
+There are eight venues, three time slots and eight reservations dated relative to the first demo load. The primary student sees seven requests; the second sees one. Admin sees all eight. New submissions, PDF attachments, approvals, declines and activity persist locally in this browser. The banner's Reset demo data button restores the examples and signs out. Local demo data is a preview, not a backend security test.
 
-   Sign out and back in after changing claims. Never put the Admin SDK or its private keys in this frontend.
-7. Add your deployed domain and `localhost` under Authentication > Settings > Authorized domains as needed. Open through XAMPP at `http://localhost/Frontend/`, not directly as a file.
+Set `FRMS_DEMO_MODE` to `false` before testing or deploying the real Firebase integration. Local demo changes are not uploaded to Firebase.
 
-Optional CLI deployment with the Firebase CLI installed and signed in:
+To create sample data in **live Firestore**, complete administrator setup below, then run:
 
 ```sh
-firebase deploy --project YOUR_PROJECT_ID --only firestore:rules,hosting
+npm run seed --prefix tools
+npm run accounts --prefix tools
+npm run mock --prefix tools
 ```
 
-## Data and behavior
+The cloud importer uses the provisioned test accounts and creates records across all six collections. It preserves existing documents and refuses to replace occupied booking slots. Cloud test accounts use their provisioned passwords, not `Demo123!`. The live mock import completed successfully for frontend-d6606: three test account profiles, eight venues, three time slots, and eight sample reservations with matching bookings and audit events. Local demo mode remains enabled until you set FRMS_DEMO_MODE to false.
 
-- `reservations`: new submissions receive Firestore IDs, the authenticated owner's UID, a server creation timestamp, and pending status. Students query only their own records; admins query all. Approval/decline writes persist to the same collection. Refresh an open page to see updates made elsewhere.
-- `venues`: optional documents with a `name` field. When the collection is empty, the existing six venue names are used as the local catalog. Only admins may modify this collection.
-- Reservation drafts remain in session storage between steps. Signing in clears the previous draft; logout clears session storage. Demo reservations and localStorage submissions are no longer used.
-- The three time slots remain a static schedule. This integration does not enforce conflicting bookings; add a trusted transaction-based booking service before relying on exclusive occupancy.
-- Supporting documents currently retain only local filename metadata in the existing form. File contents are not uploaded or attached to the saved reservation.
-- The existing admin calendar remains fixed to October 2026 and now displays Firestore reservations for that month.
-- No live project was provisioned or deployed by this change. No existing demo data is migrated automatically.
+# Firebase setup for frontend-d6606
 
-Official references: [Web setup](https://firebase.google.com/docs/web/setup), [Firestore rules](https://firebase.google.com/docs/firestore/security/get-started), [Admin custom claims](https://firebase.google.com/docs/auth/admin/custom-claims).
+The frontend uses Firebase Authentication, Cloud Firestore, Cloud Storage and two callable Cloud Functions. See `DATABASE_SCHEMA.md` for the collection inventory and behavior.
+
+## 1. Console setup
+
+- Keep your web app config in `js/firebase/config.js`.
+- Enable Authentication > Email/Password. Login accepts email addresses. Optional numeric Student IDs require `FIREBASE_STUDENT_EMAIL_DOMAIN` and matching provisioned email accounts.
+- Create the default Firestore database (Standard edition).
+- Enable Cloud Storage and confirm the web config has the bucket name. Cloud Functions and Storage require the appropriate Firebase billing plan; review the project's billing setup before deployment.
+- Add `localhost` and your deployed domain in Authentication's authorized domains where needed.
+
+## 2. Deploy the backend and rules
+
+From this folder, with Node 22 or later and Firebase CLI access to the project:
+
+```sh
+npm install --prefix functions
+npm install --prefix tools
+npx firebase-tools login
+npx firebase-tools deploy --project frontend-d6606 --only functions,firestore,storage
+```
+
+Deploy functions, Firestore rules/indexes and Storage rules together. Cross-service Storage rules may prompt Firebase to enable the Firestore service-agent permission. The frontend uses functions in `asia-southeast1`.
+
+## 3. Populate the database and test accounts
+
+Run these with project administrator Application Default Credentials. One way is to upload the project to Google Cloud Shell, select project `frontend-d6606`, install the dependencies above, and authenticate:
+
+```sh
+gcloud auth application-default login
+npm run seed --prefix tools
+npm run accounts --prefix tools
+```
+
+The seed tool creates missing venue and schedule documents without overwriting existing records. The account tool saves the existing student profile and creates/grants access to `frms-admin-test@example.com`. It prints a new generated admin password only when the Auth account is first created. Existing passwords are preserved. Sign out and back in after granting admin claims. Never store administrator credential keys in this frontend folder.
+
+Your existing student email is `frms-test-027efef2@example.com`; its password was provided in the chat. Passwords are not copied to Firestore or committed to source.
+
+## 4. Test
+
+Start XAMPP Apache and open `http://localhost/Frontend/login.html`.
+
+1. Sign in as the test student.
+2. Choose a venue, future date and available slot; enter event details and select a PDF up to 5MB.
+3. Submit and check My Reservations. The first submission creates the `reservations`, `bookings`, and `reservationEvents` collections.
+4. Sign in at `admin-login.html` with the provisioned admin; inspect the request row and PDF, approve/decline, then refresh the student's list.
+5. A declined slot should become available again; pending/approved slots should be unavailable.
+
+Local checks:
+
+```sh
+node --test tests/reservation-service.test.cjs
+```
+
+Optional Hosting deployment:
+
+```sh
+npx firebase-tools deploy --project frontend-d6606 --only hosting
+```
+
+Live test account and mock data creation has completed. Backend function deployment and publication of the local rules are separate setup steps; importing data does not deploy them. Existing pre-booking reservations are not migrated by the seed tool.
+
+References: [Firestore transactions](https://firebase.google.com/docs/firestore/manage-data/transactions), [Cloud Functions setup](https://firebase.google.com/docs/functions/get-started), [Custom claims](https://firebase.google.com/docs/auth/admin/custom-claims), [Cross-service rules](https://firebase.google.com/docs/rules/manage-deploy).
