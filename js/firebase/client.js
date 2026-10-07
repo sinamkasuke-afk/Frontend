@@ -92,7 +92,7 @@ window.FRMS = (() => {
   async function registerAdmin(displayName, email, password, invitationCode) {
     await ready;
     displayName = displayName.trim(); email = email.trim();
-    if (!/^[a-f0-9]{48}$/.test((invitationCode || "").trim())) throw new Error("Enter the invitation code supplied by an authorized administrator.");
+    if (invitationCode && !/^[a-f0-9]{48}$/.test(invitationCode.trim())) throw new Error("Invalid administrator invitation code.");
     if (!displayName || displayName.length > 100) throw new Error("Enter your full name (up to 100 characters).");
     if (!email.includes("@")) throw new Error("Enter a valid email address.");
     if (password.length < 8) throw new Error("Use at least eight characters for your password.");
@@ -106,6 +106,10 @@ window.FRMS = (() => {
       try { await credential.user.delete(); } catch (_) {}
       await auth.signOut(); user = null;
       throw error;
+    }
+    if (!invitationCode) {
+      await auth.signOut(); user = null; admin = false;
+      return;
     }
     try {
       await activateAdminRegistration(invitationCode);

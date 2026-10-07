@@ -93,9 +93,9 @@ adminRegisterForm.addEventListener('submit', async event => {
   button.disabled = adminRegisterBack.disabled = true;
   message.textContent = 'Creating account…';
   try {
-    await FRMS.registerAdmin(document.getElementById('admin-register-name').value, document.getElementById('admin-register-email').value, password, document.getElementById('admin-register-invitation').value);
+    await FRMS.registerAdmin(document.getElementById('admin-register-name').value, document.getElementById('admin-register-email').value, password);
     adminRegisterForm.reset();
-    location.href = 'admin-dashboard.html';
+    message.textContent = 'Account registered. The project owner must approve administrator access before you can log in.';
   } catch (error) { message.textContent = error.code === 'auth/email-already-in-use' ? 'This email already has an account. Sign in through Admin Login if you already registered as an administrator.' : error.message; }
   finally { button.disabled = adminRegisterBack.disabled = false; }
 });

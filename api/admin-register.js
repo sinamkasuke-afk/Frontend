@@ -17,7 +17,11 @@ function createHandler({ auth, db, timestamp }) {
       if (!snapshot.exists || !['pending', 'approved'].includes(snapshot.data().status) || snapshot.data().email !== account.email) {
         return res.status(403).json({ error: 'Register through Register as Administrator first.' });
       }
+      if (snapshot.data().status !== 'approved' && !req.body?.invitationCode) {
+        return res.status(403).json({ error: 'Your administrator account is awaiting approval from the project owner.' });
+      }
       const invitationCode = typeof req.body?.invitationCode === 'string' ? req.body.invitationCode.trim() : '';
+      if (snapshot.data().status !== 'approved') {
       if (!/^[a-f0-9]{48}$/.test(invitationCode)) return res.status(403).json({ error: 'An administrator invitation code is required.' });
       const invitation = db.collection('adminInvitations').doc(crypto.createHash('sha256').update(invitationCode).digest('hex'));
       const granted = await db.runTransaction(async tx => {
@@ -30,6 +34,7 @@ function createHandler({ auth, db, timestamp }) {
         return true;
       });
       if (!granted) return res.status(403).json({ error: 'This invitation is invalid, expired, or belongs to another email address.' });
+      }
       const data = snapshot.data();
       await db.collection('users').doc(identity.uid).set({ uid: identity.uid, email: account.email,
         displayName: data.displayName, role: 'admin', studentId: '', enrollmentStatus: 'approved', createdAt: data.createdAt });
