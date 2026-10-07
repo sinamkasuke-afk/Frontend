@@ -210,7 +210,6 @@
           </div>
 
 
-          <details style="margin:12px 0"><summary>Already registered but need to activate an invitation?</summary><div class="admin-field"><label for="admin-login-invitation">Invitation code</label><input id="admin-login-invitation" autocomplete="off" maxlength="48"></div></details>
           <button
             type="submit"
             class="admin-login-button"
@@ -224,14 +223,13 @@
 
         <section id="admin-register-section" hidden aria-labelledby="admin-register-title">
           <h3 id="admin-register-title">Register an administrator account</h3>
-          <p>Use an invitation code from an authorized administrator to create your account.</p>
+          <p>Create your account and request administrator approval.</p>
           <form id="admin-register-form">
             <div class="admin-field"><label for="admin-register-name">Full name</label><input id="admin-register-name" autocomplete="name" maxlength="100" required></div>
             <div class="admin-field"><label for="admin-register-email">Email</label><input id="admin-register-email" type="email" autocomplete="email" required></div>
             <div class="admin-field"><label for="admin-register-password">Password</label><input id="admin-register-password" type="password" autocomplete="new-password" minlength="8" required></div>
             <div class="admin-field"><label for="admin-register-confirm">Confirm password</label><input id="admin-register-confirm" type="password" autocomplete="new-password" minlength="8" required></div>
        
-            <div class="admin-field"><label for="admin-register-invitation">Administrator invitation code</label><input id="admin-register-invitation" required autocomplete="off" maxlength="48" pattern="[a-f0-9]{48}"></div>
             <p id="admin-register-message" role="status"></p>
             <button type="submit" class="admin-login-button" id="admin-register-submit">Create Administrator Account →</button>
             <button type="button" class="admin-register-button" id="admin-register-back">Back to login</button>
@@ -252,9 +250,9 @@
   <script src="js/data/sample-data.js?v=paging-enrollment-1"></script>
   <script src="js/firebase/reservation-service.js?v=hardening-1"></script>
   <script src="js/firebase/request-pagination.js?v=paging-enrollment-1"></script>
-  <script src="js/firebase/client.js?v=hardening-1"></script>
+  <script src="js/firebase/client.js?v=no-invitation-3"></script>
 <script src="js/components/navbar.js?v=brand-text-1"></script>
-  <script src="js/pages/admin-login.js?v=hardening-1"></script>
+  <script src="js/pages/admin-login.js?v=no-invitation-3"></script>
 
 </body>
 </html>

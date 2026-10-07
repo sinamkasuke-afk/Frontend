@@ -95,6 +95,10 @@ window.FRMS = (() => {
       await auth.signOut(); user = null; admin = false;
       return;
     }
+    if (!invitationCode) {
+      await auth.signOut(); user = null; admin = false;
+      return;
+    }
     try {
       await activateAdminRegistration(invitationCode);
       admin = (await user.getIdTokenResult(true)).claims.admin === true;
