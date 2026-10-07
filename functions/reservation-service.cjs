@@ -1,3 +1,11 @@
+  function bookingRange(value) {
+    const encoded = /^hours-(\d+)-(\d+)$/.exec(value.slotId || "");
+    const range = Number.isInteger(value.startMinutes) && Number.isInteger(value.endMinutes)
+      ? [value.startMinutes, value.endMinutes]
+      : encoded ? [Number(encoded[1]), Number(encoded[2])]
+      : { morning: [420, 600], midday: [600, 780], afternoon: [780, 960] }[value.slotId];
+    return range && range[0] >= 0 && range[1] <= 1440 && range[0] < range[1] ? range : null;
+  }
 class ReservationError extends Error {
   constructor(code, message) { super(message); this.code = code; }
 }
@@ -80,7 +88,7 @@ async function submitReservation({ db, actor, data, timestamp, now = new Date(),
       for (const document of occupied.docs) {
         const value = document.data();
         if (value.status === 'pending' && value.createdAt?.seconds !== undefined && now.getTime() >= value.createdAt.seconds * 1000 + 48 * 3600000) continue;
-        const other = Number.isInteger(value.startMinutes) && Number.isInteger(value.endMinutes) ? [value.startMinutes, value.endMinutes] : { morning: [420,600], midday: [600,780], afternoon: [780,960] }[value.slotId];
+        const other = bookingRange(value);
         if (!other) fail('failed-precondition', 'A booking has an unknown time range. Contact the administrator.');
         if (range[0] < other[1] && range[1] > other[0]) fail('already-exists', 'This facility is already reserved during part of your selected time. Choose another time or facility.');
       }

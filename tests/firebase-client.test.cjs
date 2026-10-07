@@ -191,3 +191,12 @@ test('ID confirmation does not disappear before Firebase acknowledges the write'
   watch.callback({metadata:{hasPendingWrites:false},data:()=>({confirmedStudentId:'2026-001'})});
   assert.equal(received.length,1);
 });
+
+test('legacy custom bookings block their encoded hours rather than the entire day', async () => {
+  const { api, records } = client();
+  records.bookings[0].value = { slotId: 'hours-300-420', status: 'approved' };
+  const slots = await api.availableSlots('garden', '2026-10-15');
+  assert.deepEqual(Array.from(slots, slot => slot.id), ['morning', 'midday']);
+  assert.equal(slots.blocked[0].startMinutes, 300);
+  assert.equal(slots.blocked[0].endMinutes, 420);
+});

@@ -170,3 +170,21 @@ test('custom hours allow an earlier start time on the current day', async () => 
   await flexible(db, { dateISO: '2026-10-06', startMinutes: 420 });
   assert.equal(records.get('reservations/request-1').startMinutes, 420);
 });
+
+test('different students can reserve the same garden on the same date at 5–7 AM and 8–10 AM', async () => {
+  const { db, records } = database();
+  records.set('venues/garden', { name: 'Garden', active: true, capacity: 50 });
+  for (const [index, startMinutes, endMinutes] of [[1, 300, 420], [2, 480, 600]]) {
+    await flexible(db, { requestId: 'garden-' + index, venueId: 'garden', startMinutes, endMinutes }, { uid: 'student-' + index, email: 'student' + index + '@gmail.com' });
+  }
+  assert.equal(records.get('reservations/garden-1').ownerUid, 'student-1');
+  assert.equal(records.get('reservations/garden-2').ownerUid, 'student-2');
+  await assert.rejects(flexible(db, { requestId: 'overlap', venueId: 'garden', startMinutes: 360, endMinutes: 540 }, { uid: 'student-3' }), { code: 'already-exists' });
+});
+
+test('legacy custom booking without minute fields permits separate hours and rejects overlap', async () => {
+  const { db, records } = database();
+  records.set('bookings/legacy', { venueId: 'hall', dateISO: data.dateISO, slotId: 'hours-300-420', status: 'approved' });
+  await flexible(db, { startMinutes: 480, endMinutes: 600 });
+  await assert.rejects(flexible(db, { requestId: 'overlap-legacy', startMinutes: 360, endMinutes: 480 }), { code: 'already-exists' });
+});

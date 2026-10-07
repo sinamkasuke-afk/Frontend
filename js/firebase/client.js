@@ -273,6 +273,14 @@ window.FRMS = (() => {
     return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }))
       .sort((a, b) => (a.order || 0) - (b.order || 0));
   }
+  function bookingRange(value) {
+    const encoded = /^hours-(\d+)-(\d+)$/.exec(value.slotId || "");
+    const range = Number.isInteger(value.startMinutes) && Number.isInteger(value.endMinutes)
+      ? [value.startMinutes, value.endMinutes]
+      : encoded ? [Number(encoded[1]), Number(encoded[2])]
+      : { morning: [420, 600], midday: [600, 780], afternoon: [780, 960] }[value.slotId];
+    return range && range[0] >= 0 && range[1] <= 1440 && range[0] < range[1] ? range : null;
+  }
   async function availableSlots(venueId, dateISO) {
     if (!await requireUser()) return [];
     const [slots, bookings] = await Promise.all([
@@ -285,7 +293,7 @@ window.FRMS = (() => {
       return !(booking.status === "pending" && booking.createdAt?.seconds !== undefined && Date.now() >= booking.createdAt.seconds * 1000 + 48 * 3600000);
     }).map(doc => {
       const value = doc.data();
-      const range = Number.isInteger(value.startMinutes) ? [value.startMinutes,value.endMinutes] : canonical[value.slotId];
+      const range = bookingRange(value);
       return range ? { startMinutes: range[0], endMinutes: range[1] } : { startMinutes: 0, endMinutes: 1440 };
     });
     const available = slots.docs.map(doc => ({ ...doc.data(), id: doc.id }))
