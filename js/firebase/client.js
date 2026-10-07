@@ -34,25 +34,9 @@ window.FRMS = (() => {
   async function requireUser(isAdmin = false) {
     await ready;
     if (!user) { location.replace(isAdmin ? "admin-login.html" : "login.html"); return false; }
-    if (isAdmin && !admin) { location.replace("dashboard.html"); return false; }
-    return true;
-  }
-  async function login(identifier, password, isAdmin = false) {
-    await ready;
-    let email = identifier.trim();
-    if (!email.includes("@") && !isAdmin && window.FIREBASE_STUDENT_EMAIL_DOMAIN) {
-      email += "@" + window.FIREBASE_STUDENT_EMAIL_DOMAIN;
-    }
-    if (!email.includes("@")) throw new Error("Enter your Firebase account email address, or configure a Student ID email domain.");
-    const credential = await auth.signInWithEmailAndPassword(email, password);
-    user = credential.user;
-    admin = (await user.getIdTokenResult(true)).claims.admin === true;
     if (isAdmin && !admin) {
-      try {
-        await activateAdminRegistration(document.getElementById("admin-login-invitation")?.value || "");
-        admin = (await user.getIdTokenResult(true)).claims.admin === true;
-        if (!admin) throw new Error("Administrator access is not enabled. Register as Administrator first.");
-      } catch (error) { await auth.signOut(); user = null; admin = false; throw error; }
+      await auth.signOut(); user = null; admin = false;
+      throw new Error("This account does not have administrator access. Contact the project owner to enable it.");
     }
     if (!isAdmin && admin) {
       await auth.signOut(); user = null; admin = false;

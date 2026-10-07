@@ -71,31 +71,3 @@ document.getElementById("forgot-password").addEventListener("click", async event
   try { await FRMS.resetPassword(adminUsername.value); window.alert("If an account exists, check your email for a password reset link."); }
   catch (error) { FRMS.showError(error); }
 });
-
-const adminRegisterSection = document.getElementById('admin-register-section');
-const adminRegisterOpen = document.getElementById('open-admin-register');
-const adminRegisterBack = document.getElementById('admin-register-back');
-const adminRegisterForm = document.getElementById('admin-register-form');
-function showAdminRegistration(open) {
-  adminLoginForm.hidden = open;
-  adminRegisterSection.hidden = !open;
-  adminRegisterOpen.setAttribute('aria-expanded', String(open));
-  document.getElementById(open ? 'admin-register-name' : 'admin-username').focus();
-}
-adminRegisterOpen.addEventListener('click', () => showAdminRegistration(true));
-adminRegisterBack.addEventListener('click', () => showAdminRegistration(false));
-adminRegisterForm.addEventListener('submit', async event => {
-  event.preventDefault();
-  const message = document.getElementById('admin-register-message');
-  const password = document.getElementById('admin-register-password').value;
-  if (password !== document.getElementById('admin-register-confirm').value) { message.textContent = 'Passwords do not match.'; return; }
-  const button = document.getElementById('admin-register-submit');
-  button.disabled = adminRegisterBack.disabled = true;
-  message.textContent = 'Creating account…';
-  try {
-    await FRMS.registerAdmin(document.getElementById('admin-register-name').value, document.getElementById('admin-register-email').value, password);
-    adminRegisterForm.reset();
-    message.textContent = 'Account registered. The project owner must approve administrator access before you can log in.';
-  } catch (error) { message.textContent = error.code === 'auth/email-already-in-use' ? 'This email already has an account. Sign in through Admin Login if you already registered as an administrator.' : error.message; }
-  finally { button.disabled = adminRegisterBack.disabled = false; }
-});

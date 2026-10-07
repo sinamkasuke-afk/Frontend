@@ -23,7 +23,7 @@
 
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components/navbar.css?v=student-menu-2">
-  <link rel="stylesheet" href="css/pages/admin-login.css?v=admin-register-1">
+  <link rel="stylesheet" href="css/pages/admin-login.css?v=admin-login-only-2">
   <link rel="stylesheet" href="css/components/reservation-detail.css?v=detail-modal-1">
 </head>
 
@@ -218,22 +218,9 @@
             <span>→</span>
           </button>
 
-          <button type="button" id="open-admin-register" class="admin-register-button" aria-controls="admin-register-section" aria-expanded="false">Register as Administrator</button>
         </form>
 
-        <section id="admin-register-section" hidden aria-labelledby="admin-register-title">
-          <h3 id="admin-register-title">Register an administrator account</h3>
-          <p>Create your account. Administrator access requires approval from the project owner.</p>
-          <form id="admin-register-form">
-            <div class="admin-field"><label for="admin-register-name">Full name</label><input id="admin-register-name" autocomplete="name" maxlength="100" required></div>
-            <div class="admin-field"><label for="admin-register-email">Email</label><input id="admin-register-email" type="email" autocomplete="email" required></div>
-            <div class="admin-field"><label for="admin-register-password">Password</label><input id="admin-register-password" type="password" autocomplete="new-password" minlength="8" required></div>
-            <div class="admin-field"><label for="admin-register-confirm">Confirm password</label><input id="admin-register-confirm" type="password" autocomplete="new-password" minlength="8" required></div>
-            <p id="admin-register-message" role="status"></p>
-            <button type="submit" class="admin-login-button" id="admin-register-submit">Create Administrator Account →</button>
-            <button type="button" class="admin-register-button" id="admin-register-back">Back to login</button>
-          </form>
-        </section>
+      </section>
 
       </section>
 
@@ -249,9 +236,9 @@
   <script src="js/data/sample-data.js?v=paging-enrollment-1"></script>
   <script src="js/firebase/reservation-service.js?v=hardening-1"></script>
   <script src="js/firebase/request-pagination.js?v=paging-enrollment-1"></script>
-  <script src="js/firebase/client.js?v=approval-registration-1"></script>
+  <script src="js/firebase/client.js?v=admin-login-only-2"></script>
 <script src="js/components/navbar.js?v=brand-text-1"></script>
-  <script src="js/pages/admin-login.js?v=approval-registration-1"></script>
+  <script src="js/pages/admin-login.js?v=admin-login-only-2"></script>
 
 </body>
 </html>
