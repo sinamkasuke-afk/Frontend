@@ -262,6 +262,7 @@ body {
 
 .admin-login-panel {
   width: 100%;
+  min-width: 0;
 
   max-width: 520px;
 
@@ -490,6 +491,7 @@ body {
 
 .admin-login-options {
   display: flex;
+  flex-wrap: wrap;
 
   align-items: center;
 
@@ -599,6 +601,10 @@ body {
     min-height: 0;
   }
 
+  .admin-login-panel {
+    grid-row: 1;
+  }
+
 
   .admin-showcase {
     min-height: 620px;
@@ -630,9 +636,7 @@ body {
 
 
   .admin-showcase {
-    min-height: 580px;
-
-    border-radius: 22px;
+    display: none;
   }
 
 
@@ -682,7 +686,8 @@ body {
 
 
   .admin-login-panel h2 {
-    font-size: 36px;
+    font-size: clamp(28px, 8vw, 36px);
+    line-height: 1.15;
   }
 
 
