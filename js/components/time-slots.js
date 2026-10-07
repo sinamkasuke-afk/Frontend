@@ -69,7 +69,6 @@ function renderTimeSlots(containerId, date, slots, onSlotSelect) {
     const minutes = hours.map((hour, index) => (hour % 12 + (periods[index].value === "PM" ? 12 : 0)) * 60);
     if (minutes[1] <= minutes[0]) { feedback.textContent = "End time must be later than start time on the same day."; return; }
     if ((slots.blocked || []).some(range => minutes[0] < range.endMinutes && minutes[1] > range.startMinutes)) { feedback.textContent = "This time overlaps an existing reservation. Choose another time or facility."; return; }
-    if (new Date(date.getFullYear(), date.getMonth(), date.getDate(), minutes[0] / 60).getTime() <= Date.now()) { feedback.textContent = "Choose a start time in the future."; return; }
     chosen = { id: `hours-${minutes[0]}-${minutes[1]}`, startMinutes: minutes[0], endMinutes: minutes[1], label: `${format(minutes[0])} – ${format(minutes[1])}` };
     feedback.textContent = `${chosen.label} · ${(minutes[1] - minutes[0]) / 60} hours`;
     use.disabled = false;

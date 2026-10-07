@@ -84,8 +84,6 @@ async function submitReservation({ db, actor, data, timestamp, now = new Date(),
         if (!other) fail('failed-precondition', 'A booking has an unknown time range. Contact the administrator.');
         if (range[0] < other[1] && range[1] > other[0]) fail('already-exists', 'This facility is already reserved during part of your selected time. Choose another time or facility.');
       }
-      const starts = new Date(date + 'T00:00:00+08:00').getTime() + range[0] * 60000;
-      if (now.getTime() >= starts) fail('invalid-argument', 'Choose a start time in the future.');
     }
     const formatHour = minutes => `${(minutes / 60) % 12 || 12}:00 ${minutes < 720 ? 'AM' : 'PM'}`;
     const requester = actor.name || actor.email || actor.uid;

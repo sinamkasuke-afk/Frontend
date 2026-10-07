@@ -154,8 +154,8 @@ test('8 and 12 hour bookings persist ranges; overlap is rejected but adjacent ti
   await cancelReservation({db,actor:student,data:{id:'request-1'},timestamp:()=>({seconds:1791244800}),now:new Date('2026-10-06T00:00:00Z')});
   assert(!records.has('bookings/hall_2026-10-15_hours-480-960'));
 });
-test('custom hours reject non-integers, reversed ranges and past start times', async () => {
-  for (const change of [{startMinutes:'480'},{startMinutes:481},{endMinutes:480},{endMinutes:1500},{startMinutes:-60},{dateISO:'2026-10-06',startMinutes:420}]) await assert.rejects(flexible(database().db,change),{code:'invalid-argument'});
+test('custom hours reject non-integers and reversed ranges', async () => {
+  for (const change of [{startMinutes:'480'},{startMinutes:481},{endMinutes:480},{endMinutes:1500},{startMinutes:-60}]) await assert.rejects(flexible(database().db,change),{code:'invalid-argument'});
 });
 test('custom ranges also conflict with existing fixed slots and simultaneous requests', async () => {
   const {db}=database(); await submit(db);
@@ -163,4 +163,10 @@ test('custom ranges also conflict with existing fixed slots and simultaneous req
   const fresh=database().db;
   const results=await Promise.allSettled([flexible(fresh),flexible(fresh,{requestId:'other',startMinutes:540,endMinutes:1200})]);
   assert.equal(results.filter(result=>result.status==='fulfilled').length,1);
+});
+
+test('custom hours allow an earlier start time on the current day', async () => {
+  const { db, records } = database();
+  await flexible(db, { dateISO: '2026-10-06', startMinutes: 420 });
+  assert.equal(records.get('reservations/request-1').startMinutes, 420);
 });
