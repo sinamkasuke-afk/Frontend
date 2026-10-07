@@ -34,9 +34,23 @@ window.FRMS = (() => {
   async function requireUser(isAdmin = false) {
     await ready;
     if (!user) { location.replace(isAdmin ? "admin-login.html" : "login.html"); return false; }
+    if (isAdmin && !admin) { location.replace("dashboard.html"); return false; }
+    return true;
+  }
+  async function login(identifier, password, isAdmin = false) {
+    await ready;
+    let email = identifier.trim();
+    if (!email.includes("@") && !isAdmin && window.FIREBASE_STUDENT_EMAIL_DOMAIN) email += "@" + window.FIREBASE_STUDENT_EMAIL_DOMAIN;
+    if (!email.includes("@")) throw new Error("Enter your account email address.");
+    const credential = await auth.signInWithEmailAndPassword(email, password);
+    user = credential.user;
+    admin = (await user.getIdTokenResult(true)).claims.admin === true;
     if (isAdmin && !admin) {
-      await auth.signOut(); user = null; admin = false;
-      throw new Error("This account does not have administrator access. Contact the project owner to enable it.");
+      try {
+        await activateAdminRegistration("");
+        admin = (await user.getIdTokenResult(true)).claims.admin === true;
+        if (!admin) throw new Error("Administrator access is awaiting project-owner approval.");
+      } catch (error) { await auth.signOut(); user = null; admin = false; throw error; }
     }
     if (!isAdmin && admin) {
       await auth.signOut(); user = null; admin = false;
@@ -90,10 +104,6 @@ window.FRMS = (() => {
       try { await credential.user.delete(); } catch (_) {}
       await auth.signOut(); user = null;
       throw error;
-    }
-    if (!invitationCode) {
-      await auth.signOut(); user = null; admin = false;
-      return;
     }
     if (!invitationCode) {
       await auth.signOut(); user = null; admin = false;
