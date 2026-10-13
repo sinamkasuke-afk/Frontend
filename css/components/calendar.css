@@ -107,3 +107,13 @@
 .calendar__day--selected,.calendar__day--selected:hover:not(:disabled) { background:#174b35;color:white; }
 .calendar__day[aria-current="date"] { border:2px solid #174b35; }
 .calendar__day:focus-visible,.calendar__nav-btn:focus-visible { outline:3px solid #81b599;outline-offset:2px; }
+
+.calendar__status { color: #64736b; font-size: 13px; margin: 0 0 14px; }
+.calendar__day--available { background: #edf7ef; color: #245936; border-color: #cde5d1; }
+.calendar__day--booked { background: #fde7e5; color: #a32929; border-color: #eca5a0; }
+.calendar__day--full { background: #ae3030; color: white; border-color: #ae3030; }
+.calendar__day--selected { box-shadow: 0 0 0 3px #e8ba34; }
+.calendar__day--booked.calendar__day--selected { background: #fde7e5; color: #a32929; }
+.calendar__day--full.calendar__day--selected { background: #ae3030; color: white; }
+.availability-legend .legend-dot--limited { background: #eca5a0; }
+.time-slots__booked { color: #a32929; font-size: 14px; line-height: 1.6; }

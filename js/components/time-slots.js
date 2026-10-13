@@ -59,7 +59,7 @@ function renderTimeSlots(containerId, date, slots, onSlotSelect) {
   const periods = custom.querySelectorAll("select");
   const feedback = custom.querySelector(".custom-time__feedback");
   const use = custom.querySelector("button");
-  const format = minutes => `${minutes / 60 % 12 || 12}:00 ${minutes < 720 ? "AM" : "PM"}`;
+  const format = minutes => `${minutes / 60 % 12 || 12}:00 ${minutes % 1440 < 720 ? "AM" : "PM"}`;
   let chosen = null;
   function validate() {
     const hours = Array.from(inputs, input => Number(input.value));
@@ -87,6 +87,9 @@ function renderTimeSlots(containerId, date, slots, onSlotSelect) {
   const presetsTitle = document.createElement("p");
   presetsTitle.className = "custom-time__hint";
   presetsTitle.textContent = slots.length ? "Or choose an available suggested time:" : "No suggested times available. You can check another time above.";
-  container.append(heading, custom, presetsTitle, list);
+  const booked = document.createElement("p");
+  booked.className = "time-slots__booked";
+  booked.textContent = (slots.blocked || []).length ? "Booked hours: " + slots.blocked.map(range => `${format(range.startMinutes)} – ${format(range.endMinutes)}`).join(", ") : "No booked hours on this date.";
+  container.append(heading, booked, custom, presetsTitle, list);
   validate();
 }

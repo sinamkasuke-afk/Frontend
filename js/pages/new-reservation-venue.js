@@ -14,6 +14,10 @@
    ========================================================== */
 
 let slotLoadVersion = 0;
+let calendar;
+let stopBookings = () => {};
+let monthVersion = 0;
+let selectedBlocked = "";
 const savedSelection = getReservation();
 const restoredDate = savedSelection.date ? new Date(savedSelection.date) : null;
 const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -76,6 +80,7 @@ function loadVenueList(venues) {
         If a date was already chosen,
         show the time slots again.
       */
+      watchCalendar();
       refreshTimeSlots();
 
     }
@@ -179,7 +184,7 @@ if (venueSearch) {
    CALENDAR
    ========================================================== */
 
-createCalendar(
+calendar = createCalendar(
   "calendar",
   function (date) {
 
@@ -198,13 +203,42 @@ createCalendar(
     refreshTimeSlots();
 
   },
-  reservation.date
+  reservation.date,
+  watchCalendar
 );
+watchCalendar();
+window.addEventListener("pagehide", () => stopBookings());
 
 
 /* ==========================================================
    REFRESH TIME SLOTS
    ========================================================== */
+
+function watchCalendar() {
+  if (!calendar) return;
+  stopBookings();
+  const version = ++monthVersion;
+  selectedBlocked = "";
+  calendar.setAvailability(null, reservation.venue ? "Loading bookings…" : "Select a venue to see bookings.");
+  if (!reservation.venue) return;
+  const {year, month} = calendar.month();
+  stopBookings = FRMS.watchVenueMonth(reservation.venue.id, year, month, days => {
+    if (version !== monthVersion) return;
+    calendar.setAvailability(days, `Availability for ${reservation.venue.name}. Red dates have booked hours.`);
+    if (reservation.date) {
+      const date = reservation.date;
+      const iso = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+      const signature = JSON.stringify(days[iso] || []);
+      if (signature !== selectedBlocked) {
+        selectedBlocked = signature;
+        reservation.slot = null;
+        refreshTimeSlots();
+      }
+    }
+  }, () => {
+    if (version === monthVersion) calendar.setAvailability(null, "Unable to load bookings. Please refresh to try again.");
+  });
+}
 
 async function refreshTimeSlots() {
   const version = ++slotLoadVersion;

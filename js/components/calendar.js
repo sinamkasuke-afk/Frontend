@@ -8,7 +8,7 @@
    Opens on the current month. Past dates cannot be selected.
    ========================================================== */
 
-function createCalendar(containerId, onDateSelect, initialDate = null) {
+function createCalendar(containerId, onDateSelect, initialDate = null, onMonthChange = () => {}) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -30,6 +30,7 @@ function createCalendar(containerId, onDateSelect, initialDate = null) {
     viewYear = selectedDate.getFullYear(); viewMonth = selectedDate.getMonth();
   } else selectedDate = null;
 
+  let availability = null;
   // Static skeleton (title, buttons, weekday row, empty grid)
   container.innerHTML = `
     <div class="calendar">
@@ -44,6 +45,7 @@ function createCalendar(containerId, onDateSelect, initialDate = null) {
       <div class="calendar__weekdays">
         ${weekdayNames.map(function (day) { return `<span>${day}</span>`; }).join("")}
       </div>
+<p class="calendar__status" role="status">Select a venue to see bookings.</p>
       <div class="calendar__grid"></div>
     </div>
   `;
@@ -80,7 +82,15 @@ function createCalendar(containerId, onDateSelect, initialDate = null) {
       button.type = "button";
       button.className = "calendar__day";
       button.textContent = day;
-      button.setAttribute("aria-label", date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }));
+      const iso = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      button.dataset.date = iso;
+      const ranges = availability?.[iso] || [];
+      const full = ranges.length && !Array.from({length: 23}, (_, hour) => hour * 60).some(start => !ranges.some(range => start < range.endMinutes && start + 60 > range.startMinutes));
+      const status = availability === null ? "unknown" : full ? "full" : ranges.length ? "booked" : "available";
+      button.dataset.status = status;
+      button.classList.add(`calendar__day--${status}`);
+      button.title = status === "booked" ? "Booked hours — select to see remaining times" : status === "full" ? "Fully booked" : status === "available" ? "Available" : "Select a venue or wait for availability";
+      button.setAttribute("aria-label", date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }) + `. ${button.title}`);
       button.setAttribute("aria-pressed", String(!!selectedDate && isSameDay(date, selectedDate)));
       if (isSameDay(date, today)) button.setAttribute("aria-current", "date");
 
@@ -102,6 +112,11 @@ function createCalendar(containerId, onDateSelect, initialDate = null) {
     }
   }
 
+  function changeMonth() {
+    availability = null;
+    renderMonth();
+    onMonthChange(viewYear, viewMonth);
+  }
   // Previous / Next month buttons
   container.querySelector('[data-action="prev"]').addEventListener("click", function () {
     viewMonth--;
@@ -109,7 +124,7 @@ function createCalendar(containerId, onDateSelect, initialDate = null) {
       viewMonth = 11;
       viewYear--;
     }
-    renderMonth();
+    changeMonth();
   });
 
   container.querySelector('[data-action="next"]').addEventListener("click", function () {
@@ -118,11 +133,19 @@ function createCalendar(containerId, onDateSelect, initialDate = null) {
       viewMonth = 0;
       viewYear++;
     }
-    renderMonth();
+    changeMonth();
   });
 
   container.querySelector('[data-action="today"]').addEventListener("click", () => {
-    viewYear = today.getFullYear(); viewMonth = today.getMonth(); renderMonth();
+    viewYear = today.getFullYear(); viewMonth = today.getMonth(); changeMonth();
   });
   renderMonth();
+  return {
+    month: () => ({ year: viewYear, month: viewMonth }),
+    setAvailability(value, message) {
+      availability = value;
+      container.querySelector(".calendar__status").textContent = message;
+      renderMonth();
+    }
+  };
 }

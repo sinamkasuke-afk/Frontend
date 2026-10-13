@@ -289,6 +289,26 @@ window.FRMS = (() => {
       : { morning: [420, 600], midday: [600, 780], afternoon: [780, 960] }[value.slotId];
     return range && range[0] >= 0 && range[1] <= 1440 && range[0] < range[1] ? range : null;
   }
+  function watchVenueMonth(venueId, year, month, onChange, onError) {
+    const iso = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-01`;
+    let records = [];
+    function refresh() {
+      const days = {};
+      records.forEach(value => {
+        if (["cancelled", "canceled", "rejected", "expired"].includes(value.status)) return;
+        if (value.status === "pending" && value.createdAt?.seconds !== undefined && Date.now() >= value.createdAt.seconds * 1000 + 48 * 3600000) return;
+        const range = bookingRange(value) || [0, 1440];
+        (days[value.dateISO] ||= []).push({startMinutes: range[0], endMinutes: range[1]});
+      });
+      onChange(days);
+    }
+    const unsubscribe = db.collection("bookings").where("venueId", "==", venueId)
+      .where("dateISO", ">=", iso(new Date(year, month, 1)))
+      .where("dateISO", "<", iso(new Date(year, month + 1, 1)))
+      .onSnapshot(snapshot => { records = snapshot.docs.map(doc => doc.data()); refresh(); }, onError);
+    const timer = setInterval(refresh, 60000);
+    return () => { unsubscribe(); clearInterval(timer); };
+  }
   async function availableSlots(venueId, dateISO) {
     if (!await requireUser()) return [];
     const [slots, bookings] = await Promise.all([
@@ -488,5 +508,5 @@ window.FRMS = (() => {
     if (!user) return null;
     const profile = await db.collection("users").doc(user.uid).get();
     return { displayName: profile.data()?.displayName || user.displayName || "", email: user.email, emailVerified: user.emailVerified, studentCode: profile.data()?.studentId, role: admin ? "admin" : "student" };
-  }, requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, registerAdmin, createAdminInvitation, upcomingReservation, watchUpcoming, requests, watchRequests, requestCounts, watchCounts, mountRequestPagination, venues, availableSlots, submit, updateStatus, cancelReservation, approveEnrollment, watchEnrollment, confirmStudentId, studentQuery, emailVerification, resetPassword, reservationEvents, showError };
+  }, requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, registerAdmin, createAdminInvitation, upcomingReservation, watchUpcoming, requests, watchRequests, requestCounts, watchCounts, mountRequestPagination, venues, watchVenueMonth, availableSlots, submit, updateStatus, cancelReservation, approveEnrollment, watchEnrollment, confirmStudentId, studentQuery, emailVerification, resetPassword, reservationEvents, showError };
 })();
