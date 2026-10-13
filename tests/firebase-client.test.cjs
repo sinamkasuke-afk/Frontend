@@ -203,3 +203,11 @@ test('legacy custom bookings block their encoded hours rather than the entire da
   assert.equal(slots.blocked[0].startMinutes, 300);
   assert.equal(slots.blocked[0].endMinutes, 420);
 });
+
+test('unverified students cannot enter protected pages but can access verification', async () => {
+ const f=client(false,false);
+ assert.equal(await f.api.requireUser(),false);
+ assert.equal(await f.api.requireUser(false,true),true);
+ assert.equal(await client(false,true).api.requireUser(),true);
+ assert.equal(await client(true,false).api.requireUser(true),true);
+});

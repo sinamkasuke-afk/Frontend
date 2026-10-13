@@ -11,7 +11,7 @@ function page() {
     return elements.get(id);
   }
   const context = { window: {}, renderNavbar() {}, document: { getElementById: element }, location: {},
-    FRMS: { register: async (...args) => calls.push(args), login: async () => {}, showError() {} } };
+    FRMS: { register: async (...args) => calls.push(args), login: async () => {}, currentUser: async () => ({emailVerified:false}), showError() {} } };
   vm.createContext(context);
   // Classic script tags share one global scope, just like the actual login page.
   vm.runInContext(fs.readFileSync('js/firebase/reservation-service.js', 'utf8'), context);
@@ -38,6 +38,15 @@ test('registration submit validates confirmation and calls Firebase registration
   element('register-confirm').value = 'TestPass123!';
   await element('register-form').listeners.submit({ preventDefault() {} });
   assert.deepEqual(Array.from(calls[0]), ['Alex Student', 'alex@example.com', 'TestPass123!']);
-  assert.equal(context.location.href, 'dashboard.html');
+  assert.equal(context.location.href, 'verify-email.html');
   assert.equal(element('register-submit').disabled, false);
+});
+
+test('sign-in routes unverified students to verification and verified students to dashboard', async () => {
+ const {element,context}=page();
+ await element('login-form').listeners.submit({preventDefault(){}});
+ assert.equal(context.location.href,'verify-email.html');
+ context.FRMS.currentUser=async()=>({emailVerified:true});
+ await element('login-form').listeners.submit({preventDefault(){}});
+ assert.equal(context.location.href,'dashboard.html');
 });

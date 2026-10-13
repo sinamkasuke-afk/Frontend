@@ -31,10 +31,14 @@ window.FRMS = (() => {
     if (user) admin = (await user.getIdTokenResult()).claims.admin === true;
     return user;
   })();
-  async function requireUser(isAdmin = false) {
+  async function requireUser(isAdmin = false, allowUnverified = false) {
     await ready;
     if (!user) { location.replace(isAdmin ? "admin-login.html" : "login.html"); return false; }
     if (isAdmin && !admin) { location.replace("dashboard.html"); return false; }
+    if (!isAdmin && !admin && !allowUnverified && !user.emailVerified) {
+      location.replace("verify-email.html"); return false;
+    }
+    document.body?.removeAttribute?.("data-auth-pending");
     return true;
   }
   async function login(identifier, password, isAdmin = false) {
@@ -310,7 +314,7 @@ window.FRMS = (() => {
   function actor() { return { uid: user.uid, email: user.email, name: user.displayName, admin }; }
   async function submit(data, onProgress = () => {}) {
     onProgress(10, "Checking your account…");
-    if (!await requireUser()) throw new Error("Sign in to submit a reservation.");
+    if (!await requireUser(false, true)) throw new Error("Sign in to submit a reservation.");
     await user.reload();
     await user.getIdToken(true);
     if (!admin && !user.emailVerified) throw new Error("Verify your email before submitting a reservation.");
@@ -338,10 +342,10 @@ window.FRMS = (() => {
     window.dispatchEvent(new CustomEvent("reservation-cancelled", { detail: { id } }));
   }
   async function emailVerification(action, code) {
-    if (!await requireUser()) throw new Error("Sign in to verify your email.");
+    if (!await requireUser(false, true)) throw new Error("Sign in to verify your email.");
     const response = await fetch("/api/email-verification", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + await user.getIdToken() }, body: JSON.stringify({ action, code }) });
     const result = await response.json();
-    if (!response.ok) throw new Error(result.error || "Email verification failed.");
+    if (!response.ok) { const error = new Error(result.error || "Email verification failed."); error.status = response.status; throw error; }
     if (result.verified) { await user.reload(); await user.getIdToken(true); }
     return result;
   }
@@ -476,7 +480,7 @@ window.FRMS = (() => {
     const link = event.target.closest("a");
     if (!link || !(link.hasAttribute("data-logout") || link.classList.contains("admin-profile-menu__logout") || link.textContent.trim() === "Logout")) return;
     event.preventDefault();
-    try { await ready; await auth.signOut(); sessionStorage.clear(); location.href = "index.html"; }
+    try { await ready; await auth.signOut(); sessionStorage.clear(); location.href = link.getAttribute("href") === "login.html" ? "login.html" : "index.html"; }
     catch (error) { showError(error); }
   }, true);
   return { currentUser: async () => {

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Email | School Facilities Reservation System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/pages/verify-email.css?v=verification-gate-1">
+</head>
+<body>
+  <header class="verification-brand"><span aria-hidden="true">▥</span><strong>SCHOOL</strong><span class="brand-divider"></span><span>Facilities Reservation System</span></header>
+  <main class="verification-layout">
+    <section class="verification-card" aria-labelledby="verification-title">
+      <div class="verification-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="4" y="7" width="24" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="m5 9 11 8L27 9" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+      <p class="eyebrow">ONE MORE STEP</p>
+      <h1 id="verification-title">Verify your email</h1>
+      <p class="verification-description">Enter the six-digit code sent to<br><strong id="verification-email">your email address</strong></p>
+      <form id="verification-form">
+        <label for="verification-code">Verification code</label>
+        <input id="verification-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required placeholder="000000" aria-describedby="verification-help verification-error" disabled>
+        <p class="verification-help" id="verification-help">Your code expires in 10 minutes. Check your spam folder if you don’t see it.</p>
+        <p id="verification-error" class="verification-error" role="alert" hidden></p>
+        <button id="verify-button" class="verify-button" type="submit" disabled>Verify &amp; continue <span aria-hidden="true">→</span></button>
+      </form>
+      <p id="verification-status" class="verification-status" role="status">Preparing verification…</p>
+      <div class="resend-row"><span>Didn’t receive a code?</span><button id="resend-code" type="button" disabled>Resend code</button></div>
+      <div class="verification-footer"><span>Wrong email or account?</span><a href="login.html" data-logout>Back to sign in</a></div>
+    </section>
+    <p class="verification-note">Verify your email to access your student dashboard.</p>
+  </main>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js?v=verification-gate-1"></script>
+  <script src="js/firebase/client.js?v=verification-gate-1"></script>
+  <script src="js/pages/verify-email.js?v=verification-gate-1"></script>
+</body>
+</html>

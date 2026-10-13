@@ -44,7 +44,7 @@ loginForm.addEventListener("submit", async function(event) {
   button.disabled = true;
   try {
     await FRMS.login(identifier.value, password.value, false);
-    location.href = "dashboard.html";
+    location.href = (await FRMS.currentUser())?.emailVerified ? "dashboard.html" : "verify-email.html";
   } catch (error) { FRMS.showError(error); }
   finally { button.disabled = false; }
 });
@@ -85,7 +85,7 @@ registerForm.addEventListener("submit", async event => {
   submit.textContent = "Creating account…";
   try {
     await FRMS.register(document.getElementById("register-name").value, document.getElementById("register-email").value, enteredPassword);
-    location.href = "dashboard.html";
+    location.href = (await FRMS.currentUser())?.emailVerified ? "dashboard.html" : "verify-email.html";
   } catch (error) {
     const messages = {
       "auth/email-already-in-use": "An account already uses this email. Sign in instead.",
