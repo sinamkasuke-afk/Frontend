@@ -86,6 +86,18 @@ document.addEventListener(
       getReservation();
 
 
+    if (!savedReservation.venue || !savedReservation.date || !savedReservation.slot) {
+      location.replace("new-reservation-venue.html");
+      return;
+    }
+    for (const input of [eventNameInput, organizationInput, eventTypeInput, purposeInput, contactPersonInput, facilityRequirementsInput, setupNotesInput]) {
+      input.maxLength = 4000;
+      input.setAttribute("aria-describedby", input.id + "-error");
+      input.addEventListener("input", () => clearError(input, input.id + "-error"));
+    }
+    expectedGuestsInput.setAttribute("aria-describedby", "expected-guests-error");
+    expectedGuestsInput.addEventListener("input", () => clearError(expectedGuestsInput, "expected-guests-error"));
+
     eventNameInput.value =
       savedReservation.eventName ||
       "";
@@ -299,6 +311,17 @@ document.addEventListener(
       }
 
 
+      const capacity = Number(savedReservation.venue.capacity);
+      if (capacity > 0 && guests > capacity) {
+        showError(expectedGuestsInput, "expected-guests-error", `This facility accommodates up to ${capacity} guests.`);
+        valid = false;
+      }
+      for (const input of [eventNameInput, organizationInput, eventTypeInput, purposeInput, contactPersonInput, facilityRequirementsInput, setupNotesInput]) {
+        if (input.value.trim().length > 4000) {
+          showError(input, input.id + "-error", "Use no more than 4,000 characters.");
+          valid = false;
+        }
+      }
       return valid;
 
     }
@@ -382,10 +405,8 @@ document.addEventListener(
       message
     ) {
 
-      const errorElement =
-        document.getElementById(
-          errorId
-        );
+      input.setAttribute("aria-invalid", "true");
+      const errorElement = document.getElementById(errorId);
 
 
       if (errorElement) {
@@ -415,6 +436,7 @@ document.addEventListener(
       errorId
     ) {
 
+      input.removeAttribute("aria-invalid");
       const errorElement =
         document.getElementById(
           errorId
@@ -466,6 +488,7 @@ document.addEventListener(
         .forEach(
           function (input) {
 
+            input.removeAttribute("aria-invalid");
             input.classList.remove(
               "input-error"
             );

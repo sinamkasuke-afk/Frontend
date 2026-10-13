@@ -84,7 +84,7 @@ registerForm.addEventListener("submit", async event => {
   submit.disabled = true; backToLogin.disabled = true;
   submit.textContent = "Creating account…";
   try {
-    await FRMS.register(document.getElementById("register-name").value, document.getElementById("register-email").value, enteredPassword, document.getElementById("register-student-id").value);
+    await FRMS.register(document.getElementById("register-name").value, document.getElementById("register-email").value, enteredPassword);
     location.href = "dashboard.html";
   } catch (error) {
     const messages = {

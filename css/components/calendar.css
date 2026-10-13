@@ -100,3 +100,10 @@
     font-size: 12px;
   }
 }
+/* Match the reservation calendar's green selection and restrained card styling. */
+.calendar { background:#fff;border:1px solid #e2e8e3;border-radius:16px;padding:18px; }
+.calendar__nav-btn { border-color:#d9e2db;border-radius:8px;padding:8px 10px;color:#174b35; }
+.calendar__day { border-color:#e4e9e5;background:#fafcfb;border-radius:8px; }
+.calendar__day--selected,.calendar__day--selected:hover:not(:disabled) { background:#174b35;color:white; }
+.calendar__day[aria-current="date"] { border:2px solid #174b35; }
+.calendar__day:focus-visible,.calendar__nav-btn:focus-visible { outline:3px solid #81b599;outline-offset:2px; }

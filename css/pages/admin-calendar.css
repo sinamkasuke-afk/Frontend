@@ -1545,3 +1545,5 @@ body {
   }
 
 }
+.calendar-grid-header[hidden] { display: none; }
+.calendar-day:focus-visible, .mini-date:focus-visible { outline: 3px solid #438f69; outline-offset: -3px; }

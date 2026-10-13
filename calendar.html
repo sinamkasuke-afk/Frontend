@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Calendar | School Facilities Reservation System
+  </title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/base.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/pages/admin-calendar.css?v=system-revision-2"
+  />
+  <link rel="stylesheet" href="css/components/admin-layout.css?v=admin-name-1" />
+  <link rel="stylesheet" href="css/components/reservation-detail.css?v=detail-modal-1">
+  <link rel="stylesheet" href="css/components/navbar.css?v=student-menu-2">
+  <style>.student-calendar-shell{max-width:1440px;margin:24px auto;padding:0 24px}.student-calendar-shell .calendar-main{min-width:0}</style>
+</head>
+
+<body data-calendar-role="student">
+
+
+  <!-- =====================================================
+       HEADER
+       ===================================================== -->
+
+  <div id="navbar"></div>
+  <main class="student-calendar-shell">
+    <section class="calendar-main">
+
+
+      <!-- PAGE HEADING -->
+
+      <div class="calendar-heading">
+
+        <div>
+
+          <p class="calendar-heading__label">
+            RESERVATION SCHEDULE
+          </p>
+
+          <h1>
+            Calendar
+          </h1>
+
+          <p>
+            View your facility reservations by date. <a href="new-reservation-venue.html">Make a reservation →</a>
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           TOP CONTROLS
+           ================================================= -->
+
+      <div class="calendar-toolbar">
+
+
+        <!-- MONTH NAV -->
+
+        <div class="calendar-toolbar__left">
+
+          <button
+            type="button"
+            class="month-nav-button"
+            id="prev-month" aria-label="Previous month"
+          >
+            ‹
+          </button>
+
+
+          <button
+            type="button"
+            class="month-select-button"
+            id="current-month-button" title="Return to the current month"
+          >
+            Loading month…
+            <span>
+              ⌄
+            </span>
+          </button>
+
+
+          <button
+            type="button"
+            class="month-nav-button"
+            id="next-month" aria-label="Next month"
+          >
+            ›
+          </button>
+
+        </div>
+
+
+        <!-- VIEW SWITCH -->
+
+        <div class="calendar-view-switch">
+
+          <button
+            type="button"
+            class="calendar-view-button calendar-view-button--active"
+          >
+            Month
+          </button>
+
+          <button
+            type="button"
+            class="calendar-view-button"
+          >
+            Week
+          </button>
+
+          <button
+            type="button"
+            class="calendar-view-button"
+          >
+            Day
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           CALENDAR LAYOUT
+           ================================================= -->
+
+      <div class="calendar-layout">
+
+
+        <!-- ===============================================
+             MAIN CALENDAR CARD
+             =============================================== -->
+
+        <section class="calendar-card">
+
+          <div class="calendar-grid-header">
+
+            <div>SUN</div>
+            <div>MON</div>
+            <div>TUE</div>
+            <div>WED</div>
+            <div>THU</div>
+            <div>FRI</div>
+            <div>SAT</div>
+
+          </div>
+
+
+          <div
+            class="calendar-grid"
+            id="calendar-grid"
+          >
+          </div>
+
+
+          <!-- LEGEND -->
+
+          <div class="calendar-legend">
+
+            <div>
+              <span class="legend-dot legend-dot--approved"></span>
+
+              <p>
+                <strong>
+                  Approved Reservation
+                </strong>
+
+                <small>
+                  Confirmed and scheduled
+                </small>
+              </p>
+            </div>
+
+
+            <div>
+              <span class="legend-dot legend-dot--pending"></span>
+
+              <p>
+                <strong>
+                  Pending Reservation
+                </strong>
+
+                <small>
+                  Awaiting approval
+                </small>
+              </p>
+            </div>
+
+
+            <div>
+              <span class="legend-dot legend-dot--declined"></span>
+
+              <p>
+                <strong>
+                  Declined Reservation
+                </strong>
+
+                <small>
+                  Not approved
+                </small>
+              </p>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===============================================
+             RIGHT PANEL
+             =============================================== -->
+
+        <aside class="calendar-side">
+
+
+          <!-- MINI CALENDAR -->
+
+          <section class="side-card mini-calendar-card">
+
+            <div class="side-card__heading">
+
+              <h2>
+                <span data-mini-month>Loading month…</span>
+              </h2>
+
+              <div>
+
+                <button
+                  type="button"
+                  class="mini-nav-button"
+                >
+                  ‹
+                </button>
+
+                <button
+                  type="button"
+                  class="mini-nav-button"
+                >
+                  ›
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div class="mini-weekdays">
+
+              <span>S</span>
+              <span>M</span>
+              <span>T</span>
+              <span>W</span>
+              <span>T</span>
+              <span>F</span>
+              <span>S</span>
+
+            </div>
+
+
+            <div
+              class="mini-calendar-grid"
+              id="mini-calendar-grid"
+            >
+            </div>
+
+          </section>
+
+
+          <!-- SELECTED DATE -->
+
+          <section class="side-card">
+
+            <p class="side-card__eyebrow">
+              Reservations on
+            </p>
+
+            <h2 id="selected-date-title">
+              Loading date…
+            </h2>
+
+
+            <div
+              class="selected-reservations"
+              id="selected-reservations"
+            >
+            </div>
+
+          </section>
+
+
+          <!-- FILTERS -->
+
+          <section class="side-card">
+
+            <h2>
+              Filter Reservations
+            </h2>
+
+
+            <label class="filter-check">
+
+              <input
+                type="checkbox"
+                id="filter-approved"
+                checked
+              />
+
+              <span class="filter-color filter-color--approved"></span>
+
+              Approved Reservation
+
+            </label>
+
+
+            <label class="filter-check">
+
+              <input
+                type="checkbox"
+                id="filter-pending"
+                checked
+              />
+
+              <span class="filter-color filter-color--pending"></span>
+
+              Pending Reservation
+
+            </label>
+
+            <label class="filter-check">
+
+              <input
+                type="checkbox"
+                id="filter-declined"
+                checked
+              />
+
+              <span class="filter-color filter-color--declined"></span>
+
+              Declined Reservation
+
+            </label>
+
+          </section>
+
+        </aside>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase/config.js?v=paging-enrollment-1"></script>
+  <script src="js/data/sample-data.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/reservation-service.js?v=hardening-1"></script>
+  <script src="js/firebase/request-pagination.js?v=paging-enrollment-1"></script>
+  <script src="js/firebase/client.js?v=system-revision-2"></script>
+<script src="js/components/navbar.js?v=system-revision-2"></script>
+<script src="js/pages/admin-calendar.js?v=system-revision-2"></script>
+
+
+<script src="js/components/student-enrollment.js?v=system-revision-2"></script>
+</body>
+</html>

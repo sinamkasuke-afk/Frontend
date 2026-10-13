@@ -58,15 +58,15 @@ test('student list queries are scoped to owner and available slots omit bookings
   assert.deepEqual(Array.from(await api.availableSlots('hall', '2026-10-15'), slot => slot.id), ['midday']);
   assert(filters.some(filter => filter.join('/') === 'bookings/dateISO/==/2026-10-15'));
 });
-test('submission does not require email verification and has no PDF support', async () => {
+test('submission requires verified email and has no PDF support', async () => {
   const { api, calls } = client();
   assert.equal(await api.submit({ requestId: 'request-1', venueId: 'hall' }), 'request-1');
   assert.equal(calls[0].name, 'server-submit');
   assert(!('hasAttachment' in calls[0].data));
   assert.equal(api.openDocument, undefined);
   const unverified = client(false, false);
-  assert.equal(await unverified.api.submit({ requestId: 'request-1' }), 'request-1');
-  assert.equal(unverified.calls[0].name, 'server-submit');
+  await assert.rejects(unverified.api.submit({ requestId: 'request-1' }), /Verify your email/);
+  assert.equal(unverified.calls.length, 0);
 });
 test('student cannot invoke admin review; admin uses a Firestore transaction', async () => {
   const student = client(); await assert.rejects(student.api.updateStatus('request-1', 'approved'));
@@ -81,6 +81,9 @@ test('registration saves a student profile and name without copying passwords', 
   assert.equal(writes[0].name, 'users');
   assert.equal(writes[0].data.role, 'student');
   assert.equal(writes[0].data.displayName, 'Alex Student');
+  assert.equal(writes[0].data.enrollmentStatus, 'approved');
+  assert.equal(writes[0].data.studentId, 'STU-student-1');
+  assert.equal(writes[0].data.confirmedStudentId, 'STU-student-1');
   assert(!('password' in writes[0].data));
   await assert.rejects(api.updateStatus('request-1', 'approved'));
 });

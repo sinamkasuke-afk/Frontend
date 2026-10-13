@@ -35,7 +35,7 @@
 
   <link
     rel="stylesheet"
-    href="css/pages/admin-calendar.css"
+    href="css/pages/admin-calendar.css?v=system-revision-2"
   />
   <link rel="stylesheet" href="css/components/admin-layout.css?v=admin-name-1" />
   <link rel="stylesheet" href="css/components/reservation-detail.css?v=detail-modal-1">
@@ -238,7 +238,7 @@
           <button
             type="button"
             class="month-nav-button"
-            id="prev-month"
+            id="prev-month" aria-label="Previous month"
           >
             ‹
           </button>
@@ -247,7 +247,7 @@
           <button
             type="button"
             class="month-select-button"
-            id="current-month-button"
+            id="current-month-button" title="Return to the current month"
           >
             Loading month…
             <span>
@@ -259,7 +259,7 @@
           <button
             type="button"
             class="month-nav-button"
-            id="next-month"
+            id="next-month" aria-label="Next month"
           >
             ›
           </button>
@@ -452,7 +452,7 @@
             </p>
 
             <h2 id="selected-date-title">
-              October 4, 2026
+              Loading date…
             </h2>
 
 
@@ -535,8 +535,8 @@
   <script src="js/data/sample-data.js?v=paging-enrollment-1"></script>
   <script src="js/firebase/reservation-service.js?v=hardening-1"></script>
   <script src="js/firebase/request-pagination.js?v=paging-enrollment-1"></script>
-  <script src="js/firebase/client.js?v=hardening-1"></script>
-<script src="js/pages/admin-calendar.js?v=hardening-1"></script>
+  <script src="js/firebase/client.js?v=system-revision-2"></script>
+<script src="js/pages/admin-calendar.js?v=system-revision-2"></script>
 
   <script src="js/components/admin-profile.js?v=admin-name-1"></script>
 </body>

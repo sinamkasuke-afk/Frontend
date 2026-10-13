@@ -13,9 +13,13 @@
    CURRENT RESERVATION
    ========================================================== */
 
+let slotLoadVersion = 0;
+const savedSelection = getReservation();
+const restoredDate = savedSelection.date ? new Date(savedSelection.date) : null;
+const today = new Date(); today.setHours(0, 0, 0, 0);
 const reservation = {
   venue: null,
-  date: null,
+  date: restoredDate && !Number.isNaN(restoredDate.getTime()) && restoredDate >= today ? restoredDate : null,
   slot: null,
 };
 
@@ -84,7 +88,7 @@ function loadVenueList(venues) {
 
 loadVenueList(venues);
 if (!venues.length) venueListElement.textContent = "No facilities are configured yet. Ask your administrator to populate the venue catalog.";
-const selectedName = new URLSearchParams(location.search).get("venue");
+const selectedName = new URLSearchParams(location.search).get("venue") || savedSelection.venue?.name;
 if (selectedName) {
   const selectedIndex = venues.findIndex(venue => venue.name === selectedName);
   if (selectedIndex >= 0) venueListElement.querySelectorAll(".venue-item")[selectedIndex]?.click();
@@ -193,7 +197,8 @@ createCalendar(
     */
     refreshTimeSlots();
 
-  }
+  },
+  reservation.date
 );
 
 
@@ -201,7 +206,6 @@ createCalendar(
    REFRESH TIME SLOTS
    ========================================================== */
 
-let slotLoadVersion = 0;
 async function refreshTimeSlots() {
   const version = ++slotLoadVersion;
 

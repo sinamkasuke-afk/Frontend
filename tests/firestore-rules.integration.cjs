@@ -30,7 +30,7 @@ test('verified submission writes booking, request number, audit and daily quota'
   await assertSucceeds(submit());
   assert.equal((await db().collection('reservations').doc('request-1').get()).data().requestNumber, 1);
 });
-test('enrollment-approved students can submit without email verification', async () => { await assertSucceeds(submit(db(uid, false))); });
+test('automatically approved students must verify email before submitting', async () => { await assertFails(submit(db(uid, false))); });
 test('student cannot read another student reservation or approve it', async () => {
   await submit();
   await assertFails(db('other').collection('reservations').doc('request-1').get());
@@ -113,7 +113,7 @@ test('approved bookings cannot be stolen even if their creation time is old', as
   await env.withSecurityRulesDisabled(async ctx => { await ctx.firestore().collection('bookings').doc('hall_' + dateISO + '_morning').update({ createdAt: firebase.firestore.Timestamp.fromMillis(Date.now() - 49 * 3600000) }); });
   await assert.rejects(submit(db(), { requestId: 'replacement' }), { code: 'already-exists' });
 });
-test('real Auth emulator workflow: register without verification, admin enrollment approval, login, submit, approve and cancel', async () => {
+test('real Auth emulator workflow: automatic approval, email verification, login, submit, approve and cancel', async () => {
   if (!process.env.FIREBASE_AUTH_EMULATOR_HOST) throw new Error('Auth emulator must be running; refusing external email operations.');
   const app = firebase.initializeApp({ projectId: 'demo-frms-rules', apiKey: 'demo-key', authDomain: 'demo-frms-rules.firebaseapp.com' }, 'auth-workflow');
   const auth = app.auth(); auth.useEmulator('http://127.0.0.1:9096', { disableWarnings: true });
@@ -123,17 +123,18 @@ test('real Auth emulator workflow: register without verification, admin enrollme
     const credential = await auth.createUserWithEmailAndPassword(email, password);
     const student = credential.user;
     await student.updateProfile({ displayName: 'Integration Student' });
-    await database.collection('users').doc(student.uid).set({ uid: student.uid, email, displayName: student.displayName, role: 'student', studentId: '2026-TEST', enrollmentStatus: 'pending', createdAt: stamp() });
+    await database.collection('users').doc(student.uid).set({ uid: student.uid, email, displayName: student.displayName, role: 'student', studentId: 'STU-' + student.uid, confirmedStudentId: 'STU-' + student.uid, enrollmentStatus: 'approved', createdAt: stamp() });
     const options = { db: database, actor: { uid: student.uid, email, name: student.displayName }, data: { ...data, requestId: 'auth-request' }, timestamp: stamp };
     await assertFails(submitReservation(options));
     assert.equal(student.emailVerified, false);
-    await db('admin1', true, true).collection('users').doc(student.uid).update({ enrollmentStatus: 'approved', approvedBy: 'admin1', updatedAt: stamp() });
+    const { getAuth } = require('firebase-admin/auth');
+    const { initializeApp, getApps } = require('firebase-admin/app');
+    const serverApp = getApps()[0] || initializeApp({ projectId: 'demo-frms-rules' });
+    await getAuth(serverApp).updateUser(student.uid, { emailVerified: true });
     await auth.signOut();
     await assert.rejects(auth.signInWithEmailAndPassword(email, 'WrongPassword123!'));
     await auth.signInWithEmailAndPassword(email, password);
-    await assertFails(submitReservation(options));
     await assertFails(database.collection('users').doc(student.uid).update({ confirmedStudentId: 'WRONG', studentIdConfirmedAt: stamp() }));
-    await assertSucceeds(database.collection('users').doc(student.uid).update({ confirmedStudentId: '2026-TEST', studentIdConfirmedAt: stamp() }));
     await assertSucceeds(submitReservation(options));
     await assertSucceeds(reviewReservation({ db: db('admin1', true, true), actor: { uid: 'admin1', admin: true }, data: { id: 'auth-request', status: 'approved' }, timestamp: stamp }));
     assert.equal((await database.collection('reservations').doc('auth-request').get()).data().status, 'approved');
@@ -198,3 +199,16 @@ test('server custom ranges can be approved and cancelled; managed days block leg
   assert.equal((await db().collection('reservations').doc('request-1').get()).data().endMinutes,1200);
   await assertSucceeds(cancelReservation({db:db(),actor,data:{id:'request-1'},timestamp:stamp}));
 });
+
+ test('pending student migration generates its own code and rejected accounts cannot reactivate', async () => {
+  const ref = db().collection('users').doc(uid);
+  await env.withSecurityRulesDisabled(async ctx => { await ctx.firestore().collection('users').doc(uid).update({ enrollmentStatus: 'pending' }); });
+  await assertFails(ref.update({ enrollmentStatus: 'approved', studentId: 'STU-other', confirmedStudentId: 'STU-other' }));
+  await assertSucceeds(ref.update({ enrollmentStatus: 'approved', studentId: 'STU-' + uid, confirmedStudentId: 'STU-' + uid }));
+  await env.withSecurityRulesDisabled(async ctx => { await ctx.firestore().collection('users').doc(uid).update({ enrollmentStatus: 'rejected' }); });
+  await assertFails(ref.update({ enrollmentStatus: 'approved' }));
+ });
+ test('verification challenges are server-only', async () => {
+  await assertFails(db().collection('emailVerifications').doc(uid).get());
+  await assertFails(db().collection('emailVerifications').doc(uid).set({ code: '123456' }));
+ });

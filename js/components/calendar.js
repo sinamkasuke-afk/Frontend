@@ -8,7 +8,7 @@
    Opens on the current month. Past dates cannot be selected.
    ========================================================== */
 
-function createCalendar(containerId, onDateSelect) {
+function createCalendar(containerId, onDateSelect, initialDate = null) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -25,7 +25,10 @@ function createCalendar(containerId, onDateSelect) {
   // Calendar state
   let viewYear = today.getFullYear();
   let viewMonth = today.getMonth();
-  let selectedDate = null;
+  let selectedDate = initialDate ? new Date(initialDate) : null;
+  if (selectedDate && !Number.isNaN(selectedDate.getTime()) && selectedDate >= today) {
+    viewYear = selectedDate.getFullYear(); viewMonth = selectedDate.getMonth();
+  } else selectedDate = null;
 
   // Static skeleton (title, buttons, weekday row, empty grid)
   container.innerHTML = `
@@ -34,6 +37,7 @@ function createCalendar(containerId, onDateSelect) {
         <h3 class="calendar__title"></h3>
         <div class="calendar__nav">
           <button type="button" class="calendar__nav-btn" data-action="prev">Previous</button>
+          <button type="button" class="calendar__nav-btn" data-action="today">Today</button>
           <button type="button" class="calendar__nav-btn" data-action="next">Next</button>
         </div>
       </div>
@@ -76,6 +80,9 @@ function createCalendar(containerId, onDateSelect) {
       button.type = "button";
       button.className = "calendar__day";
       button.textContent = day;
+      button.setAttribute("aria-label", date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }));
+      button.setAttribute("aria-pressed", String(!!selectedDate && isSameDay(date, selectedDate)));
+      if (isSameDay(date, today)) button.setAttribute("aria-current", "date");
 
       if (date < today) {
         button.disabled = true;
@@ -114,5 +121,8 @@ function createCalendar(containerId, onDateSelect) {
     renderMonth();
   });
 
+  container.querySelector('[data-action="today"]').addEventListener("click", () => {
+    viewYear = today.getFullYear(); viewMonth = today.getMonth(); renderMonth();
+  });
   renderMonth();
 }

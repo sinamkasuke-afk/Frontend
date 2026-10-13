@@ -2,7 +2,10 @@ document.addEventListener(
   "DOMContentLoaded",
   async function () {
     try {
-      if (!await FRMS.requireUser(true)) return;
+      const studentCalendar = document.body.dataset.calendarRole === "student";
+      var calendarIsAdmin = !studentCalendar;
+      if (!await FRMS.requireUser(calendarIsAdmin)) return;
+      if (studentCalendar) renderNavbar("navbar", "calendar", "student");
       var firebaseRequests = [];
     } catch (error) { FRMS.showError(error); return; }
 
@@ -23,6 +26,7 @@ document.addEventListener(
     let selectedDay = today.getDate();
     let calendarStop = () => {}, calendarVersion = 0;
     let reservations = [];
+    let viewMode = "month";
     let previousMonthDays = [];
     let currentMonthDays = [];
     function refreshMonth() {
@@ -183,8 +187,14 @@ document.addEventListener(
       );
 
 
+      const weekStart = Math.floor((previousMonthDays.length + selectedDay - 1) / 7) * 7;
+      const visibleCells = viewMode === "day" ? cells.filter(cell => !cell.outside && cell.day === selectedDay)
+        : viewMode === "week" ? cells.slice(weekStart, weekStart + 7) : cells;
+      calendarGrid.style.gridTemplateColumns = viewMode === "day" ? "1fr" : "repeat(7, minmax(0, 1fr))";
+      const weekdays = document.querySelector(".calendar-grid-header");
+      if (weekdays) weekdays.hidden = viewMode === "day";
       calendarGrid.innerHTML =
-        cells
+        visibleCells
           .map(
             function (
               cell
@@ -272,7 +282,7 @@ document.addEventListener(
                   ${
                     cell.outside
                       ? ""
-                      : `data-day="${cell.day}"`
+                      : `data-day="${cell.day}" role="button" tabindex="0" aria-label="${new Date(viewYear, viewMonth, cell.day).toLocaleDateString()}" aria-pressed="${cell.day === selectedDay}"`
                   }
                 >
 
@@ -363,7 +373,7 @@ document.addEventListener(
                   ${
                     cell.outside
                       ? ""
-                      : `data-mini-day="${cell.day}"`
+                      : `data-mini-day="${cell.day}" role="button" tabindex="0" aria-label="${new Date(viewYear, viewMonth, cell.day).toLocaleDateString()}"`
                   }
                 >
                   ${cell.day}
@@ -482,6 +492,21 @@ document.addEventListener(
     document.getElementById("prev-month").addEventListener("click", () => changeMonth(-1));
     document.getElementById("next-month").addEventListener("click", () => changeMonth(1));
     document.querySelectorAll(".mini-nav-button").forEach((button, index) => button.addEventListener("click", () => changeMonth(index === 0 ? -1 : 1)));
+    document.getElementById("current-month-button").addEventListener("click", () => {
+      const now = new Date(); viewYear = now.getFullYear(); viewMonth = now.getMonth(); selectedDay = now.getDate();
+      refreshMonth(); renderAll(); watchMonth();
+    });
+    document.querySelectorAll(".calendar-view-button").forEach(button => button.addEventListener("click", () => {
+      viewMode = button.textContent.trim().toLowerCase();
+      document.querySelectorAll(".calendar-view-button").forEach(item => {
+        item.classList.toggle("calendar-view-button--active", item === button);
+        item.setAttribute("aria-pressed", String(item === button));
+      });
+      renderAll();
+    }));
+    for (const grid of [calendarGrid, miniCalendarGrid]) grid.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); event.target.click(); }
+    });
     refreshMonth();
 
     /* ==========================================================
@@ -655,7 +680,7 @@ document.addEventListener(
         const stop = await FRMS.watchRequests(records => {
           if (version !== calendarVersion) return;
           firebaseRequests = records; refreshMonth(); renderAll();
-        }, true, { month: viewYear + '-' + String(viewMonth + 1).padStart(2,'0') });
+        }, calendarIsAdmin, { month: viewYear + '-' + String(viewMonth + 1).padStart(2,'0') });
         if (version !== calendarVersion) stop(); else calendarStop = stop;
       } catch (error) { FRMS.showError(error); }
     }

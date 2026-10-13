@@ -10,6 +10,7 @@ service cloud.firestore {
     function today() { return (request.time + duration.value(8, 'h')).date(); }
     function approvedStudent() {
       return signedIn()
+        && request.auth.token.get('email_verified', false) == true
         && request.auth.token.email.matches('^[^@]+@gmail[.]com$')
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('enrollmentStatus', 'pending') == 'approved'
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('confirmedStudentId', '') == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.studentId;
@@ -63,8 +64,10 @@ service cloud.firestore {
         && request.resource.data.displayName is string
         && request.resource.data.createdAt == request.time
         && request.resource.data.studentId is string && request.resource.data.studentId.size() <= 50
-        && request.resource.data.enrollmentStatus == (admin() ? 'approved' : 'pending')
-        && !request.resource.data.keys().hasAny(['approvedBy','updatedAt','confirmedStudentId','studentIdConfirmedAt'])
+        && request.resource.data.enrollmentStatus == 'approved'
+        && (admin() || request.resource.data.studentId == 'STU-' + uid)
+        && (admin() || request.resource.data.confirmedStudentId == request.resource.data.studentId)
+        && !request.resource.data.keys().hasAny(['approvedBy','updatedAt','studentIdConfirmedAt'])
         && (request.resource.data.role == 'student' || (admin() && request.resource.data.role == 'admin'));
       allow update: if admin()
         && request.resource.data.uid == resource.data.uid
@@ -80,6 +83,13 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['confirmedStudentId', 'studentIdConfirmedAt'])
         && request.resource.data.confirmedStudentId == resource.data.studentId
         && request.resource.data.studentIdConfirmedAt == request.time;
+      // Migrate existing pending student accounts without permitting rejected accounts to reactivate.
+      allow update: if signedIn() && request.auth.uid == uid
+        && resource.data.role == 'student' && resource.data.enrollmentStatus == 'pending'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['studentId', 'confirmedStudentId', 'enrollmentStatus'])
+        && request.resource.data.studentId == 'STU-' + uid
+        && request.resource.data.confirmedStudentId == request.resource.data.studentId
+        && request.resource.data.enrollmentStatus == 'approved';
       allow delete: if false;
     }
     match /venues/{id} {

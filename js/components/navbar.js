@@ -243,6 +243,10 @@ function renderNavbar(containerId, activePage, variant = "public") {
         href: "new-reservation-venue.html"
       },
       {
+        label: "Calendar",
+        href: "calendar.html"
+      },
+      {
         label: "My Reservations",
         href: "my-requests.html"
       },

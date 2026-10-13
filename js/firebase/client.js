@@ -60,21 +60,19 @@ window.FRMS = (() => {
     requestCache.clear();
     sessionStorage.removeItem("frms_reservation");
   }
-  async function register(displayName, email, password, studentId) {
+  async function register(displayName, email, password) {
     await ready;
     displayName = displayName.trim();
     email = email.trim();
     if (!displayName || displayName.length > 100) throw new Error("Enter your full name (up to 100 characters).");
     if (!/^[^@\s]+@gmail\.com$/i.test(email)) throw new Error("Register using a gmail.com email address.");
     if (password.length < 8) throw new Error("Use a password with at least 8 characters.");
-    studentId = (studentId || "").trim();
-    if (!/^[a-zA-Z0-9-]{1,50}$/.test(studentId)) throw new Error("Enter your school student ID (letters, numbers and hyphens only).");
     const credential = await auth.createUserWithEmailAndPassword(email, password);
     user = credential.user;
     admin = false;
     try {
       await user.updateProfile({ displayName });
-      await ensureProfile(studentId);
+      await ensureProfile();
     } catch (error) {
       await auth.signOut(); user = null;
       throw new Error("Your account was created, but your profile could not be saved. Sign in again to finish setup.");
@@ -117,19 +115,25 @@ window.FRMS = (() => {
     requestCache.clear();
     sessionStorage.removeItem("frms_reservation");
   }
-  async function ensureProfile(studentId = "") {
+  async function ensureProfile() {
     if (!user) return;
     const ref = db.collection("users").doc(user.uid);
     const profile = await ref.get();
+    const studentId = admin ? "" : "STU-" + user.uid;
     if (!profile.exists) {
       await ref.set({
         uid: user.uid,
         email: user.email,
         displayName: user.displayName || "",
         role: admin ? "admin" : "student",
-        studentId, enrollmentStatus: admin ? "approved" : "pending",
+        studentId, enrollmentStatus: "approved",
+        confirmedStudentId: studentId,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+    } else if (!admin && profile.data().enrollmentStatus === "pending") {
+      await ref.update({ studentId, confirmedStudentId: studentId, enrollmentStatus: "approved" });
+    } else if (!admin && profile.data().enrollmentStatus === "approved" && profile.data().confirmedStudentId !== profile.data().studentId) {
+      await ref.update({ confirmedStudentId: profile.data().studentId, studentIdConfirmedAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
   }
   function requestQuery(isAdmin) {
@@ -309,10 +313,11 @@ window.FRMS = (() => {
     if (!await requireUser()) throw new Error("Sign in to submit a reservation.");
     await user.reload();
     await user.getIdToken(true);
-    onProgress(25, "Checking enrollment and student ID…");
+    if (!admin && !user.emailVerified) throw new Error("Verify your email before submitting a reservation.");
+    onProgress(25, "Checking your student account…");
     const profile = await db.collection("users").doc(user.uid).get();
-    if (!admin && profile.data()?.enrollmentStatus !== "approved") throw new Error("Your student enrollment is awaiting administrator approval. Contact the facilities office with your student ID.");
-    if (!admin && profile.data()?.confirmedStudentId !== profile.data()?.studentId) throw new Error("Confirm your approved student ID at the top of this page before reserving.");
+    if (!admin && profile.data()?.enrollmentStatus !== "approved") throw new Error("Your student account is unavailable. Contact the facilities office.");
+    if (!admin && profile.data()?.confirmedStudentId !== profile.data()?.studentId) throw new Error("Sign out and sign in again to finish setting up your student account.");
     onProgress(40, "Validating reservation details…");
     onProgress(60, "Checking availability and saving your reservation…");
     const response = await fetch("/api/reservation-submit", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${await user.getIdToken()}` }, body: JSON.stringify(data) });
@@ -331,6 +336,14 @@ window.FRMS = (() => {
     await FRMS_RESERVATION_SERVICE.cancelReservation({ db, actor: actor(), data: { id },
       timestamp: () => firebase.firestore.FieldValue.serverTimestamp() });
     window.dispatchEvent(new CustomEvent("reservation-cancelled", { detail: { id } }));
+  }
+  async function emailVerification(action, code) {
+    if (!await requireUser()) throw new Error("Sign in to verify your email.");
+    const response = await fetch("/api/email-verification", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + await user.getIdToken() }, body: JSON.stringify({ action, code }) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Email verification failed.");
+    if (result.verified) { await user.reload(); await user.getIdToken(true); }
+    return result;
   }
   async function resetPassword(email) {
     await ready;
@@ -470,6 +483,6 @@ window.FRMS = (() => {
     await ready;
     if (!user) return null;
     const profile = await db.collection("users").doc(user.uid).get();
-    return { displayName: profile.data()?.displayName || user.displayName || "", email: user.email, role: admin ? "admin" : "student" };
-  }, requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, registerAdmin, createAdminInvitation, upcomingReservation, watchUpcoming, requests, watchRequests, requestCounts, watchCounts, mountRequestPagination, venues, availableSlots, submit, updateStatus, cancelReservation, approveEnrollment, watchEnrollment, confirmStudentId, studentQuery, resetPassword, reservationEvents, showError };
+    return { displayName: profile.data()?.displayName || user.displayName || "", email: user.email, emailVerified: user.emailVerified, studentCode: profile.data()?.studentId, role: admin ? "admin" : "student" };
+  }, requestLabel: id => requestCache.get(id)?.requestNumber || id, ready, requireUser, login, register, registerAdmin, createAdminInvitation, upcomingReservation, watchUpcoming, requests, watchRequests, requestCounts, watchCounts, mountRequestPagination, venues, availableSlots, submit, updateStatus, cancelReservation, approveEnrollment, watchEnrollment, confirmStudentId, studentQuery, emailVerification, resetPassword, reservationEvents, showError };
 })();

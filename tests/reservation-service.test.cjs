@@ -34,7 +34,7 @@ function submit(db, overrides = {}, actor = student) {
   return submitReservation({ db, actor, data: { ...data, ...overrides }, timestamp: () => 'SERVER', now: new Date('2026-10-06T00:00:00Z'), verifyAttachment: async () => ({ path: 'proposal.pdf' }) });
 }
 function review(db, status, id = data.requestId, actor = admin) {
-  return reviewReservation({ db, actor, data: { id, status }, timestamp: () => 'SERVER' });
+  return reviewReservation({ db, actor, data: { id, status }, timestamp: () => 'SERVER', now: new Date('2026-10-06T00:00:00Z') });
 }
 test('submission atomically writes pending request, booking and audit event', async () => {
   const { db, records } = database(); await submit(db, { status: 'approved', ownerUid: 'spoof' });

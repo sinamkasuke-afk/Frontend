@@ -11,6 +11,7 @@ function createHandler({ auth, db, timestamp }) {
       const profile = await db.collection('users').doc(account.uid).get();
       const value = profile.data() || {};
       const admin = account.customClaims?.admin === true;
+      if (!admin && !account.emailVerified) return res.status(403).json({ error: 'Verify your email before submitting a reservation.' });
       if (!admin && (!/^[^@]+@gmail\.com$/.test(account.email || '') || value.role !== 'student' || value.enrollmentStatus !== 'approved' || !value.studentId || value.confirmedStudentId !== value.studentId)) return res.status(403).json({ error: 'Your enrollment must be approved and your student ID confirmed before reserving.' });
       const result = await submitReservation({ db, actor: { uid: account.uid, email: account.email, name: value.displayName || account.email, admin }, data: req.body || {}, timestamp, flexible: true });
       return res.status(200).json(result);

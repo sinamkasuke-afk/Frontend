@@ -2,11 +2,11 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-test('admin calendar navigates months, filters records and includes leap day', async () => {
+for (const studentCalendar of [false, true]) test(`${studentCalendar ? 'student' : 'admin'} calendar navigates months, filters records and includes leap day`, async () => {
   const elements = new Map(); let initialize;
   function element(key) {
     if (!elements.has(key)) elements.set(key, {
-      innerHTML: '', textContent: '', checked: true, listeners: {},
+      style: {}, setAttribute() {}, innerHTML: '', textContent: '', checked: true, listeners: {},
       addEventListener(type, callback) { this.listeners[type] = callback; },
       replaceChildren(text) { this.textContent = text; }, classList: { toggle() {}, remove() {} }
     });
@@ -16,17 +16,18 @@ test('admin calendar navigates months, filters records and includes leap day', a
     constructor(...args) { super(...(args.length ? args : ['2026-10-06T04:00:00Z'])); }
   }
   const document = {
+    body: { dataset: { calendarRole: studentCalendar ? "student" : "admin" } },
     addEventListener(type, callback) { if (type === 'DOMContentLoaded') initialize = callback; },
     getElementById: element,
     querySelector: element,
-    querySelectorAll: () => [element('mini-prev'), element('mini-next')]
+    querySelectorAll: selector => selector === '.mini-nav-button' ? [element('mini-prev'), element('mini-next')] : []
   };
   const errors = [];
-  const context = { window: { addEventListener() {} }, document, Date: FixedDate, FRMS: {
+  const context = { window: { addEventListener() {} }, document, Date: FixedDate, renderNavbar() {}, FRMS: {
     requireUser: async () => true,
     requests: async () => { throw Error('Calendar must not load all records'); },
     watchRequests: async (callback, isAdmin, options) => {
-      assert.equal(isAdmin, true); assert(options.month);
+      assert.equal(isAdmin, !studentCalendar); assert(options.month);
       callback(options.month === '2028-02' ? [{id:'request-1',dateISO:'2028-02-29',status:'approved',venue:'Hall',time:'Morning',event:'Leap day event'}] : []);
       return () => {};
     },
